@@ -48,7 +48,7 @@ if (!module.exports.EB_APP_ID) {
 }
 
 module.exports.EB_PRIVATE_KEY_FILE =
-  process.env.EB_PRIVATE_KEY_FILE ?? "./private.pem";
+  process.env.EB_PRIVATE_KEY_FILE ?? path.join(__dirname, "../private.pem");
 if (!fs.existsSync(module.exports.EB_PRIVATE_KEY_FILE)) {
   console.error(
     "Error: Enable Banking Private key is missing, please check that EB_PRIVATE_KEY_FILE is pointing to the location of the key you received when setting up your EnableBanking application.",

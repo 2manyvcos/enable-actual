@@ -1,5 +1,4 @@
 const fs = require("fs");
-
 const { DATA_DIR, STATE_FILE } = require("./config");
 
 function loadState() {

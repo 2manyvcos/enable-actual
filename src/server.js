@@ -1,7 +1,7 @@
+const path = require("path");
 const express = require("express");
 const { engine } = require("express-handlebars");
 const cron = require("node-cron");
-
 const { PORT, PUBLIC_URL, SYNC_SCHEDULE, APP_NAME } = require("./config");
 const sync = require("./sync");
 const ebRouter = require("./eb/router");
@@ -12,7 +12,7 @@ cron.schedule(SYNC_SCHEDULE, sync);
 const app = express();
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
-app.set("views", "./views");
+app.set("views", path.join(__dirname, "./views"));
 app.use(express.urlencoded());
 
 app.get("/", (req, res) => {

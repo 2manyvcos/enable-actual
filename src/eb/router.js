@@ -1,7 +1,6 @@
 const express = require("express");
 const fs = require("fs");
 const crypto = require("crypto");
-
 const {
   PUBLIC_URL,
   EB_API,
@@ -14,7 +13,6 @@ const {
   APP_NAME,
 } = require("../config");
 const { putState } = require("../state");
-
 const EBClient = require("./client");
 
 const router = express.Router();

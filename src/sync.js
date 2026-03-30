@@ -1,4 +1,4 @@
-const { PUBLIC_URL, SESSION_EXPIRY_WARNING, DATA_DIR } = require("./config");
+const { PUBLIC_URL, SESSION_EXPIRY_WARNING } = require("./config");
 const fetchTransactions = require("./eb/fetchTransactions");
 const importTransactions = require("./actual/importTransactions");
 const notify = require("./notify");

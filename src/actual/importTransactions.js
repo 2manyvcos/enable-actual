@@ -1,6 +1,5 @@
 const fs = require("fs");
 const api = require("@actual-app/api");
-
 const {
   ACTUAL_DATA_DIR,
   ACTUAL_BUDGET_ID,

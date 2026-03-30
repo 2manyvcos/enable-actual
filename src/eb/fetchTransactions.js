@@ -1,5 +1,4 @@
 const fs = require("fs");
-
 const {
   EB_API,
   EB_APP_ID,
