@@ -8,4 +8,7 @@ COPY src src
 
 EXPOSE 3000
 
+VOLUME /data
+ENV DATA_DIR=/data
+
 CMD [ "node", "src/server.js" ]
