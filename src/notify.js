@@ -19,7 +19,7 @@ function notify(message, url) {
     if (NTFY_USERNAME && NTFY_PASSWORD) {
       headers.set(
         "Authorization",
-        `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
+        `Basic ${Buffer.from(`${NTFY_USERNAME}:${NTFY_PASSWORD}`).toString("base64")}`,
       );
     }
 
