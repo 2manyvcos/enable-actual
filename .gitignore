@@ -1,4 +1,19 @@
+# Dependency directories
 node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Optional npm cache directory
+.npm
+
+# Editor state
+.vscode/launch.json
+__debug_*
+
+# Runtime data
 .env
 data
 private.pem

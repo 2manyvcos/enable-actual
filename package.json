@@ -1,30 +1,41 @@
 {
   "name": "enable-actual",
-  "version": "1.1.2",
   "description": "Import transactions from European banks into Actual Budget using Enable Banking",
-  "private": true,
-  "homepage": "https://github.com/2manyvcos/enable-actual#readme",
-  "bugs": {
-    "url": "https://github.com/2manyvcos/enable-actual/issues"
+  "version": "1.1.2",
+  "author": {
+    "name": "Aaron Burmeister"
   },
+  "homepage": "https://github.com/2manyvcos/enable-actual#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/2manyvcos/enable-actual.git"
   },
+  "bugs": {
+    "url": "https://github.com/2manyvcos/enable-actual/issues"
+  },
+  "private": true,
+  "type": "module",
   "license": "MIT",
-  "author": "Aaron Burmeister",
-  "type": "commonjs",
-  "main": "src/server.js",
+  "main": "src/server.ts",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --env-file=.env src/server.js"
+    "start": "node .",
+    "dev": "tsc && node --env-file=.env .",
+    "build": "tsc -b && vite build",
+    "prettify": "prettier . --write"
   },
   "dependencies": {
     "@actual-app/api": "^26.3.0",
+    "@types/express": "^5.0.6",
     "express": "^5.2.1",
     "express-handlebars": "^8.0.7",
     "jsonwebtoken": "^9.0.3",
     "node-cron": "^4.2.1",
     "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.5.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
   }
 }

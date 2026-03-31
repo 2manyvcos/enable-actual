@@ -1,10 +1,10 @@
-<form method="post" action="{{action}}">
+<form method='post' action='{{action}}'>
   <p>
-    <label for="accounts">Choose which accounts to synchronize:</label>
+    <label for='accounts'>Choose which accounts to synchronize:</label>
 
-    <select id="accounts" name="accounts" multiple>
+    <select id='accounts' name='accounts' multiple>
       {{#each accountOptions}}
-        <option value="{{value}}" {{attrs}}>
+        <option value='{{value}}' {{attrs}}>
           {{description}}
         </option>
       {{/each}}
@@ -12,6 +12,6 @@
   </p>
 
   <p>
-    <input type="submit" value="Submit" />
+    <input type='submit' value='Submit' />
   </p>
 </form>

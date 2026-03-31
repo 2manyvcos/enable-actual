@@ -1,20 +1,18 @@
-const fetchTransactions = require("./eb/fetchTransactions");
-const importTransactions = require("./actual/importTransactions");
-const notify = require("./notify");
-const { loadState, putState } = require("./state");
-const checkSession = require("./checkSession");
+import fetchTransactions from './eb/fetchTransactions.ts';
+import importTransactions from './actual/importTransactions.ts';
+import notify from './notify.ts';
+import { loadState, putState } from './state.ts';
+import checkSession from './checkSession.ts';
 
-async function sync() {
+export default async function sync() {
   console.log(`Starting sync at ${new Date().toLocaleString()}…`);
-
-  if (!checkSession()) {
-    return;
-  }
 
   const { source, sync } = loadState();
 
+  if (!checkSession(source) || !source) return;
+
   const results = await Promise.all(
-    source.accountUIDs?.map(async (accountUID) => {
+    source.accountUIDs.map(async (accountUID) => {
       const syncState = sync?.[accountUID] ?? {};
       try {
         console.log(`Fetching transactions for account ${accountUID}…`);
@@ -23,7 +21,7 @@ async function sync() {
           syncState,
         );
         return { accountUID, state, transactions };
-      } catch (err) {
+      } catch (err: any) {
         notify(`Syncing account ${accountUID} failed: ${err.message ?? err}`);
         return { accountUID, state: syncState, transactions: [] };
       }
@@ -32,7 +30,7 @@ async function sync() {
 
   const transactions = results.flatMap((result) => result.transactions);
   if (!transactions.length) {
-    console.log("No new transactions found to be imported");
+    console.log('No new transactions found to be imported');
   } else {
     console.log(
       `Importing ${transactions.length} transactions to Actual Budget…`,
@@ -48,5 +46,3 @@ async function sync() {
 
   console.log(`Done syncing ${source.accountUIDs?.length ?? 0} accounts`);
 }
-
-module.exports = sync;

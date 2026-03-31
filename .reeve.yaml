@@ -16,10 +16,10 @@ when:
 
 steps:
   - name: Get package version
-    task: "@reeve/node-get-package-version"
+    task: '@reeve/node-get-package-version'
 
   - name: Build image
-    task: "@docker/build"
+    task: '@docker/build'
     params:
       DOCKER_LOGIN_REGISTRIES: { env: docker/hub/login }
       NAME: docker.io/2manyvcos/enable-actual

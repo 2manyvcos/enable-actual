@@ -16,4 +16,4 @@ VOLUME /data
 ENV DATA_DIR=/data
 ENV EB_PRIVATE_KEY_FILE=/data/private.pem
 
-CMD [ "node", "src/server.js" ]
+CMD [ "node", "." ]

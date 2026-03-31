@@ -122,7 +122,8 @@ This setup:
 | `NTFY_PASSWORD`          | Optional password                                                                     | —                               |
 | `EB_API`                 | Enable Banking API URL                                                                | `https://api.enablebanking.com` |
 | `EB_APP_ID`              | Enable Banking App ID                                                                 | —                               |
-| `EB_PRIVATE_KEY_FILE`    | Path to private key                                                                   | `./private.pem`                 |
+| `EB_PRIVATE_KEY`         | Private key                                                                           | —                               |
+| `EB_PRIVATE_KEY_FILE`    | Path to private key file (alternative to `EB_PRIVATE_KEY`)                            | `./private.pem`                 |
 | `EB_TOKEN_VALIDITY`      | Session validity (ms)                                                                 | `180 days`                      |
 | `EB_BANK_NAME`           | Bank name (e.g. `N26`)                                                                | —                               |
 | `EB_BANK_COUNTRY`        | Bank country (e.g. `DE`)                                                              | —                               |
