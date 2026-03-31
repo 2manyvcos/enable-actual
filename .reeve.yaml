@@ -21,7 +21,7 @@ steps:
   - name: Build image
     task: '@docker/build'
     params:
-      DOCKER_LOGIN_REGISTRIES: { env: docker/hub/login }
+      DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
       NAME: docker.io/2manyvcos/enable-actual
       TAG: { var: PACKAGE_VERSION }
       PLATFORM: amd64
