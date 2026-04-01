@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="Import transactions from European banks into Actual Budget using Enable Banking"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>%ENABLE_ACTUAL_CONFIG_APP_NAME%</title>
+    <script>
+      window.enableActual = {
+        appName: '%ENABLE_ACTUAL_CONFIG_APP_NAME%',
+        publicURL: '%ENABLE_ACTUAL_CONFIG_PUBLIC_URL%',
+      };
+    </script>
+  </head>
+  <body>
+    <div id="root" class="app"></div>
+    <script type="module" src="/client/src/main.tsx"></script>
+  </body>
+</html>

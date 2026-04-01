@@ -1,0 +1,16 @@
+.vscode
+client/dist
+data
+node_modules
+.env
+.git
+.gitignore
+.reeve.yaml
+Dockerfile
+private.pem
+
+logs
+*.log
+npm-debug.log*
+.npm
+__debug_*

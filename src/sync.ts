@@ -1,8 +1,8 @@
-import fetchTransactions from './eb/fetchTransactions.ts';
 import importTransactions from './actual/importTransactions.ts';
+import checkSession from './checkSession.ts';
+import fetchTransactions from './eb/fetchTransactions.ts';
 import notify from './notify.ts';
 import { loadState, putState } from './state.ts';
-import checkSession from './checkSession.ts';
 
 export default async function sync() {
   console.log(`Starting sync at ${new Date().toLocaleString()}…`);
@@ -21,7 +21,10 @@ export default async function sync() {
           syncState,
         );
         return { accountUID, state, transactions };
-      } catch (err: any) {
+      } catch (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        err: any
+      ) {
         notify(`Syncing account ${accountUID} failed: ${err.message ?? err}`);
         return { accountUID, state: syncState, transactions: [] };
       }

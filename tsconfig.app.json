@@ -25,9 +25,8 @@
     "noUncheckedSideEffectImports": true,
 
     /* Path aliases */
-    "baseUrl": "client",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./client/src/*"]
     }
   },
   "include": ["client/src"]

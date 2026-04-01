@@ -1,0 +1,8 @@
+{
+  "name": "${ENABLE_ACTUAL_CONFIG_APP_NAME}",
+  "description": "Import transactions from European banks into Actual Budget using Enable Banking",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#8cb4f3",
+  "background_color": "#ffffff"
+}

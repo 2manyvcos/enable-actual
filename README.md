@@ -183,6 +183,7 @@ NTFY_URL=https://ntfy.sh/your-topic
 ```bash
 docker run \
   -it \
+  -p 3000:3000 \
   -v ./data/sync:data \
   -e PUBLIC_URL=https://sync.example.com \
   -e EB_APP_ID=${EB_APP_ID} \

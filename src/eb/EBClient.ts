@@ -65,7 +65,7 @@ export default class EBClient {
     privateKey?: string;
     privateKeyFile?: string;
   }) {
-    this.api = api.replace(/\/*$/g, '');
+    this.api = api.replace(/\/*$/, '');
     this.appID = appID;
     if (privateKey) this.privateKey = privateKey;
     else if (privateKeyFile)
@@ -208,12 +208,11 @@ export default class EBClient {
       transactions,
       continuationKey: nextContinuationKey,
       next: nextContinuationKey
-        ? async () => {
-            return this.getTransactions({
+        ? async () =>
+            this.getTransactions({
               accountUID,
               continuationKey: nextContinuationKey,
-            });
-          }
+            })
         : undefined,
     };
   }

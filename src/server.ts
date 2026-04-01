@@ -1,7 +1,7 @@
+import path from 'path';
 import express, { type ErrorRequestHandler } from 'express';
 import { engine } from 'express-handlebars';
 import cron from 'node-cron';
-import path from 'path';
 import checkSession from './checkSession.ts';
 import { APP_NAME, PORT, PUBLIC_URL, SYNC_SCHEDULE } from './config.ts';
 import ebRouter from './eb/router.ts';

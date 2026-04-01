@@ -22,7 +22,10 @@ export function loadState(): State {
   if (fs.existsSync(STATE_FILE)) {
     try {
       return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-    } catch (err: any) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      err: any
+    ) {
       console.error(`Error loading existing state: ${err.message ?? err}`);
     }
   }

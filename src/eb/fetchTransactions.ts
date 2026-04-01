@@ -40,21 +40,22 @@ export default async function fetchTransactions(
     if (new Date(dateFrom) < new Date(initial)) dateFrom = initial;
   }
 
+  const allTransactions = [];
   let { transactions, next } = await client.getTransactions({
     accountUID,
     dateFrom,
     dateTo,
     transactionStatus: 'BOOK',
   });
+  allTransactions.push(...transactions);
   while (next) {
-    let nextTransactions;
-    ({ transactions: nextTransactions, next } = await next());
-    transactions.push(...nextTransactions);
+    ({ transactions, next } = await next());
+    allTransactions.push(...transactions);
   }
 
   return {
     state: { initial, date: dateTo },
-    transactions: transactions.map((transaction) => {
+    transactions: allTransactions.map((transaction) => {
       let amount = Math.round(
         parseFloat(transaction.transaction_amount.amount) * 100 || 0,
       );
