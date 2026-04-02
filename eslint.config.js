@@ -34,7 +34,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/*.ts'],
+    files: ['server/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended, prettier],
     settings: {
       'import/resolver': {
@@ -53,7 +53,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['client/**/*.{ts,tsx}', 'src/**/*.ts'],
+    files: ['client/**/*.{ts,tsx}', 'server/**/*.ts'],
     plugins: {
       'unused-imports': unusedImports,
       import: importPlugin,

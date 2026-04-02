@@ -1,5 +1,5 @@
 {
-  "name": "${ENABLE_ACTUAL_CONFIG_APP_NAME}",
+  "name": "${ENABLEACTUAL_CONFIG_APP_NAME}",
   "description": "Import transactions from European banks into Actual Budget using Enable Banking",
   "start_url": ".",
   "display": "standalone",

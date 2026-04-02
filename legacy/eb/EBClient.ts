@@ -55,7 +55,7 @@ export default class EBClient {
   private privateKey: string;
 
   constructor({
-    api,
+    api = 'https://api.enablebanking.com',
     appID,
     privateKey,
     privateKeyFile,

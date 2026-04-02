@@ -1,3 +1,18 @@
+# TODO: v2
+
+- multiple accounts
+- account mapping
+- payee mapping?
+- choose if default cleared
+- choose if notified on success
+- sync details in UI
+- use enablebanking /sessions/session_id for session information
+- MIGRATION from v1!!!
+  - data/state.json -> data/enable-actual.json + schema changes
+  - data/actual -> data/actual/server-id
+  - move private.pem to state file
+  - users should keep existing env for auto migration (add note to readme)
+
 # Enable Actual
 
 **Import transactions from European banks into Actual Budget using Enable Banking.**

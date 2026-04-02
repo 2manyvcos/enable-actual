@@ -18,7 +18,7 @@ FROM base
 
 COPY --from=builder --chown=app:app /app/client/dist/ ./client/dist/
 COPY --from=builder --chown=app:app /app/node_modules/ ./node_modules/
-COPY --from=builder --chown=app:app /app/src/ ./src/
+COPY --from=builder --chown=app:app /app/server/ ./server/
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
 

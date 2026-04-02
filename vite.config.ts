@@ -8,5 +8,5 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   build: { outDir: 'client/dist' },
   publicDir: 'client/public',
-  envPrefix: 'ENABLE_ACTUAL_',
+  envPrefix: 'ENABLEACTUAL_',
 });

@@ -1,6 +1,6 @@
-import fs from 'fs';
 import api, { type ImportTransactionsOpts } from '@actual-app/api';
 import type { ImportTransactionEntity } from '@actual-app/api/@types/loot-core/src/types/models';
+import fs from 'fs';
 import type { Transaction } from '../common.ts';
 import {
   ACTUAL_ACCOUNT_ID,
@@ -30,15 +30,16 @@ export default async function importTransactions(
   const { added, updated, errors } = await api.importTransactions(
     ACTUAL_ACCOUNT_ID,
     transactions.map(
-      (transaction): ImportTransactionEntity => ({
-        account: ACTUAL_ACCOUNT_ID,
-        date: transaction.date,
-        amount: transaction.amount,
-        payee_name: transaction.payee,
-        imported_payee: transaction.payee,
-        notes: transaction.notes,
-        imported_id: transaction.id,
-      }),
+      (transaction) =>
+        ({
+          account: ACTUAL_ACCOUNT_ID,
+          date: transaction.date,
+          amount: transaction.amount,
+          payee_name: transaction.payee,
+          imported_payee: transaction.payee,
+          notes: transaction.notes,
+          imported_id: transaction.id,
+        }) satisfies ImportTransactionEntity,
     ),
     {
       reimportDeleted: false, // this is mentioned in the documentation but is missing from the TypeScript definition and doesn't seem to have an effect - it is left here for the future nonetheless

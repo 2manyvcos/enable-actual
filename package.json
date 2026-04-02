@@ -16,7 +16,7 @@
   "private": true,
   "type": "module",
   "license": "MIT",
-  "main": "src/server.ts",
+  "main": "server/main.ts",
   "scripts": {
     "start": "node .",
     "dev": "tsc && touch .env && node --env-file=.env .",
