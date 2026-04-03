@@ -13,6 +13,7 @@
   - data/actual -> data/actual/server-id
   - move private.pem to state file
   - users should keep existing env for auto migration (add note to readme)
+- debug logs
 
 # Enable Actual
 
