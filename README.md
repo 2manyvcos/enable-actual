@@ -3,6 +3,7 @@
 - multiple accounts
 - account mapping
 - payee mapping?
+- pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
 - choose if default cleared
 - choose if notified on success
 - sync details in UI
