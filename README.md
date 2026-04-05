@@ -159,7 +159,7 @@ Control this behavior with `SYNC_OVERSCAN_DAYS`.
 
 ### Multiple Accounts
 
-Currently, Enable Actual can only sync from one Enable Banking Application to one Actual Banking Account.
+Currently, Enable Actual can only sync from one Enable Banking Application to one Actual Budget Account.
 If you want to sync multiple accounts, you need to host multiple instances of Enable Actual.
 
 ---
