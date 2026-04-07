@@ -10,12 +10,21 @@ type NotificationSettings = {
     username?: string;
     password?: string;
   };
+  alerts?: {
+    sessionExpiryDays?: number;
+    successfulImports?: boolean;
+    unsuccessfulImports?: boolean;
+  };
 };
 
 export default function NotificationSettings() {
   const [ntfyURL, setNtfyURL] = useState('');
   const [ntfyUsername, setNtfyUsername] = useState('');
   const [ntfyPassword, setNtfyPassword] = useState('');
+  const [alertsSessionExpiryDays, setAlertsSessionExpiryDays] = useState(0);
+  const [alertsSuccessfulImports, setAlertsSuccessfulImports] = useState(false);
+  const [alertsUnsuccessfulImports, setAlertsUnsuccessfulImports] =
+    useState(false);
 
   const resource = useResource<
     FetchProviderType,
@@ -30,6 +39,13 @@ export default function NotificationSettings() {
     setNtfyURL(resource.data?.ntfy?.url ?? '');
     setNtfyUsername(resource.data?.ntfy?.username ?? '');
     setNtfyPassword(resource.data?.ntfy?.password ?? '');
+    setAlertsSessionExpiryDays(resource.data?.alerts?.sessionExpiryDays ?? 0);
+    setAlertsSuccessfulImports(
+      resource.data?.alerts?.successfulImports ?? false,
+    );
+    setAlertsUnsuccessfulImports(
+      resource.data?.alerts?.unsuccessfulImports ?? false,
+    );
   }, [resource.data]);
 
   if (resource.error) {
@@ -51,6 +67,11 @@ export default function NotificationSettings() {
                   url: ntfyURL || undefined,
                   username: ntfyUsername || undefined,
                   password: ntfyPassword || undefined,
+                },
+                alerts: {
+                  sessionExpiryDays: alertsSessionExpiryDays || undefined,
+                  successfulImports: alertsSuccessfulImports,
+                  unsuccessfulImports: alertsUnsuccessfulImports,
                 },
               } satisfies NotificationSettings),
             }))(),
@@ -113,6 +134,76 @@ export default function NotificationSettings() {
               value={ntfyPassword}
               onChange={(event) => {
                 setNtfyPassword(event.target.value);
+              }}
+            />
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Alerts</legend>
+
+          <p>
+            <label htmlFor="alerts-session-expiry">Session expiry</label>
+
+            <input
+              type="checkbox"
+              id="alerts-session-expiry"
+              name="alerts-session-expiry"
+              checked={alertsSessionExpiryDays > 0}
+              onChange={(event) => {
+                setAlertsSessionExpiryDays(event.target.checked ? 7 : 0);
+              }}
+            />
+          </p>
+
+          {!alertsSessionExpiryDays ? null : (
+            <p>
+              <label htmlFor="alerts-session-expiry-days">
+                Days before session expiry
+              </label>
+
+              <input
+                type="number"
+                id="alerts-session-expiry-days"
+                name="alerts-session-expiry-days"
+                min={1}
+                step={1}
+                value={alertsSessionExpiryDays}
+                onChange={(event) => {
+                  setAlertsSessionExpiryDays(+(event.target.value || 0));
+                }}
+              />
+            </p>
+          )}
+
+          <p>
+            <label htmlFor="alerts-successful-imports">
+              Successful imports
+            </label>
+
+            <input
+              type="checkbox"
+              id="alerts-successful-imports"
+              name="alerts-successful-imports"
+              checked={alertsSuccessfulImports}
+              onChange={(event) => {
+                setAlertsSuccessfulImports(event.target.checked);
+              }}
+            />
+          </p>
+
+          <p>
+            <label htmlFor="alerts-unsuccessful-imports">
+              Unsuccessful imports
+            </label>
+
+            <input
+              type="checkbox"
+              id="alerts-unsuccessful-imports"
+              name="alerts-unsuccessful-imports"
+              checked={alertsUnsuccessfulImports}
+              onChange={(event) => {
+                setAlertsUnsuccessfulImports(event.target.checked);
               }}
             />
           </p>

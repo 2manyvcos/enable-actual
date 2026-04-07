@@ -153,6 +153,7 @@ This setup:
 | `ACTUAL_BUDGET_ID`       | Budget sync ID                                                                        | —                               |
 | `ACTUAL_BUDGET_PASSWORD` | Budget password                                                                       | —                               |
 | `ACTUAL_ACCOUNT_ID`      | Target account ID                                                                     | —                               |
+| `LOG_LEVEL`              | Log level (one of `none`, `info`, `debug`)                                            | `info`                          |
 
 ---
 

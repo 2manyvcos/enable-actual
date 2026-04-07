@@ -62,3 +62,13 @@ fieldset > p {
   display: flex;
   flex-direction: column;
 }
+
+fieldset > p:has(> input[type='checkbox']) {
+  flex-direction: row-reverse;
+  gap: 10px;
+}
+
+fieldset > p:has(> input[type='checkbox']) > label {
+  flex: 1 0 auto;
+  user-select: none;
+}
