@@ -1,11 +1,16 @@
-import type { FetchProviderType } from '@civet/common';
-import { useResource } from '@civet/core';
+import { Toaster } from 'react-hot-toast';
+import NotificationSettings from './NotificationSettings';
+import Section from './Section';
+import './styles.css';
 
 export default function App() {
-  const resource = useResource<FetchProviderType, string | undefined>({
-    name: 'v1/health',
-    query: undefined,
-  });
+  return (
+    <>
+      <Section collapsible header="Notifications">
+        <NotificationSettings />
+      </Section>
 
-  return resource.error?.toString() ?? resource.data;
+      <Toaster />
+    </>
+  );
 }

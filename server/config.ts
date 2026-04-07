@@ -23,3 +23,5 @@ export const ENABLEBANKING_API =
   process.env.ENABLEBANKING_API ?? 'https://api.enablebanking.com';
 
 export const ACTUAL_DATA_DIR = path.join(DATA_DIR, 'actual');
+
+export const LOG_LEVEL = process.env.LOG_LEVEL ?? 'info';

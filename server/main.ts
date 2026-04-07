@@ -6,11 +6,15 @@ import express from 'express';
 import apiRouter from './api/router.ts';
 import {
   LISTEN_ADDRESS,
+  LOG_LEVEL,
   PORT,
   SSL_CERTIFICATE_FILE,
   SSL_PRIVATE_KEY_FILE,
 } from './config.ts';
 import resolveClientTemplate from './resolveClientTemplate.ts';
+
+if (!['debug', 'info'].includes(LOG_LEVEL)) console.info = () => {};
+if (!['debug'].includes(LOG_LEVEL)) console.debug = () => {};
 
 const app = express();
 
@@ -46,5 +50,5 @@ if (SSL_PRIVATE_KEY_FILE && SSL_CERTIFICATE_FILE) {
 }
 
 server.listen(+PORT, LISTEN_ADDRESS, () => {
-  console.log(`Server is listening on ${proto}://${LISTEN_ADDRESS}:${+PORT}`);
+  console.info(`Server is listening on ${proto}://${LISTEN_ADDRESS}:${+PORT}`);
 });
