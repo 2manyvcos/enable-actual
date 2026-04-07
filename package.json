@@ -24,7 +24,7 @@
     "prettify": "prettier . --write"
   },
   "dependencies": {
-    "@actual-app/api": "^26.3.0",
+    "@actual-app/api": "^26.4.0",
     "@types/express": "^5.0.6",
     "express": "^5.2.1",
     "express-handlebars": "^8.0.7",
