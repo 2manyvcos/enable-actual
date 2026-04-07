@@ -1,3 +1,11 @@
+import type { FetchProviderType } from '@civet/common';
+import { useResource } from '@civet/core';
+
 export default function App() {
-  return 'Hello, React!';
+  const resource = useResource<FetchProviderType, string | undefined>({
+    name: 'v1/health',
+    query: undefined,
+  });
+
+  return resource.error?.toString() ?? resource.data;
 }

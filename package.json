@@ -19,7 +19,7 @@
   "main": "server/main.ts",
   "scripts": {
     "start": "node .",
-    "dev": "tsc && touch .env && node --env-file=.env .",
+    "dev": "tsc && touch .env .env.server && node --env-file=.env --env-file=.env.server .",
     "client:dev": "vite",
     "client:build": "tsc -b && vite build",
     "client:preview": "vite preview",
@@ -27,12 +27,13 @@
     "prettify": "prettier . --write"
   },
   "dependencies": {
-    "@actual-app/api": "^26.3.0",
+    "@actual-app/api": "^26.4.0",
     "@civet/common": "^2.3.1",
     "@civet/core": "^6.2.5",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "cors": "^2.8.6",
     "express": "^5.2.1",
-    "express-handlebars": "^8.0.7",
     "jsonwebtoken": "^9.0.3",
     "node-cron": "^4.2.1",
     "node-fetch": "^3.3.2",
@@ -42,7 +43,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",

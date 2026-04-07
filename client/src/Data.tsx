@@ -3,7 +3,7 @@ import { ConfigProvider } from '@civet/core';
 import { type ReactNode } from 'react';
 
 const apiURL = new URL(
-  'api/v1/',
+  'api/',
   window.enableActual.publicURL.replace(/\/*$/, '/'),
 );
 

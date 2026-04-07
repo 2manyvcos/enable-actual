@@ -16,5 +16,6 @@ __debug_*
 # Application data
 client/dist
 .env
+.env.server
 data
 private.pem

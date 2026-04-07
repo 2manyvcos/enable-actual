@@ -3,6 +3,7 @@ client/dist
 data
 node_modules
 .env
+.env.server
 .git
 .gitignore
 .reeve.yaml
