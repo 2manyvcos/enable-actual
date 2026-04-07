@@ -2,7 +2,13 @@ import path from 'path';
 
 export const APP_NAME = process.env.APP_NAME ?? 'Enable Actual';
 
+export const LISTEN_ADDRESS = process.env.LISTEN_ADDRESS ?? '0.0.0.0';
+
 export const PORT = process.env.PORT ?? '3000';
+
+export const SSL_PRIVATE_KEY_FILE = process.env.SSL_PRIVATE_KEY_FILE;
+
+export const SSL_CERTIFICATE_FILE = process.env.SSL_CERTIFICATE_FILE;
 
 export const PUBLIC_URL = (
   process.env.PUBLIC_URL ?? `http://localhost:${PORT}`

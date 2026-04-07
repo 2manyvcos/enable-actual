@@ -1,67 +1,28 @@
 import fs from 'fs';
+import http from 'http';
+import https from 'https';
 import path from 'node:path';
 import express from 'express';
 import apiRouter from './api/router.ts';
-import { APP_NAME, PORT, PUBLIC_URL } from './config.ts';
+import {
+  LISTEN_ADDRESS,
+  PORT,
+  SSL_CERTIFICATE_FILE,
+  SSL_PRIVATE_KEY_FILE,
+} from './config.ts';
+import resolveClientTemplate from './resolveClientTemplate.ts';
 
 const app = express();
 
 app.use('/api', apiRouter);
 
-const templates: { [path: string]: string | undefined } = {};
-const templateParams = {
-  ENABLEACTUAL_CONFIG_APP_NAME: APP_NAME,
-  ENABLEACTUAL_CONFIG_PUBLIC_URL: PUBLIC_URL,
-};
-function resolveTemplate(templatePath: string): string {
-  if (!templates[templatePath]) {
-    templates[templatePath] = Object.entries(templateParams).reduce(
-      (src, [param, value]) =>
-        src
-          .replaceAll(
-            `'%${param}%'`,
-            `'${value
-              .replace(/\\/g, '\\\\')
-              .replace(/'/g, "\\'")
-              .replace(/\n/g, '\\n')}'`,
-          )
-          .replaceAll(
-            `"%${param}%"`,
-            `"${value
-              .replace(/\\/g, '\\\\')
-              .replace(/"/g, '\\"')
-              .replace(/\n/g, '\\n')}"`,
-          )
-          .replaceAll(
-            `>%${param}%<`,
-            `>${value
-              .replace(/&/g, '&amp;')
-              .replace(/"/g, '&quot;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')}<`,
-          ),
-      fs.readFileSync(templatePath).toString(),
-    );
-  }
-  return templates[templatePath];
-}
 app.get('/index.html', (_req, res) => {
-  res
-    .contentType('text/html')
-    .send(
-      resolveTemplate(
-        path.join(import.meta.dirname, '../client/dist/index.html'),
-      ),
-    );
+  res.contentType('text/html').send(resolveClientTemplate('index.html'));
 });
 app.get('/manifest.json', (_req, res) => {
   res
     .contentType('application/json')
-    .send(
-      resolveTemplate(
-        path.join(import.meta.dirname, '../client/dist/manifest.json'),
-      ),
-    );
+    .send(resolveClientTemplate('manifest.json'));
 });
 app.use(
   express.static(path.join(import.meta.dirname, '../client/dist'), {
@@ -69,15 +30,21 @@ app.use(
   }),
 );
 app.get('{*splat}', (_req, res) => {
-  res
-    .contentType('text/html')
-    .send(
-      resolveTemplate(
-        path.join(import.meta.dirname, '../client/dist/index.html'),
-      ),
-    );
+  res.contentType('text/html').send(resolveClientTemplate('index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is listening on http://localhost:${PORT}`);
+let server;
+let proto;
+if (SSL_PRIVATE_KEY_FILE && SSL_CERTIFICATE_FILE) {
+  const key = fs.readFileSync(SSL_PRIVATE_KEY_FILE);
+  const cert = fs.readFileSync(SSL_CERTIFICATE_FILE);
+  server = https.createServer({ key, cert }, app);
+  proto = 'https';
+} else {
+  server = http.createServer(app);
+  proto = 'http';
+}
+
+server.listen(+PORT, LISTEN_ADDRESS, () => {
+  console.log(`Server is listening on ${proto}://${LISTEN_ADDRESS}:${+PORT}`);
 });
