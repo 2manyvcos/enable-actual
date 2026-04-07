@@ -115,7 +115,6 @@ This setup:
 ### 3. Configure Enable Actual
 
 - **HTTPS is required** when using production banking data (PSD2 requirement)
-- Run Enable Actual behind a reverse proxy with TLS
 - **Add external authentication if exposed to the internet**
 
 > ⚠️ Enable Actual does **not** provide built-in authentication.
@@ -127,7 +126,10 @@ This setup:
 | Variable                 | Description                                                                           | Default                         |
 | ------------------------ | ------------------------------------------------------------------------------------- | ------------------------------- |
 | `APP_NAME`               | Application name                                                                      | `Enable Actual`                 |
+| `LISTEN_ADDRESS`         | IP address to listen on                                                               | `0.0.0.0`                       |
 | `PORT`                   | HTTP port                                                                             | `3000`                          |
+| `SSL_PRIVATE_KEY_FILE`   | (Optional) path to SSL private key file (enables HTTPS)                               | —                               |
+| `SSL_CERTIFICATE_FILE`   | (Optional) path to SSL certificate file (enables HTTPS)                               | —                               |
 | `SYNC_SCHEDULE`          | Cron schedule for syncing                                                             | `0 0 * * *`                     |
 | `SYNC_INITIAL_DAYS`      | Days to fetch on first sync                                                           | `30`                            |
 | `SYNC_OVERSCAN_DAYS`     | Overlap days for syncing                                                              | `7`                             |
@@ -171,6 +173,13 @@ Control this behavior with `SYNC_OVERSCAN_DAYS`.
 - Transactions are imported **without currency conversion**
 - The currency provided by Enable Banking is currently ignored
 - Ensure your bank and Actual Budget use the same currency
+
+---
+
+### Multiple Accounts
+
+Currently, Enable Actual can only sync from one Enable Banking Application to one Actual Budget Account.
+If you want to sync multiple accounts, you need to host multiple instances of Enable Actual.
 
 ---
 

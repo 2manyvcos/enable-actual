@@ -1,9 +1,20 @@
 import path from 'path';
 import express, { type ErrorRequestHandler } from 'express';
 import { engine } from 'express-handlebars';
+import fs from 'fs';
+import http from 'http';
+import https from 'https';
 import cron from 'node-cron';
 import checkSession from './checkSession.ts';
-import { APP_NAME, PORT, PUBLIC_URL, SYNC_SCHEDULE } from './config.ts';
+import {
+  APP_NAME,
+  LISTEN_ADDRESS,
+  PORT,
+  PUBLIC_URL,
+  SSL_CERTIFICATE_FILE,
+  SSL_PRIVATE_KEY_FILE,
+  SYNC_SCHEDULE,
+} from './config.ts';
 import ebRouter from './eb/router.ts';
 import { loadState } from './state.ts';
 import sync from './sync.ts';
@@ -48,6 +59,18 @@ app.use(((error, _req, res, _next) => {
   res.status(500).send('Internal server error');
 }) satisfies ErrorRequestHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is listening on http://localhost:${PORT}`);
+let server;
+let proto;
+if (SSL_PRIVATE_KEY_FILE && SSL_CERTIFICATE_FILE) {
+  const key = fs.readFileSync(SSL_PRIVATE_KEY_FILE);
+  const cert = fs.readFileSync(SSL_CERTIFICATE_FILE);
+  server = https.createServer({ key, cert }, app);
+  proto = 'https';
+} else {
+  server = http.createServer(app);
+  proto = 'http';
+}
+
+server.listen(+PORT, LISTEN_ADDRESS, () => {
+  console.log(`Server is listening on ${proto}://${LISTEN_ADDRESS}:${+PORT}`);
 });
