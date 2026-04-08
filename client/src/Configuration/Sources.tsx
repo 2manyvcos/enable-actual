@@ -1,3 +1,4 @@
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -30,12 +31,12 @@ export default function Sources() {
           >
             <ListItemText primary={account.name} secondary={account.type} />
 
-            <Button color="success" sx={{ marginInline: 2 }}>
-              Authorize
-            </Button>
+            <Button sx={{ marginInline: 2 }}>Authorize</Button>
           </ListItem>
         ))}
       </List>
+
+      <Button startIcon={<AddIcon />}>Add account</Button>
     </Stack>
   );
 }
