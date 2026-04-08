@@ -8,7 +8,6 @@ router.get('/notifications', (_req, res) => {
 });
 router.put('/notifications', (req, res) => {
   if (typeof req.body !== 'object') {
-    console.debug(req.body);
     res.sendStatus(400);
     return;
   }

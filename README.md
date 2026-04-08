@@ -1,6 +1,7 @@
 # TODO: v2
 
 - multiple accounts
+- option to ignore today (prevents syncing issues with n26 caused by changed IDs)
 - account mapping
 - payee mapping?
 - pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)

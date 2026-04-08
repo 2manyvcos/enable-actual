@@ -109,8 +109,8 @@ export default function NotificationSettings() {
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
+      onSubmit={(event) => {
+        event.preventDefault();
 
         const promise = save();
 

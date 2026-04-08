@@ -6,6 +6,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import { useState, type SyntheticEvent } from 'react';
 import NotificationSettings from './NotificationSettings';
+import Sources from './Sources';
 
 export default function Configuration() {
   const [expanded, setExpanded] = useState<string | false>(false);
@@ -17,6 +18,23 @@ export default function Configuration() {
 
   return (
     <Container sx={{ paddingTop: 2 }}>
+      <Accordion
+        expanded={expanded === 'sources'}
+        onChange={handleChange('sources')}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="sources-content"
+          id="sources-header"
+        >
+          <Typography component="span">Sources</Typography>
+        </AccordionSummary>
+
+        <AccordionDetails>
+          <Sources />
+        </AccordionDetails>
+      </Accordion>
+
       <Accordion
         expanded={expanded === 'notification-settings'}
         onChange={handleChange('notification-settings')}
