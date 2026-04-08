@@ -8,7 +8,7 @@ export default function notify(message: string, url?: string): void {
   const { notifications } = loadState();
   const ntfy = notifications?.ntfy ?? {};
 
-  if (ntfy.url) {
+  if (ntfy.enabled && ntfy.url) {
     const headers = new Headers({
       Title: APP_NAME,
       Click: url ?? PUBLIC_URL,

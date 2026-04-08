@@ -3,9 +3,15 @@ import { DATA_DIR, STATE_FILE } from './config.ts';
 
 export type NotificationState = {
   ntfy?: {
+    enabled?: boolean;
     url?: string;
     username?: string;
     password?: string;
+  };
+  alerts?: {
+    sessionExpiryDays?: number;
+    successfulImports?: boolean;
+    unsuccessfulImports?: boolean;
   };
 };
 
