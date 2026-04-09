@@ -1,6 +1,7 @@
 import type { FetchProviderType } from '@civet/common';
 import { useResource } from '@civet/core';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Accordion from '@mui/material/Accordion';
@@ -30,7 +31,7 @@ export default function NotificationSettings() {
     FetchProviderType,
     output<typeof NotificationSettingsSchema> | undefined
   >({
-    name: 'v1/config/notifications',
+    name: 'v1/notification-settings',
     query: undefined,
   });
 
@@ -56,6 +57,18 @@ export default function NotificationSettings() {
   };
 
   const [ntfyPasswordVisible, setNtfyPasswordVisible] = useState(false);
+
+  const save = async () => {
+    await resource.dataProvider.request('v1/notification-settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state),
+    });
+
+    const { revision } = await resource.notify();
+
+    setResetStateAfterRevision(revision);
+  };
 
   if (resource.isLoading && resource.isInitial) {
     return (
@@ -84,18 +97,6 @@ export default function NotificationSettings() {
     );
   }
 
-  const save = async () => {
-    await resource.dataProvider.request('v1/config/notifications', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(state),
-    });
-
-    const { revision } = await resource.notify();
-
-    setResetStateAfterRevision(revision);
-  };
-
   return (
     <form
       onSubmit={(event) => {
@@ -107,9 +108,9 @@ export default function NotificationSettings() {
 
         toast.promise(promise, {
           loading: 'Saving changes…',
-          success: 'Saved changes successfully',
+          success: 'Changes saved successfully',
           error: (error) => {
-            console.error(error);
+            console.debug('Saving changes failed:', error);
             return `Error saving changes: ${
               error?.message ?? error ?? 'Unexpected error'
             }`;
@@ -314,7 +315,8 @@ export default function NotificationSettings() {
 
         <Button
           type="submit"
-          variant="contained"
+          sx={{ alignSelf: 'flex-end' }}
+          startIcon={<SaveIcon />}
           loading={resource.isLoading}
           disabled={!state}
         >

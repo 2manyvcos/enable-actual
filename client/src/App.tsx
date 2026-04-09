@@ -7,7 +7,7 @@ import { Outlet, Link as RouterLink } from 'react-router';
 export default function App() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="fixed" variant="outlined" color="transparent">
+      <AppBar position="fixed" variant="outlined">
         <Toolbar>
           {/* <IconButton
             size="large"

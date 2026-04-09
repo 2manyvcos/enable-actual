@@ -10,7 +10,7 @@ export function loadState(): output<typeof State> {
     try {
       raw = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
     } catch (error) {
-      console.error(
+      console.debug(
         `Error loading existing state: ${(error as Error).message ?? error}`,
       );
     }
