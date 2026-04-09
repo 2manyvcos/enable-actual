@@ -51,8 +51,8 @@ export default async function importTransactions(
     `Added ${added.length} and updated ${updated.length} transactions`,
   );
 
-  errors?.forEach((err: Error) => {
-    notify(`Importing transactions failed: ${err.message ?? err}`);
+  errors?.forEach((error: Error) => {
+    notify(`Importing transactions failed: ${error.message ?? error}`);
   });
 
   await api.shutdown();

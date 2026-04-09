@@ -13,64 +13,60 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useEffect, useState } from 'react';
+import { setIn } from 'immutable';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import type { input, output } from 'zod';
 import NumberField from '@/NumberField';
-
-type NotificationSettings = {
-  ntfy?: {
-    enabled?: boolean;
-    url?: string;
-    username?: string;
-    password?: string;
-  };
-  alerts?: {
-    sessionExpiryDays?: number;
-    successfulImports?: boolean;
-    unsuccessfulImports?: boolean;
-  };
-};
+import NotificationSettingsSchema from '@schema/NotificationSettings';
 
 export default function NotificationSettings() {
-  const [ntfyEnabled, setNtfyEnabled] = useState(false);
-  const [ntfyURL, setNtfyURL] = useState('');
-  const [ntfyUsername, setNtfyUsername] = useState('');
-  const [ntfyPassword, setNtfyPassword] = useState('');
-  const [ntfyPasswordVisible, setNtfyPasswordVisible] = useState(false);
-  const [alertsSessionExpiryDays, setAlertsSessionExpiryDays] = useState(0);
-  const [alertsSuccessfulImports, setAlertsSuccessfulImports] = useState(false);
-  const [alertsUnsuccessfulImports, setAlertsUnsuccessfulImports] =
-    useState(false);
-
   const resource = useResource<
     FetchProviderType,
-    NotificationSettings | undefined
+    output<typeof NotificationSettingsSchema> | undefined
   >({
     name: 'v1/config/notifications',
     query: undefined,
   });
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNtfyEnabled(resource.data?.ntfy?.enabled ?? false);
-    setNtfyURL(resource.data?.ntfy?.url ?? '');
-    setNtfyUsername(resource.data?.ntfy?.username ?? '');
-    setNtfyPassword(resource.data?.ntfy?.password ?? '');
-    setAlertsSessionExpiryDays(resource.data?.alerts?.sessionExpiryDays ?? 0);
-    setAlertsSuccessfulImports(
-      resource.data?.alerts?.successfulImports ?? false,
-    );
-    setAlertsUnsuccessfulImports(
-      resource.data?.alerts?.unsuccessfulImports ?? false,
-    );
-  }, [resource.data]);
+  const [state, setState] =
+    useState<input<typeof NotificationSettingsSchema>>();
+  const [resetStateAfterRevision, setResetStateAfterRevision] =
+    useState<string>();
+  if (resetStateAfterRevision) {
+    if (resource.revision >= resetStateAfterRevision) {
+      setState(undefined);
+      setResetStateAfterRevision(undefined);
+    }
+  }
+
+  const data = state ?? resource.data;
+
+  const handleChange = (path: string[], value: unknown): void => {
+    setState((prev) => {
+      const base = prev ?? resource.data;
+      if (!base) return prev;
+      return setIn(base, path, value);
+    });
+  };
+
+  const [ntfyPasswordVisible, setNtfyPasswordVisible] = useState(false);
 
   if (resource.isLoading && resource.isInitial) {
-    // TODO: render skeleton
+    return (
+      <Stack spacing={2}>
+        <Skeleton variant="rounded" height={48} />
+
+        <Skeleton variant="rounded" height={315} />
+
+        <Skeleton variant="rounded" height={36} />
+      </Stack>
+    );
   }
 
   if (resource.error) {
@@ -88,29 +84,24 @@ export default function NotificationSettings() {
     );
   }
 
-  const save = async () =>
-    resource.dataProvider.request('v1/config/notifications', {
+  const save = async () => {
+    await resource.dataProvider.request('v1/config/notifications', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ntfy: {
-          enabled: ntfyEnabled,
-          url: ntfyURL || undefined,
-          username: ntfyUsername || undefined,
-          password: ntfyPassword || undefined,
-        },
-        alerts: {
-          sessionExpiryDays: alertsSessionExpiryDays || undefined,
-          successfulImports: alertsSuccessfulImports,
-          unsuccessfulImports: alertsUnsuccessfulImports,
-        },
-      } satisfies NotificationSettings),
+      body: JSON.stringify(state),
     });
+
+    const { revision } = await resource.notify();
+
+    setResetStateAfterRevision(revision);
+  };
 
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
+
+        if (!state) return;
 
         const promise = save();
 
@@ -129,7 +120,7 @@ export default function NotificationSettings() {
       <Stack
         component="fieldset"
         spacing={2}
-        sx={{ border: 'none' }}
+        sx={{ margin: 0, padding: 0, border: 'none' }}
         disabled={resource.isLoading}
       >
         <Accordion variant="outlined">
@@ -149,9 +140,9 @@ export default function NotificationSettings() {
                 control={
                   <Switch
                     id="ntfy-enabled"
-                    checked={ntfyEnabled}
+                    checked={data?.ntfy?.enabled ?? false}
                     onChange={(_event, checked) => {
-                      setNtfyEnabled(checked);
+                      handleChange(['ntfy', 'enabled'], checked);
                     }}
                   />
                 }
@@ -163,10 +154,14 @@ export default function NotificationSettings() {
                 id="ntfy-url"
                 label="URL"
                 name="ntfy-url"
-                value={ntfyURL}
+                value={data?.ntfy?.url ?? ''}
                 onChange={(event) => {
-                  setNtfyURL(event.target.value);
+                  handleChange(
+                    ['ntfy', 'url'],
+                    event.target.value || undefined,
+                  );
                 }}
+                required={data?.ntfy?.enabled}
               />
 
               <TextField
@@ -174,9 +169,12 @@ export default function NotificationSettings() {
                 label="Username"
                 name="ntfy-username"
                 autoComplete="username"
-                value={ntfyUsername}
+                value={data?.ntfy?.username ?? ''}
                 onChange={(event) => {
-                  setNtfyUsername(event.target.value);
+                  handleChange(
+                    ['ntfy', 'username'],
+                    event.target.value || undefined,
+                  );
                 }}
               />
 
@@ -186,9 +184,12 @@ export default function NotificationSettings() {
                 name="ntfy-password"
                 type={ntfyPasswordVisible ? 'text' : 'password'}
                 autoComplete="current-password"
-                value={ntfyPassword}
+                value={data?.ntfy?.password ?? ''}
                 onChange={(event) => {
-                  setNtfyPassword(event.target.value);
+                  handleChange(
+                    ['ntfy', 'password'],
+                    event.target.value || undefined,
+                  );
                 }}
                 slotProps={{
                   input: {
@@ -244,9 +245,12 @@ export default function NotificationSettings() {
                   control={
                     <Switch
                       id="alerts-session-expiry"
-                      checked={alertsSessionExpiryDays > 0}
+                      checked={(data?.alerts?.sessionExpiryDays ?? 0) > 0}
                       onChange={(_event, checked) => {
-                        setAlertsSessionExpiryDays(checked ? 7 : 0);
+                        handleChange(
+                          ['alerts', 'sessionExpiryDays'],
+                          checked ? 7 : 0,
+                        );
                       }}
                     />
                   }
@@ -258,9 +262,9 @@ export default function NotificationSettings() {
                   control={
                     <Switch
                       id="alerts-successful-imports"
-                      checked={alertsSuccessfulImports}
+                      checked={data?.alerts?.successfulImports ?? false}
                       onChange={(_event, checked) => {
-                        setAlertsSuccessfulImports(checked);
+                        handleChange(['alerts', 'successfulImports'], checked);
                       }}
                     />
                   }
@@ -272,9 +276,12 @@ export default function NotificationSettings() {
                   control={
                     <Switch
                       id="alerts-unsuccessful-imports"
-                      checked={alertsUnsuccessfulImports}
+                      checked={data?.alerts?.unsuccessfulImports ?? false}
                       onChange={(_event, checked) => {
-                        setAlertsUnsuccessfulImports(checked);
+                        handleChange(
+                          ['alerts', 'unsuccessfulImports'],
+                          checked,
+                        );
                       }}
                     />
                   }
@@ -287,7 +294,7 @@ export default function NotificationSettings() {
                 }}
               />
 
-              {!alertsSessionExpiryDays ? null : (
+              {!data?.alerts?.sessionExpiryDays ? null : (
                 <NumberField
                   id="alerts-session-expiry-days"
                   label="Days before session expiry"
@@ -295,9 +302,9 @@ export default function NotificationSettings() {
                   name="alerts-session-expiry-days"
                   min={1}
                   step={1}
-                  value={alertsSessionExpiryDays}
+                  value={data.alerts.sessionExpiryDays}
                   onValueChange={(value) => {
-                    setAlertsSessionExpiryDays(value ?? 1);
+                    handleChange(['alerts', 'sessionExpiryDays'], value ?? 1);
                   }}
                 />
               )}
@@ -305,7 +312,12 @@ export default function NotificationSettings() {
           </AccordionDetails>
         </Accordion>
 
-        <Button type="submit" variant="contained" loading={resource.isLoading}>
+        <Button
+          type="submit"
+          variant="contained"
+          loading={resource.isLoading}
+          disabled={!state}
+        >
           Save
         </Button>
       </Stack>

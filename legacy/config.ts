@@ -11,7 +11,7 @@ export const SSL_PRIVATE_KEY_FILE = process.env.SSL_PRIVATE_KEY_FILE;
 
 export const SSL_CERTIFICATE_FILE = process.env.SSL_CERTIFICATE_FILE;
 
-export const SYNC_SCHEDULE = process.env.SYNC_SCHEDULE ?? '0 0 * * *';
+export const SYNC_SCHEDULE = process.env.SYNC_SCHEDULE ?? '0 4 * * *';
 
 export const SYNC_INITIAL_DAYS = Math.max(
   0,

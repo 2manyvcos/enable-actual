@@ -1,41 +1,28 @@
 import fs from 'fs';
+import { type output } from 'zod';
+import State from '../schema/State.ts';
 import { DATA_DIR, STATE_FILE } from './config.ts';
 
-export type NotificationState = {
-  ntfy?: {
-    enabled?: boolean;
-    url?: string;
-    username?: string;
-    password?: string;
-  };
-  alerts?: {
-    sessionExpiryDays?: number;
-    successfulImports?: boolean;
-    unsuccessfulImports?: boolean;
-  };
-};
+export function loadState(): output<typeof State> {
+  let raw: unknown = {};
 
-export type State = {
-  notifications?: NotificationState;
-};
-
-export function loadState(): State {
   if (fs.existsSync(STATE_FILE)) {
     try {
-      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-    } catch (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      err: any
-    ) {
-      console.error(`Error loading existing state: ${err.message ?? err}`);
+      raw = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    } catch (error) {
+      console.error(
+        `Error loading existing state: ${(error as Error).message ?? error}`,
+      );
     }
   }
 
-  return {};
+  return State.parse(raw);
 }
 
 export function putState(
-  nextState: Partial<State> | ((state: State) => State),
+  nextState:
+    | Partial<output<typeof State>>
+    | ((state: output<typeof State>) => output<typeof State>),
 ): void {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 

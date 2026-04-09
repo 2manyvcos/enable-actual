@@ -1,7 +1,6 @@
 # TODO: v2
 
 - multiple accounts
-- option to ignore today (prevents syncing issues with n26 caused by changed IDs)
 - account mapping
 - payee mapping?
 - pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
@@ -131,7 +130,7 @@ This setup:
 | `PORT`                   | HTTP port                                                                             | `3000`                          |
 | `SSL_PRIVATE_KEY_FILE`   | (Optional) path to SSL private key file (enables HTTPS)                               | —                               |
 | `SSL_CERTIFICATE_FILE`   | (Optional) path to SSL certificate file (enables HTTPS)                               | —                               |
-| `SYNC_SCHEDULE`          | Cron schedule for syncing                                                             | `0 0 * * *`                     |
+| `SYNC_SCHEDULE`          | Cron schedule for syncing                                                             | `0 4 * * *`                     |
 | `SYNC_INITIAL_DAYS`      | Days to fetch on first sync                                                           | `30`                            |
 | `SYNC_OVERSCAN_DAYS`     | Overlap days for syncing                                                              | `7`                             |
 | `SESSION_EXPIRY_WARNING` | Notify before session expiry (ms)                                                     | `7 days`                        |

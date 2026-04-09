@@ -21,11 +21,10 @@ export default async function sync() {
           syncState,
         );
         return { accountUID, state, transactions };
-      } catch (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        err: any
-      ) {
-        notify(`Syncing account ${accountUID} failed: ${err.message ?? err}`);
+      } catch (error) {
+        notify(
+          `Syncing account ${accountUID} failed: ${(error as Error).message ?? error}`,
+        );
         return { accountUID, state: syncState, transactions: [] };
       }
     }) ?? [],

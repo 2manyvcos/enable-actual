@@ -25,6 +25,7 @@ export default defineConfig([
         alias: {
           extensions: ['.ts', '.tsx'],
           map: [['@', './client/src']],
+          map: [['@schema', './schema']],
         },
       },
     },
@@ -34,7 +35,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['server/**/*.ts'],
+    files: ['server/**/*.ts', 'schema/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended, prettier],
     settings: {
       'import/resolver': {
@@ -53,7 +54,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['client/**/*.{ts,tsx}', 'server/**/*.ts'],
+    files: ['client/**/*.{ts,tsx}', 'server/**/*.ts', 'schema/**/*.ts'],
     plugins: {
       'unused-imports': unusedImports,
       import: importPlugin,

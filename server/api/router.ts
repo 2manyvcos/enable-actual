@@ -1,7 +1,7 @@
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { PUBLIC_URL } from '../config.ts';
-import configRouter from './config.ts';
+import configRouter from './config/router.ts';
 
 const router = express.Router();
 router.use(cors({ origin: new URL(PUBLIC_URL).origin }));
