@@ -4,7 +4,7 @@ import NotificationSettings from '../../../schema/NotificationSettings.ts';
 import { loadState, putState } from '../../state.ts';
 
 export function getNotifications(_req: Request, res: Response): void {
-  res.send(loadState().notifications ?? {});
+  res.send(loadState().notifications);
 }
 
 export function putNotifications(req: Request, res: Response): void {

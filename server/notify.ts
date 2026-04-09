@@ -5,8 +5,9 @@ import { loadState } from './state.ts';
 export default function notify(message: string, url?: string): void {
   console.log(`\n\n! ${message}${url ? ` - ${url}` : ''}\n\n`);
 
-  const { notifications } = loadState();
-  const ntfy = notifications?.ntfy ?? {};
+  const {
+    notifications: { ntfy },
+  } = loadState();
 
   if (ntfy.enabled && ntfy.url) {
     const headers = new Headers({
