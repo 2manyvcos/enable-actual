@@ -27,8 +27,8 @@
     /* Path aliases */
     "paths": {
       "@/*": ["./client/src/*"],
-      "@schema/*": ["./schema/*"]
+      "@shared/*": ["./shared/*"]
     }
   },
-  "include": ["client/src", "schema"]
+  "include": ["client/src", "shared"]
 }

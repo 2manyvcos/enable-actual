@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { v7 as uuid } from 'uuid';
 import type { output } from 'zod';
-import Source from '../../schema/Source.ts';
+import Source from '../../shared/schema/Source.ts';
 import { loadState, putState } from '../state.ts';
 
 export function getSources(_req: Request, res: Response): void {

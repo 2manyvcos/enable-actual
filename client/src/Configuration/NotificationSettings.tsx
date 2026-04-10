@@ -24,7 +24,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import type { input, output } from 'zod';
 import NumberField from '@/NumberField';
-import NotificationSettingsSchema from '@schema/NotificationSettings';
+import NotificationSettingsSchema from '@shared/schema/NotificationSettings';
 
 export default function NotificationSettings() {
   const resource = useResource<

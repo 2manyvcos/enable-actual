@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { output } from 'zod';
-import type EnableBankingASPSP from '../../schema/EnableBankingASPSP.ts';
+import type EnableBankingASPSP from '../../shared/schema/EnableBankingASPSP.ts';
 import { ENABLEBANKING_API } from '../config.ts';
 import EBClient, { EBError } from '../integrations/enablebanking/EBClient.ts';
 

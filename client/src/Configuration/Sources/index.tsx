@@ -6,7 +6,7 @@ import List from '@mui/material/List';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import { strictObject, string, type output } from 'zod';
-import SourceSchema from '@schema/Source';
+import SourceSchema from '@shared/schema/Source';
 import AddSource from './AddSource';
 import Source from './Source';
 

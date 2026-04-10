@@ -8,12 +8,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import type { output } from 'zod';
-import SourceSchema from '@schema/Source';
+import EnableBankingSource from '@/integrations/enablebanking/Source';
+import SourceSchema from '@shared/schema/Source';
 
 export default function Source({
   id,
@@ -37,22 +36,23 @@ export default function Source({
 
   return (
     <>
-      <ListItem
-        secondaryAction={
-          <IconButton
-            aria-label="delete"
-            onClick={() => {
-              setDeleteRequested(true);
-            }}
-          >
-            <DeleteIcon />
-          </IconButton>
-        }
-      >
-        <ListItemText primary={data.name ?? id} secondary={data.type} />
-
-        <Button sx={{ marginInline: 2 }}>Authorize</Button>
-      </ListItem>
+      {data.type !== 'enablebanking' ? null : (
+        <EnableBankingSource
+          id={id}
+          data={data}
+          notify={notify}
+          deleteAction={
+            <IconButton
+              aria-label="delete"
+              onClick={() => {
+                setDeleteRequested(true);
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          }
+        />
+      )}
 
       <Dialog
         open={deleteRequested}

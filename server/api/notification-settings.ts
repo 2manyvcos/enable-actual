@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { type output } from 'zod';
-import NotificationSettings from '../../schema/NotificationSettings.ts';
+import NotificationSettings from '../../shared/schema/NotificationSettings.ts';
 import { loadState, putState } from '../state.ts';
 
 export function getNotificationSettings(_req: Request, res: Response): void {

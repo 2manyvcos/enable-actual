@@ -8,7 +8,7 @@ import App from '@/App';
 import Configuration from '@/Configuration';
 import Data from '@/Data';
 import PageNotFound from '@/PageNotFound';
-import EnableBankingAuthCallback from '@/enablebanking/AuthCallback';
+import EnableBankingAuthCallback from '@/integrations/enablebanking/AuthCallback';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';

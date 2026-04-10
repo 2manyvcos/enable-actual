@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { type output } from 'zod';
-import State from '../schema/State.ts';
+import State from '../shared/schema/State.ts';
 import { DATA_DIR, STATE_FILE } from './config.ts';
 
 export function loadState(): output<typeof State> {
