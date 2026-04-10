@@ -7,7 +7,7 @@
 - implement sync
 - add import history UI
 - send consolidated sync notification (with link to import history)
-- add quick fixes UI (expiring / missing sessions, sync errors)
+- add quick fixes UI (expiring / missing sessions, unavailable account IDs / budget IDs, sync errors)
 - implement data migration
 - handle pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
 - add debug logs
@@ -15,6 +15,7 @@
 
 ---
 
+- better credential handling (don't send private keys to client, don't send private key directly from client for aspsp call) -> split source setup process? (first create account with app ID and private key, then setup existing account; this would also allow editing existing accounts)
 - use enablebanking /sessions/session_id for session information
 - MIGRATION from v1!!!
   - data/state.json -> data/enable-actual.json + schema changes
