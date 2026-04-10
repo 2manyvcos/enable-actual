@@ -15,17 +15,44 @@ const headers = { 'Content-Type': 'application/json' };
 export default function AuthCallback() {
   const [search] = useSearchParams();
 
+  const state = search.get('state');
+  const code = search.get('code');
+  const error = search.get('error');
+  const errorDescription = search.get('error_description');
+
   const resource = useResource<FetchProviderType, output<typeof IDResponse>>({
     name: 'v1/enablebanking/session',
     query: {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        state: search.get('state')!,
-        code: search.get('code')!,
+        state: state!,
+        code: code!,
       } satisfies input<typeof EnableBankingSessionRequest>),
     },
+    disabled: !state || !code,
   });
+
+  if (!state || !code) {
+    let errorMessage = 'Something went wrong';
+    if (error) errorMessage += ` (${error})`;
+    if (errorDescription) errorMessage += ` - ${errorDescription}`;
+
+    return (
+      <Container sx={{ paddingTop: 2 }}>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" component={RouterLink} to="/">
+              Home
+            </Button>
+          }
+        >
+          {errorMessage}
+        </Alert>
+      </Container>
+    );
+  }
 
   if (resource.isLoading) {
     return (
