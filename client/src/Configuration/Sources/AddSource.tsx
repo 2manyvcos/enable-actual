@@ -140,20 +140,6 @@ export default function AddSource({ notify }: { notify: () => void }) {
             />
 
             <TextField
-              id="enablebanking-app-id"
-              label="App ID"
-              name="enablebanking-app-id"
-              value={data.enablebanking?.appID ?? ''}
-              onChange={(event) => {
-                handleChange(
-                  ['enablebanking', 'appID'],
-                  event.target.value || undefined,
-                );
-              }}
-              required
-            />
-
-            <TextField
               id="enablebanking-private-key"
               label="Private Key"
               name="enablebanking-private-key"
@@ -180,8 +166,9 @@ export default function AddSource({ notify }: { notify: () => void }) {
                 type="file"
                 onChange={(event) => {
                   if (event.target.files?.length) {
+                    const [file] = event.target.files;
                     const reader = new FileReader();
-                    reader.readAsText(event.target.files[0]);
+                    reader.readAsText(file);
                     reader.onload = () => {
                       const content = reader.result?.toString() ?? '';
                       if (!content.startsWith('-----BEGIN PRIVATE KEY-----')) {
@@ -190,7 +177,18 @@ export default function AddSource({ notify }: { notify: () => void }) {
                         );
                         return;
                       }
-                      handleChange(['enablebanking', 'privateKey'], content);
+                      handleChange(
+                        ['enablebanking', 'privateKey'],
+                        content || undefined,
+                      );
+                      if (!data.enablebanking?.appID) {
+                        handleChange(
+                          ['enablebanking', 'appID'],
+                          (file.name.includes('.')
+                            ? file.name.split('.').slice(0, -1).join('.')
+                            : file.name) || undefined,
+                        );
+                      }
                     };
                     reader.onerror = () => {
                       toast.error('Error loading file');
@@ -200,6 +198,27 @@ export default function AddSource({ notify }: { notify: () => void }) {
                 }}
               />
             </Button>
+
+            <TextField
+              id="enablebanking-app-id"
+              label="Application ID"
+              name="enablebanking-app-id"
+              value={data.enablebanking?.appID ?? ''}
+              onChange={(event) => {
+                handleChange(
+                  ['enablebanking', 'appID'],
+                  event.target.value || undefined,
+                );
+              }}
+              required
+            />
+
+            {!aspspResource.isDisabled ? null : (
+              <Alert severity="info">
+                Please enter your application ID and private key so that the
+                available banks can be retrieved from Enable Banking.
+              </Alert>
+            )}
 
             {aspspResource.isLoading && aspspResource.isInitial ? (
               <>
@@ -222,12 +241,15 @@ export default function AddSource({ notify }: { notify: () => void }) {
                       </Button>
                     }
                   >
+                    The available banks could not be retrieved. Please make sure
+                    that your application ID and private key are correct.
+                    <br />
                     Error:{' '}
                     {`${aspspResource.error.message ?? aspspResource.error}`}
                   </Alert>
                 )}
 
-                <FormControl fullWidth required disabled={!countries.length}>
+                <FormControl fullWidth required>
                   <InputLabel id="bank-country-label">Bank Country</InputLabel>
                   <Select
                     labelId="bank-country-label"
@@ -240,8 +262,6 @@ export default function AddSource({ notify }: { notify: () => void }) {
                         event.target.value || undefined,
                       );
                     }}
-                    // TODO:
-                    // - make visually clear that this depends on app ID & country (accordions + mui alert?)
                   >
                     {countries.map((country) => (
                       <MenuItem key={country} value={country}>
@@ -251,7 +271,7 @@ export default function AddSource({ notify }: { notify: () => void }) {
                   </Select>
                 </FormControl>
 
-                <FormControl fullWidth required disabled={!aspsps.length}>
+                <FormControl fullWidth required>
                   <InputLabel id="bank-name-label">Bank Name</InputLabel>
                   <Select
                     labelId="bank-name-label"
@@ -276,8 +296,6 @@ export default function AddSource({ notify }: { notify: () => void }) {
                         nameParts.join('-') || undefined,
                       );
                     }}
-                    // TODO:
-                    // - make visually clear that this depends on app ID & country (accordions + mui alert?)
                   >
                     {aspsps.map(({ name, country }) => (
                       <MenuItem

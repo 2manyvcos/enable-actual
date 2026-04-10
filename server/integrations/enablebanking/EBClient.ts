@@ -1,5 +1,6 @@
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
+import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
 
 export type EBASPSPsResponse = {
@@ -58,6 +59,30 @@ export type EBTransactionsResponse = {
   next?: () => Promise<EBTransactionsResponse>;
 };
 
+export class EBError extends Error {
+  readonly code: number;
+  readonly status: string;
+  readonly description?: string;
+
+  constructor(
+    message: string,
+    code: number,
+    status: string,
+    description?: string,
+  ) {
+    super(
+      `${message}: ${code} ${status}${description ? `\n${description}` : ''}`,
+    );
+    this.code = code;
+    this.status = status;
+    this.description = description;
+  }
+}
+
+async function throwStatus(res: Response, message: string) {
+  throw new EBError(message, res.status, res.statusText, await res.text());
+}
+
 export default class EBClient {
   private api: string;
   private appID: string;
@@ -85,16 +110,25 @@ export default class EBClient {
   createJWT(): string {
     const now = Math.floor(Date.now() / 1000);
 
-    return jwt.sign(
-      {
-        iss: 'enablebanking.com',
-        aud: 'api.enablebanking.com',
-        iat: now,
-        exp: now + 3600,
-      },
-      this.privateKey,
-      { algorithm: 'RS256', header: { alg: 'RS256', kid: this.appID } },
-    );
+    try {
+      return jwt.sign(
+        {
+          iss: 'enablebanking.com',
+          aud: 'api.enablebanking.com',
+          iat: now,
+          exp: now + 3600,
+        },
+        this.privateKey,
+        { algorithm: 'RS256', header: { alg: 'RS256', kid: this.appID } },
+      );
+    } catch (error) {
+      throw new EBError(
+        'Error signing JWT',
+        0,
+        'invalid-jwt',
+        (error as Error)?.message || error?.toString(),
+      );
+    }
   }
 
   async getASPSPs({
@@ -114,9 +148,7 @@ export default class EBClient {
     });
 
     if (!res.ok) {
-      throw new Error(
-        `ASPSP request failed: ${res.status} ${res.statusText}\n${await res.text()}`,
-      );
+      await throwStatus(res, 'ASPSP request failed');
     }
 
     const { aspsps } = (await res.json()) as EBASPSPsResponse;
@@ -159,9 +191,7 @@ export default class EBClient {
     });
 
     if (!res.ok) {
-      throw new Error(
-        `Auth request failed: ${res.status} ${res.statusText}\n${await res.text()}`,
-      );
+      await throwStatus(res, 'Auth request failed');
     }
 
     const { url } = (await res.json()) as { url: string };
@@ -186,9 +216,7 @@ export default class EBClient {
     });
 
     if (!res.ok) {
-      throw new Error(
-        `Session request failed: ${res.status} ${res.statusText}\n${await res.text()}`,
-      );
+      await throwStatus(res, 'Session request failed');
     }
 
     const { session_id: sessionID, accounts } = (await res.json()) as {
@@ -229,9 +257,7 @@ export default class EBClient {
     );
 
     if (!res.ok) {
-      throw new Error(
-        `Transaction request failed: ${res.status} ${res.statusText}\n${await res.text()}`,
-      );
+      await throwStatus(res, 'Transaction request failed');
     }
 
     const { transactions, continuation_key: nextContinuationKey } =
