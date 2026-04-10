@@ -7,6 +7,7 @@ export type EBASPSPsResponse = {
   aspsps: {
     name: string;
     country: string;
+    psu_types: string[];
   }[];
 };
 
@@ -151,9 +152,7 @@ export default class EBClient {
       await throwStatus(res, 'ASPSP request failed');
     }
 
-    const { aspsps } = (await res.json()) as EBASPSPsResponse;
-    // remove unused excess data
-    return { aspsps: aspsps.map(({ name, country }) => ({ name, country })) };
+    return (await res.json()) as EBASPSPsResponse;
   }
 
   async initAuth({

@@ -1,4 +1,6 @@
 import type { Request, Response } from 'express';
+import type { output } from 'zod';
+import type EnableBankingASPSP from '../../schema/EnableBankingASPSP.ts';
 import { ENABLEBANKING_API } from '../config.ts';
 import EBClient, { EBError } from '../integrations/enablebanking/EBClient.ts';
 
@@ -21,7 +23,14 @@ export async function getEnableBankingASPSPs(req: Request, res: Response) {
   try {
     const { aspsps } = await client.getASPSPs({ country });
 
-    res.send(aspsps);
+    res.send(
+      aspsps.map(
+        ({ country, name, psu_types }) =>
+          ({ country, name, psuTypes: psu_types }) satisfies output<
+            typeof EnableBankingASPSP
+          >,
+      ),
+    );
   } catch (error) {
     if (
       error instanceof EBError &&

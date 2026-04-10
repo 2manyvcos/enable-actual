@@ -20,7 +20,8 @@ import { setIn } from 'immutable';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { v7 as uuid } from 'uuid';
-import type { input } from 'zod';
+import type { input, output } from 'zod';
+import type EnableBankingASPSP from '@schema/EnableBankingASPSP';
 import type Source from '@schema/Source';
 
 const VisuallyHiddenInput = styled('input')({
@@ -62,7 +63,7 @@ export default function AddSource({ notify }: { notify: () => void }) {
 
   const aspspResource = useResource<
     FetchProviderType,
-    { name: string; country: string }[] | undefined
+    output<typeof EnableBankingASPSP>[] | undefined
   >({
     name: 'v1/enablebanking/aspsps',
     query: {
@@ -74,6 +75,8 @@ export default function AddSource({ notify }: { notify: () => void }) {
     disabled: !data.enablebanking?.appID || !data.enablebanking.privateKey,
   });
 
+  const selectedCountry = data.enablebanking?.bankCountry;
+  const selectedName = data.enablebanking?.bankName;
   const countries = useMemo(
     () =>
       [
@@ -83,8 +86,6 @@ export default function AddSource({ notify }: { notify: () => void }) {
       ].toSorted(),
     [aspspResource.data],
   );
-
-  const selectedCountry = data.enablebanking?.bankCountry;
   const aspsps = useMemo(
     () =>
       aspspResource.data
@@ -93,6 +94,16 @@ export default function AddSource({ notify }: { notify: () => void }) {
         )
         .toSorted((a, b) => a.name.localeCompare(b.name)) ?? [],
     [aspspResource.data, selectedCountry],
+  );
+  const psuTypes = useMemo(
+    () =>
+      aspspResource.data
+        ?.find(
+          ({ country, name }) =>
+            country === selectedCountry && name === selectedName,
+        )
+        ?.psuTypes.toSorted() ?? [],
+    [aspspResource.data, selectedCountry, selectedName],
   );
 
   return (
@@ -215,13 +226,15 @@ export default function AddSource({ notify }: { notify: () => void }) {
 
             {!aspspResource.isDisabled ? null : (
               <Alert severity="info">
-                Please enter your application ID and private key so that the
-                available banks can be retrieved from Enable Banking.
+                Please enter your application ID and private key to retrieve the
+                available banks from Enable Banking.
               </Alert>
             )}
 
             {aspspResource.isLoading && aspspResource.isInitial ? (
               <>
+                <Skeleton variant="rounded" height={56} />
+
                 <Skeleton variant="rounded" height={56} />
 
                 <Skeleton variant="rounded" height={56} />
@@ -307,28 +320,30 @@ export default function AddSource({ notify }: { notify: () => void }) {
                     ))}
                   </Select>
                 </FormControl>
+
+                <FormControl fullWidth required>
+                  <InputLabel id="psu-type-label">PSU Type</InputLabel>
+                  <Select
+                    labelId="psu-type-label"
+                    id="psu-type-select"
+                    label="PSU Type *"
+                    value={data.enablebanking?.psuType || ''}
+                    onChange={(event) => {
+                      handleChange(
+                        ['enablebanking', 'psuType'],
+                        event.target.value || undefined,
+                      );
+                    }}
+                  >
+                    {psuTypes.map((psuType) => (
+                      <MenuItem key={psuType} value={psuType}>
+                        {psuType}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </>
             )}
-
-            <FormControl fullWidth required>
-              <InputLabel id="psu-type-label">PSU Type</InputLabel>
-              <Select
-                labelId="psu-type-label"
-                id="psu-type-select"
-                label="PSU Type *"
-                value={data.enablebanking?.psuType || ''}
-                onChange={(event) => {
-                  handleChange(
-                    ['enablebanking', 'psuType'],
-                    event.target.value || undefined,
-                  );
-                }}
-                // TODO: take this from aspsp data instead of hard coding the values
-              >
-                <MenuItem value="personal">Personal</MenuItem>
-                <MenuItem value="business">Business</MenuItem>
-              </Select>
-            </FormControl>
 
             <Button
               type="submit"
