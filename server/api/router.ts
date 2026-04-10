@@ -1,7 +1,11 @@
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { PUBLIC_URL } from '../config.ts';
-import { getEnableBankingASPSPs } from './enablebanking.ts';
+import {
+  getEnableBankingASPSPs,
+  postEnableBankingAuthBySourceID,
+  postEnableBankingSession,
+} from '../integrations/enablebanking/api.ts';
 import {
   getNotificationSettings,
   putNotificationSettings,
@@ -33,12 +37,18 @@ router.put('/v1/notification-settings', putNotificationSettings);
 
 router.get('/v1/enablebanking/aspsps', getEnableBankingASPSPs);
 
+router.post(
+  '/v1/enablebanking/auth/:sourceID',
+  postEnableBankingAuthBySourceID,
+);
+router.post('/v1/enablebanking/session', postEnableBankingSession);
+
 router.all('{*splat}', (_req, res) => {
   res.sendStatus(404);
 });
 
 router.use(((error, _req, res, _next) => {
-  console.debug(`Server error: ${error.message ?? error}`);
+  console.debug('Server error:', error);
   res.sendStatus(500);
 }) satisfies ErrorRequestHandler);
 

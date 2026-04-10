@@ -62,7 +62,9 @@ export default function NotificationSettings() {
     await resource.dataProvider.request('v1/notification-settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(state),
+      body: JSON.stringify(
+        state! satisfies input<typeof NotificationSettingsSchema>,
+      ),
     });
 
     const { revision } = await resource.notify();

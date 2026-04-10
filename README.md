@@ -13,6 +13,7 @@
   - data/state.json -> data/enable-actual.json + schema changes
   - data/actual -> data/actual/server-id
   - move private.pem to state file
+  - enable banking callback moved from /eb/callback to /enablebanking/callback
   - users should keep existing env for auto migration (add note to readme)
 - debug logs
 
@@ -59,7 +60,7 @@ Enable Actual uses this service to automatically import your bank transactions i
    - **Redirect URL:**
 
      ```
-     https://{your-enable-actual-hostname}:443/eb/callback
+     https://{your-enable-actual-hostname}:443/enablebanking/callback
      ```
 
      - HTTPS is required for production
@@ -124,37 +125,37 @@ This setup:
 
 ## Configuration
 
-| Variable                 | Description                                                                           | Default                         |
-| ------------------------ | ------------------------------------------------------------------------------------- | ------------------------------- |
-| `APP_NAME`               | Application name                                                                      | `Enable Actual`                 |
-| `LISTEN_ADDRESS`         | IP address to listen on                                                               | `0.0.0.0`                       |
-| `PORT`                   | HTTP port                                                                             | `3000`                          |
-| `SSL_PRIVATE_KEY_FILE`   | (Optional) path to SSL private key file (enables HTTPS)                               | —                               |
-| `SSL_CERTIFICATE_FILE`   | (Optional) path to SSL certificate file (enables HTTPS)                               | —                               |
-| `SYNC_SCHEDULE`          | Cron schedule for syncing                                                             | `0 4 * * *`                     |
-| `SYNC_INITIAL_DAYS`      | Days to fetch on first sync                                                           | `30`                            |
-| `SYNC_OVERSCAN_DAYS`     | Overlap days for syncing                                                              | `7`                             |
-| `SESSION_EXPIRY_WARNING` | Notify before session expiry (ms)                                                     | `7 days`                        |
-| `DATA_DIR`               | Data directory                                                                        | `./data`                        |
-| `PUBLIC_URL`             | Public service URL (must match what is configured in your Enable Banking application) | `http://localhost:{PORT}`       |
-| `NTFY_URL`               | ntfy.sh URL                                                                           | —                               |
-| `NTFY_USERNAME`          | Optional username                                                                     | —                               |
-| `NTFY_PASSWORD`          | Optional password                                                                     | —                               |
-| `EB_API`                 | Enable Banking API URL                                                                | `https://api.enablebanking.com` |
-| `EB_APP_ID`              | Enable Banking App ID                                                                 | —                               |
-| `EB_PRIVATE_KEY`         | Private key                                                                           | —                               |
-| `EB_PRIVATE_KEY_FILE`    | Path to private key file (alternative to `EB_PRIVATE_KEY`)                            | `./private.pem`                 |
-| `EB_TOKEN_VALIDITY`      | Session validity (ms)                                                                 | `180 days`                      |
-| `EB_BANK_NAME`           | Bank name (e.g. `N26`)                                                                | —                               |
-| `EB_BANK_COUNTRY`        | Bank country (e.g. `DE`)                                                              | —                               |
-| `EB_PSU_TYPE`            | PSU type                                                                              | `personal`                      |
-| `ACTUAL_DATA_DIR`        | Actual data directory                                                                 | `{DATA_DIR}/actual`             |
-| `ACTUAL_URL`             | Actual Budget URL                                                                     | —                               |
-| `ACTUAL_PASSWORD`        | Server password                                                                       | —                               |
-| `ACTUAL_BUDGET_ID`       | Budget sync ID                                                                        | —                               |
-| `ACTUAL_BUDGET_PASSWORD` | Budget password                                                                       | —                               |
-| `ACTUAL_ACCOUNT_ID`      | Target account ID                                                                     | —                               |
-| `LOG_LEVEL`              | Log level (one of `none`, `info`, `debug`)                                            | `info`                          |
+| Variable                 | Description                                                                                           | Default                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `APP_NAME`               | Application name                                                                                      | `Enable Actual`                 |
+| `LISTEN_ADDRESS`         | IP address to listen on                                                                               | `0.0.0.0`                       |
+| `PORT`                   | HTTP port                                                                                             | `3000`                          |
+| `SSL_PRIVATE_KEY_FILE`   | (Optional) path to SSL private key file (enables HTTPS)                                               | —                               |
+| `SSL_CERTIFICATE_FILE`   | (Optional) path to SSL certificate file (enables HTTPS)                                               | —                               |
+| `SYNC_SCHEDULE`          | Cron schedule for syncing                                                                             | `0 4 * * *`                     |
+| `SYNC_INITIAL_DAYS`      | Days to fetch on first sync                                                                           | `30`                            |
+| `SYNC_OVERSCAN_DAYS`     | Overlap days for syncing                                                                              | `7`                             |
+| `SESSION_EXPIRY_WARNING` | Notify before session expiry (ms)                                                                     | `7 days`                        |
+| `DATA_DIR`               | Data directory                                                                                        | `./data`                        |
+| `PUBLIC_URL`             | Public service URL (must match what is configured in your Enable Banking application as Redirect URL) | `http://localhost:{PORT}`       |
+| `NTFY_URL`               | ntfy.sh URL                                                                                           | —                               |
+| `NTFY_USERNAME`          | Optional username                                                                                     | —                               |
+| `NTFY_PASSWORD`          | Optional password                                                                                     | —                               |
+| `EB_API`                 | Enable Banking API URL                                                                                | `https://api.enablebanking.com` |
+| `EB_APP_ID`              | Enable Banking App ID                                                                                 | —                               |
+| `EB_PRIVATE_KEY`         | Private key                                                                                           | —                               |
+| `EB_PRIVATE_KEY_FILE`    | Path to private key file (alternative to `EB_PRIVATE_KEY`)                                            | `./private.pem`                 |
+| `EB_TOKEN_VALIDITY`      | Session validity (ms)                                                                                 | `180 days`                      |
+| `EB_BANK_NAME`           | Bank name (e.g. `N26`)                                                                                | —                               |
+| `EB_BANK_COUNTRY`        | Bank country (e.g. `DE`)                                                                              | —                               |
+| `EB_PSU_TYPE`            | PSU type                                                                                              | `personal`                      |
+| `ACTUAL_DATA_DIR`        | Actual data directory                                                                                 | `{DATA_DIR}/actual`             |
+| `ACTUAL_URL`             | Actual Budget URL                                                                                     | —                               |
+| `ACTUAL_PASSWORD`        | Server password                                                                                       | —                               |
+| `ACTUAL_BUDGET_ID`       | Budget sync ID                                                                                        | —                               |
+| `ACTUAL_BUDGET_PASSWORD` | Budget password                                                                                       | —                               |
+| `ACTUAL_ACCOUNT_ID`      | Target account ID                                                                                     | —                               |
+| `LOG_LEVEL`              | Log level (one of `none`, `info`, `debug`)                                                            | `info`                          |
 
 ---
 

@@ -8,10 +8,9 @@ export type EBASPSPsResponse = {
     name: string;
     country: string;
     psu_types: string[];
+    maximum_consent_validity: number;
   }[];
 };
-
-export type EBPSUType = 'personal' | 'business';
 
 export type EBStartAuthorizationResponse = {
   state: string;
@@ -31,6 +30,7 @@ export type EBAccount = {
 export type EBAuthorizeSessionResponse = {
   sessionID: string;
   accounts: EBAccount[];
+  validUntil: string;
 };
 
 export type EBCreditDebitIndicator = 'CRDT' | 'DBIT';
@@ -60,13 +60,17 @@ export type EBTransactionsResponse = {
   next?: () => Promise<EBTransactionsResponse>;
 };
 
+export type EBErrorResponsible = 'client' | 'server';
+
 export class EBError extends Error {
+  readonly responsible: EBErrorResponsible;
   readonly code: number;
   readonly status: string;
   readonly description?: string;
 
   constructor(
     message: string,
+    responsible: EBErrorResponsible,
     code: number,
     status: string,
     description?: string,
@@ -74,6 +78,7 @@ export class EBError extends Error {
     super(
       `${message}: ${code} ${status}${description ? `\n${description}` : ''}`,
     );
+    this.responsible = responsible;
     this.code = code;
     this.status = status;
     this.description = description;
@@ -81,7 +86,13 @@ export class EBError extends Error {
 }
 
 async function throwStatus(res: Response, message: string) {
-  throw new EBError(message, res.status, res.statusText, await res.text());
+  throw new EBError(
+    message,
+    res.status < 500 ? 'client' : 'server',
+    res.status,
+    res.statusText,
+    await res.text(),
+  );
 }
 
 export default class EBClient {
@@ -125,6 +136,7 @@ export default class EBClient {
     } catch (error) {
       throw new EBError(
         'Error signing JWT',
+        'client',
         0,
         'invalid-jwt',
         (error as Error)?.message || error?.toString(),
@@ -167,7 +179,7 @@ export default class EBClient {
     tokenValidity: number;
     bankName: string;
     bankCountry: string;
-    psuType: EBPSUType;
+    psuType: string;
     redirectURL: string;
   }): Promise<EBStartAuthorizationResponse> {
     const jwt = this.createJWT();
@@ -218,11 +230,16 @@ export default class EBClient {
       await throwStatus(res, 'Session request failed');
     }
 
-    const { session_id: sessionID, accounts } = (await res.json()) as {
+    const {
+      session_id: sessionID,
+      accounts,
+      access: { valid_until: validUntil },
+    } = (await res.json()) as {
       session_id: string;
       accounts: EBAccount[];
+      access: { valid_until: string };
     };
-    return { sessionID, accounts };
+    return { sessionID, accounts, validUntil };
   }
 
   async getTransactions({

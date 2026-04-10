@@ -33,7 +33,7 @@ createRoot(document.getElementById('root')!).render(
               <Route index element={<Configuration />} />
 
               <Route
-                path="/eb/callback"
+                path="/enablebanking/callback"
                 element={<EnableBankingAuthCallback />}
               />
 

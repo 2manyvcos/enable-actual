@@ -12,9 +12,19 @@ import {
   SSL_PRIVATE_KEY_FILE,
 } from './config.ts';
 import resolveClientTemplate from './resolveClientTemplate.ts';
+import { loadState } from './state.ts';
 
 if (!['debug', 'info'].includes(LOG_LEVEL)) console.info = () => {};
 if (!['debug'].includes(LOG_LEVEL)) console.debug = () => {};
+
+// prevent server startup if state file is invalid
+try {
+  loadState();
+} catch (error) {
+  throw new Error(
+    `Error loading state: ${(error as Error)?.message ?? error?.toString()}`,
+  );
+}
 
 const app = express();
 

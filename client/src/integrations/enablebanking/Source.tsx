@@ -1,9 +1,13 @@
+import type { FetchProviderType } from '@civet/common';
+import { useConfigContext } from '@civet/core';
 import Button from '@mui/material/Button';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import { type ReactNode } from 'react';
+import toast from 'react-hot-toast';
 import { type output } from 'zod';
+import type EnableBankingAuthorizationRequest from '@shared/schema/EnableBankingAuthorizationRequest';
 import SourceSchema from '@shared/schema/Source';
 import { addToDate, startOfDate } from '@shared/utils';
 
@@ -18,6 +22,16 @@ export default function Source({
   notify: () => void;
   deleteAction: ReactNode;
 }) {
+  const { dataProvider } = useConfigContext<FetchProviderType>();
+
+  const auth = async () => {
+    const { url } = await dataProvider!.request<
+      output<typeof EnableBankingAuthorizationRequest>
+    >(`v1/enablebanking/auth/${encodeURIComponent(id)}`, { method: 'POST' });
+
+    window.location.href = url;
+  };
+
   const sessionValidUntil = !data.enablebanking?.sessionValidUntil
     ? undefined
     : startOfDate(data.enablebanking.sessionValidUntil);
@@ -91,7 +105,24 @@ export default function Source({
         }
       />
 
-      <Button sx={{ marginInline: 2 }}>
+      <Button
+        sx={{ marginInline: 2 }}
+        onClick={() => {
+          const promise = auth();
+
+          toast.promise(promise, {
+            loading: 'Requesting authorization…',
+            success:
+              'Authorization requested successfully - you should be redirected now',
+            error: (error) => {
+              console.debug('Requesting authorization failed:', error);
+              return `Error requesting authorization: ${
+                error?.message ?? error ?? 'Unexpected error'
+              }`;
+            },
+          });
+        }}
+      >
         {data.enablebanking?.sessionID ? 'Reauthorize' : 'Authorize'}
       </Button>
     </ListItem>

@@ -13,8 +13,49 @@ import { styled } from '@mui/material/styles';
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import type { input, output } from 'zod';
+import Md from '@/Md';
+import NumberField from '@/NumberField';
 import type EnableBankingASPSP from '@shared/schema/EnableBankingASPSP';
 import type Source from '@shared/schema/Source';
+
+const setupInstructions = `
+### Enable Banking Configuration
+
+The following steps are required before adding an Enable Banking account.
+
+1. Visit [https://enablebanking.com](https://enablebanking.com) and create an account (if you don't already have one)
+
+2. Navigate to **API Applications** and click **Add a new application**
+
+3. Fill out the form:
+
+  - **Environment:**
+    - \`Production\` → real bank data
+    - \`Sandbox\` → mock data for testing (support and availability depends on the selected bank)
+
+  - Generate a **private key in the browser**
+  - Use a descriptive name (e.g. \`Actual Budget Import\`)
+  - **Redirect URL:**
+
+    \`\`\`
+    {PUBLIC_URL}/enablebanking/callback
+    \`\`\`
+
+    - HTTPS is required for production
+    - The URL does _not_ need to be accessible from the internet
+
+  - Provide your email (data protection contact)
+  - Set Privacy Policy / Terms URL (e.g. your service URL)
+
+4. Submit the form — a \`.pem\` private key file will be downloaded.
+
+  > 🔐 **Important:** Store the private key securely. You will need it later.
+
+5. Note your **Application ID**
+6. Link your bank accounts (required for the free plan)
+
+After setup, your app will show as \`restricted\` but \`active\`, which is expected.
+`;
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -82,6 +123,16 @@ export default function AddSource({
 
   return (
     <>
+      <Alert
+        severity="info"
+        sx={{
+          '& > * > *:first-child': { marginTop: 0 },
+          '& > * > *:last-child': { marginBottom: 0 },
+        }}
+      >
+        <Md>{setupInstructions}</Md>
+      </Alert>
+
       <TextField
         id="enablebanking-private-key"
         label="Private Key"
@@ -221,16 +272,25 @@ export default function AddSource({
                   : ''
               }
               onChange={(event) => {
-                const [country, ...nameParts] = (
+                const [nextCountry, ...nextNameParts] = (
                   event.target.value ?? ''
                 ).split('-');
+                const nextName = nextNameParts.join('-');
+                const aspsp = aspspResource.data?.find(
+                  ({ country, name }) =>
+                    country === nextCountry && name === nextName,
+                );
                 onChange(
                   ['enablebanking', 'bankCountry'],
-                  country || undefined,
+                  aspsp?.country || undefined,
                 );
                 onChange(
                   ['enablebanking', 'bankName'],
-                  nameParts.join('-') || undefined,
+                  aspsp?.name || undefined,
+                );
+                onChange(
+                  ['enablebanking', 'tokenValidityDays'],
+                  aspsp?.maxTokenValidityDays || undefined,
                 );
               }}
             >
@@ -268,6 +328,20 @@ export default function AddSource({
           </FormControl>
         </>
       )}
+
+      <NumberField
+        id="token-validity-days"
+        label="Token validity (in days)"
+        helperText="Select how many days the session should be valid, meaning that it needs to be renewed after the specified time. You should keep this unchanged in most cases."
+        name="token-validity-days"
+        min={1}
+        step={1}
+        value={data.enablebanking?.tokenValidityDays || null}
+        onValueChange={(value) => {
+          onChange(['enablebanking', 'tokenValidityDays'], value || undefined);
+        }}
+        required
+      />
     </>
   );
 }

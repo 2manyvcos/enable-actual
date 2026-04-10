@@ -32,7 +32,7 @@ export default function AddSource({ notify }: { notify: () => void }) {
     await dataProvider!.request('v1/sources', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data satisfies input<typeof Source>),
     });
 
     notify();
