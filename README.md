@@ -1,13 +1,19 @@
 # TODO: v2
 
-- multiple accounts
-- account mapping
-- payee mapping?
-- optional sync offset (in days) for banks that change IDs in the last 24 hours
-- pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
-- choose if default cleared
-- choose if notified on success
-- sync details in UI
+- implement cron schedule for session expiry alerts
+- add target configuration UI (for actual budget)
+- add sync configuration UI (account mapping, schedule, initial days, overscan days, offset days, transactions cleared)
+- add payee mapping UI
+- implement sync
+- add import history UI
+- send consolidated sync notification (with link to import history)
+- implement data migration
+- handle pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
+- add debug logs
+- update readme
+
+---
+
 - use enablebanking /sessions/session_id for session information
 - MIGRATION from v1!!!
   - data/state.json -> data/enable-actual.json + schema changes
@@ -15,7 +21,8 @@
   - move private.pem to state file
   - enable banking callback moved from /eb/callback to /enablebanking/callback
   - users should keep existing env for auto migration (add note to readme)
-- debug logs
+
+---
 
 # Enable Actual
 
