@@ -24,7 +24,9 @@ export function getEnableBankingSourceResponse(
     type: 'enablebanking',
     name:
       name ||
-      [bankName, !bankCountry ? undefined : `(${bankCountry})`].join(' ') ||
+      [bankName, !bankCountry ? undefined : `(${bankCountry})`]
+        .filter(Boolean)
+        .join(' ') ||
       undefined,
     appID,
     bankCountry,

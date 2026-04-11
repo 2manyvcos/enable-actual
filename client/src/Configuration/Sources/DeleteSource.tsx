@@ -1,5 +1,6 @@
 import type { FetchProviderType } from '@civet/common';
 import { useConfigContext } from '@civet/core';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -54,6 +55,7 @@ export default function DeleteSource({
         </Button>
 
         <Button
+          color="error"
           onClick={() => {
             const promise = _delete();
 
@@ -64,8 +66,9 @@ export default function DeleteSource({
                 `Error deleting source: ${error?.message ?? error ?? 'Unexpected error'}`,
             });
           }}
+          startIcon={<DeleteIcon />}
         >
-          Confirm
+          Delete
         </Button>
       </DialogActions>
     </Dialog>
