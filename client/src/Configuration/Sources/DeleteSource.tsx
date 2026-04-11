@@ -12,12 +12,14 @@ import type { output } from 'zod';
 import type SourceResponse from '@shared/schema/SourceResponse';
 
 export default function DeleteSource({
+  open,
   data,
-  onNotify,
+  onSuccess,
   onClose,
 }: {
-  data: output<typeof SourceResponse> | undefined;
-  onNotify: () => void;
+  open: boolean;
+  data: output<typeof SourceResponse>;
+  onSuccess: () => void;
   onClose: () => void;
 }) {
   const { dataProvider } = useConfigContext<FetchProviderType>();
@@ -25,16 +27,16 @@ export default function DeleteSource({
   const _delete = async () => {
     onClose();
 
-    await dataProvider!.request(`v1/sources/${encodeURIComponent(data!.id)}`, {
+    await dataProvider!.request(`v1/sources/${encodeURIComponent(data.id)}`, {
       method: 'DELETE',
     });
 
-    onNotify();
+    onSuccess();
   };
 
   return (
     <Dialog
-      open={!!data}
+      open={open}
       onClose={onClose}
       aria-labelledby="delete-dialog-title"
       aria-describedby="delete-dialog-description"
@@ -44,8 +46,8 @@ export default function DeleteSource({
 
       <DialogContent>
         <DialogContentText id="delete-dialog-description">
-          Confirm that you want to delete "{data?.name ?? data?.id}". This
-          cannot be undone.
+          Confirm that you want to delete "{data.name ?? data.id}". This cannot
+          be undone.
         </DialogContentText>
       </DialogContent>
 

@@ -11,10 +11,8 @@ const components = {
 
 export default function Source({
   data,
-  onNotify,
 }: {
   data: output<typeof SourceResponse>;
-  onNotify: () => void;
 }) {
   const navigate = useNavigate();
 
@@ -38,7 +36,6 @@ export default function Source({
           <EditIcon />
         </IconButton>
       }
-      onNotify={onNotify}
     />
   );
 }

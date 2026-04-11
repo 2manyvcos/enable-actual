@@ -69,10 +69,10 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 export default function AddSource({
-  onNotify,
+  onSuccess,
   onReset,
 }: {
-  onNotify: () => void;
+  onSuccess: () => void;
   onReset: () => void;
 }) {
   const navigate = useNavigate();
@@ -104,7 +104,7 @@ export default function AddSource({
       },
     );
 
-    onNotify();
+    onSuccess();
     onReset();
 
     navigate({

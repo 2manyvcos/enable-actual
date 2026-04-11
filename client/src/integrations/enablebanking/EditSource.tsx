@@ -1,6 +1,5 @@
 import type { FetchProviderType } from '@civet/common';
 import { useConfigContext, useResource } from '@civet/core';
-import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -13,25 +12,26 @@ import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router';
 import type { input, output } from 'zod';
 import NumberField from '@/NumberField';
 import type EnableBankingASPSP from '@shared/schema/EnableBankingASPSP';
+import type EnableBankingAuthorizationRequest from '@shared/schema/EnableBankingAuthorizationRequest';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import type EnableBankingSourceUpdate from '@shared/schema/EnableBankingSourceUpdate';
 
 export default function EditSource({
   data: source,
-  onNotify,
+  onSuccess,
   onClose,
+  deleteAction,
 }: {
   data: output<typeof EnableBankingSourceResponse>;
-  onNotify: () => void;
+  onSuccess: () => void;
   onClose: () => void;
+  deleteAction: ReactNode;
 }) {
-  const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
   const [data, setData] =
@@ -58,8 +58,18 @@ export default function EditSource({
       } satisfies input<typeof EnableBankingSourceUpdate>),
     });
 
-    onNotify();
+    onSuccess();
     onClose();
+  };
+
+  const auth = async () => {
+    const { url } = await dataProvider!.request<
+      output<typeof EnableBankingAuthorizationRequest>
+    >(`v1/sources/${encodeURIComponent(source.id)}/enablebanking/auth`, {
+      method: 'POST',
+    });
+
+    window.location.href = url;
   };
 
   const aspspResource = useResource<
@@ -106,19 +116,31 @@ export default function EditSource({
       <DialogContent>
         <form
           id="edit-source"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
 
             const promise = update();
 
-            toast.promise(promise, {
+            await toast.promise(promise, {
               loading: 'Saving changes…',
               success: 'Changes saved successfully',
               error: (error) =>
                 `Error saving changes: ${error?.message ?? error ?? 'Unexpected error'}`,
             });
 
-            // TODO: authorize here if no valid session exists? (await previous toast.promise)
+            if (!source.sessionID) {
+              const promise = auth();
+
+              toast.promise(promise, {
+                loading: 'Requesting authorization…',
+                success:
+                  'Authorization requested successfully - you should be redirected now',
+                error: (error) =>
+                  `Error requesting authorization: ${
+                    error?.message ?? error ?? 'Unexpected error'
+                  }`,
+              });
+            }
           }}
         >
           <Stack
@@ -264,27 +286,12 @@ export default function EditSource({
       </DialogContent>
 
       <DialogActions>
-        <Button
-          onClick={() => {
-            onClose();
-
-            navigate({
-              pathname: '/',
-              search: new URLSearchParams({
-                delete: `source:${encodeURIComponent(source.id)}`,
-              }).toString(),
-            });
-          }}
-          color="error"
-          startIcon={<DeleteIcon />}
-        >
-          Delete
-        </Button>
+        {deleteAction}
 
         <Button onClick={onClose}>Cancel</Button>
 
         <Button type="submit" form="edit-source" startIcon={<SaveIcon />}>
-          Save
+          {source.sessionID ? 'Save' : 'Save and authorize'}
         </Button>
       </DialogActions>
     </>

@@ -9,21 +9,15 @@ import { useSearchParams } from 'react-router';
 import { type output } from 'zod';
 import type SourceResponse from '@shared/schema/SourceResponse';
 import AddSource from './AddSource';
-import DeleteSource from './DeleteSource';
 import EditSource from './EditSource';
 import Source from './Source';
 
 export default function Sources() {
   const [search, setSearch] = useSearchParams();
   const edit = search.get('edit');
-  const _delete = search.get('delete');
 
   const editID = edit?.startsWith('source:')
     ? edit.substring('source:'.length)
-    : undefined;
-
-  const deleteID = _delete?.startsWith('source:')
-    ? _delete.substring('source:'.length)
     : undefined;
 
   const resource = useResource<
@@ -63,35 +57,20 @@ export default function Sources() {
     <Stack spacing={2}>
       <List>
         {resource.data?.map((source) => (
-          <Source key={source.id} data={source} onNotify={resource.notify} />
+          <Source key={source.id} data={source} />
         ))}
       </List>
 
-      <AddSource onNotify={resource.notify} />
+      <AddSource onSuccess={resource.notify} />
 
       <EditSource
         data={
           !editID ? undefined : resource.data?.find(({ id }) => id === editID)
         }
-        onNotify={resource.notify}
+        onSuccess={resource.notify}
         onClose={() => {
           setSearch((search) => {
             search.delete('edit');
-            return search;
-          });
-        }}
-      />
-
-      <DeleteSource
-        data={
-          !deleteID
-            ? undefined
-            : resource.data?.find(({ id }) => id === deleteID)
-        }
-        onNotify={resource.notify}
-        onClose={() => {
-          setSearch((search) => {
-            search.delete('delete');
             return search;
           });
         }}

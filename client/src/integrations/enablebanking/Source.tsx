@@ -15,11 +15,9 @@ import { addToDate, startOfDate } from '@shared/utils';
 export default function Source({
   data,
   editAction,
-  onNotify: _,
 }: {
   data: output<typeof EnableBankingSourceResponse>;
   editAction: ReactNode;
-  onNotify: () => void;
 }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();

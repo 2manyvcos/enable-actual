@@ -1,8 +1,12 @@
+import DeleteIcon from '@mui/icons-material/Delete';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
+import { useState } from 'react';
 import type { output } from 'zod';
 import EnableBankingEditSource from '@/integrations/enablebanking/EditSource';
 import type SourceResponse from '@shared/schema/SourceResponse';
+import DeleteSource from './DeleteSource';
 
 const components = {
   enablebanking: EnableBankingEditSource,
@@ -10,22 +14,55 @@ const components = {
 
 export default function EditSource({
   data,
-  onNotify,
+  onSuccess,
   onClose,
 }: {
   data: output<typeof SourceResponse> | undefined;
-  onNotify: () => void;
+  onSuccess: () => void;
   onClose: () => void;
 }) {
   const Component = data ? components[data.type] : undefined;
 
-  return (
-    <Dialog open={!!data} onClose={onClose}>
-      <DialogTitle>Edit source</DialogTitle>
+  const [deleteRequested, setDeleteRequested] = useState(false);
 
-      {Component ? (
-        <Component data={data!} onNotify={onNotify} onClose={onClose} />
-      ) : undefined}
-    </Dialog>
+  return (
+    <>
+      <Dialog open={!!data} onClose={onClose}>
+        <DialogTitle>Edit source</DialogTitle>
+
+        {Component ? (
+          <Component
+            data={data!}
+            onSuccess={onSuccess}
+            onClose={onClose}
+            deleteAction={
+              <Button
+                onClick={() => {
+                  setDeleteRequested(true);
+                }}
+                color="error"
+                startIcon={<DeleteIcon />}
+              >
+                Delete
+              </Button>
+            }
+          />
+        ) : undefined}
+      </Dialog>
+
+      {!data ? null : (
+        <DeleteSource
+          open={deleteRequested}
+          data={data}
+          onSuccess={() => {
+            onSuccess();
+            onClose();
+          }}
+          onClose={() => {
+            setDeleteRequested(false);
+          }}
+        />
+      )}
+    </>
   );
 }
