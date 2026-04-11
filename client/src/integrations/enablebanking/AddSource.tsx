@@ -1,22 +1,21 @@
 import type { FetchProviderType } from '@civet/common';
-import { useResource } from '@civet/core';
+import { useConfigContext } from '@civet/core';
+import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionDetails from '@mui/material/AccordionDetails';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { styled } from '@mui/material/styles';
-import { useMemo } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 import type { input, output } from 'zod';
 import Md from '@/Md';
-import NumberField from '@/NumberField';
-import type EnableBankingASPSP from '@shared/schema/EnableBankingASPSP';
-import type Source from '@shared/schema/Source';
+import EnableBankingSourceRequest from '@shared/schema/EnableBankingSourceRequest';
+import type IDResponse from '@shared/schema/IDResponse';
 
 const setupInstructions = `
 ### Enable Banking Configuration
@@ -70,278 +69,170 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 export default function AddSource({
-  data,
-  onChange,
+  onNotify,
+  onReset,
 }: {
-  data: input<typeof Source>;
-  onChange: (path: string[], value: unknown) => void;
+  onNotify: () => void;
+  onReset: () => void;
 }) {
-  const aspspResource = useResource<
-    FetchProviderType,
-    output<typeof EnableBankingASPSP>[] | undefined
-  >({
-    name: 'v1/enablebanking/aspsps',
-    query: {
-      search: new URLSearchParams({
-        appID: data.enablebanking?.appID ?? '',
-        privateKey: data.enablebanking?.privateKey ?? '',
-      }).toString(),
-    },
-    disabled: !data.enablebanking?.appID || !data.enablebanking.privateKey,
-  });
+  const navigate = useNavigate();
+  const { dataProvider } = useConfigContext<FetchProviderType>();
 
-  const selectedCountry = data.enablebanking?.bankCountry;
-  const selectedName = data.enablebanking?.bankName;
-  const countries = useMemo(
-    () =>
-      [
-        ...new Set([
-          ...(aspspResource.data?.map(({ country }) => country) ?? []),
-        ]),
-      ].toSorted(),
-    [aspspResource.data],
-  );
-  const aspsps = useMemo(
-    () =>
-      aspspResource.data
-        ?.filter(
-          ({ country }) => !selectedCountry || country === selectedCountry,
-        )
-        .toSorted((a, b) => a.name.localeCompare(b.name)) ?? [],
-    [aspspResource.data, selectedCountry],
-  );
-  const psuTypes = useMemo(
-    () =>
-      aspspResource.data
-        ?.find(
-          ({ country, name }) =>
-            country === selectedCountry && name === selectedName,
-        )
-        ?.psuTypes.toSorted() ?? [],
-    [aspspResource.data, selectedCountry, selectedName],
-  );
+  const [data, setData] = useState<
+    Partial<input<typeof EnableBankingSourceRequest>>
+  >({});
+
+  const handleChange: <F extends keyof typeof data>(
+    field: F,
+    value: (typeof data)[F],
+  ) => void = (field: string, value: unknown): void => {
+    setData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const create = async () => {
+    const { id } = await dataProvider!.request<output<typeof IDResponse>>(
+      'v1/sources',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'enablebanking',
+          appID: data.appID!,
+          privateKey: data.privateKey!,
+          name: data.name,
+        } satisfies input<typeof EnableBankingSourceRequest>),
+      },
+    );
+
+    onNotify();
+    onReset();
+
+    navigate({
+      pathname: '/',
+      search: new URLSearchParams({
+        edit: `source:${encodeURIComponent(id)}`,
+      }).toString(),
+    });
+  };
 
   return (
     <>
-      <Alert
-        severity="info"
-        sx={{
-          '& > * > *:first-child': { marginTop: 0 },
-          '& > * > *:last-child': { marginBottom: 0 },
-        }}
-      >
-        <Md>{setupInstructions}</Md>
-      </Alert>
+      <AccordionDetails>
+        <form
+          id="add-source"
+          onSubmit={(event) => {
+            event.preventDefault();
 
-      <TextField
-        id="enablebanking-private-key"
-        label="Private Key"
-        name="enablebanking-private-key"
-        value={data.enablebanking?.privateKey ?? ''}
-        onChange={(event) => {
-          onChange(
-            ['enablebanking', 'privateKey'],
-            event.target.value || undefined,
-          );
-        }}
-        multiline
-        required
-      />
+            const promise = create();
 
-      <Button
-        component="label"
-        role={undefined}
-        variant="contained"
-        tabIndex={-1}
-        startIcon={<CloudUploadIcon />}
-      >
-        Upload private key
-        <VisuallyHiddenInput
-          type="file"
-          onChange={(event) => {
-            if (event.target.files?.length) {
-              const [file] = event.target.files;
-              const reader = new FileReader();
-              reader.readAsText(file);
-              reader.onload = () => {
-                const content = reader.result?.toString() ?? '';
-                if (!content.startsWith('-----BEGIN PRIVATE KEY-----')) {
-                  toast.error(
-                    'The uploaded file does not seem to contain a private key',
-                  );
-                  return;
-                }
-                onChange(['enablebanking', 'privateKey'], content || undefined);
-                if (!data.enablebanking?.appID) {
-                  onChange(
-                    ['enablebanking', 'appID'],
-                    (file.name.includes('.')
-                      ? file.name.split('.').slice(0, -1).join('.')
-                      : file.name) || undefined,
-                  );
-                }
-              };
-              reader.onerror = () => {
-                toast.error('Error loading file');
-              };
-            }
-            event.target.value = '';
+            toast.promise(promise, {
+              loading: 'Creating source…',
+              success: 'Source created successfully',
+              error: (error) =>
+                `Error creating source: ${error?.message ?? error ?? 'Unexpected error'}`,
+            });
           }}
-        />
-      </Button>
-
-      <TextField
-        id="enablebanking-app-id"
-        label="Application ID"
-        name="enablebanking-app-id"
-        value={data.enablebanking?.appID ?? ''}
-        onChange={(event) => {
-          onChange(['enablebanking', 'appID'], event.target.value || undefined);
-        }}
-        required
-      />
-
-      {!aspspResource.isDisabled ? null : (
-        <Alert severity="info">
-          Please enter your application ID and private key to retrieve the
-          available banks from Enable Banking.
-        </Alert>
-      )}
-
-      {aspspResource.isLoading && aspspResource.isInitial ? (
-        <>
-          <Skeleton variant="rounded" height={56} />
-
-          <Skeleton variant="rounded" height={56} />
-
-          <Skeleton variant="rounded" height={56} />
-        </>
-      ) : (
-        <>
-          {!aspspResource.error ? null : (
+        >
+          <Stack
+            component="fieldset"
+            spacing={2}
+            sx={{ margin: 0, padding: 0, border: 'none' }}
+          >
             <Alert
-              severity="error"
-              action={
-                <Button
-                  color="inherit"
-                  size="small"
-                  onClick={aspspResource.notify}
-                >
-                  Retry
-                </Button>
-              }
+              severity="info"
+              sx={{
+                '& > * > *:first-child': { marginTop: 0 },
+                '& > * > *:last-child': { marginBottom: 0 },
+              }}
             >
-              The available banks could not be retrieved. Please make sure that
-              your application ID and private key are correct.
-              <br />
-              Error: {`${aspspResource.error.message ?? aspspResource.error}`}
+              <Md>{setupInstructions}</Md>
             </Alert>
-          )}
 
-          <FormControl fullWidth required>
-            <InputLabel id="bank-country-label">Bank Country</InputLabel>
-            <Select
-              labelId="bank-country-label"
-              id="bank-country-select"
-              label="Bank Country *"
-              value={data.enablebanking?.bankCountry ?? ''}
+            <TextField
+              id="name"
+              label="Display Name"
+              name="name"
+              value={data.name ?? ''}
               onChange={(event) => {
-                onChange(
-                  ['enablebanking', 'bankCountry'],
-                  event.target.value || undefined,
-                );
+                handleChange('name', event.target.value || undefined);
               }}
-            >
-              {countries.map((country) => (
-                <MenuItem key={country} value={country}>
-                  {country}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            />
 
-          <FormControl fullWidth required>
-            <InputLabel id="bank-name-label">Bank Name</InputLabel>
-            <Select
-              labelId="bank-name-label"
-              id="bank-name-select"
-              label="Bank Name *"
-              value={
-                data.enablebanking?.bankCountry && data.enablebanking?.bankName
-                  ? `${data.enablebanking.bankCountry}-${data.enablebanking.bankName}`
-                  : ''
-              }
+            <TextField
+              id="private-key"
+              label="Private Key"
+              name="private-key"
+              value={data.privateKey ?? ''}
               onChange={(event) => {
-                const [nextCountry, ...nextNameParts] = (
-                  event.target.value ?? ''
-                ).split('-');
-                const nextName = nextNameParts.join('-');
-                const aspsp = aspspResource.data?.find(
-                  ({ country, name }) =>
-                    country === nextCountry && name === nextName,
-                );
-                onChange(
-                  ['enablebanking', 'bankCountry'],
-                  aspsp?.country || undefined,
-                );
-                onChange(
-                  ['enablebanking', 'bankName'],
-                  aspsp?.name || undefined,
-                );
-                onChange(
-                  ['enablebanking', 'tokenValidityDays'],
-                  aspsp?.maxTokenValidityDays || undefined,
-                );
+                handleChange('privateKey', event.target.value || undefined);
               }}
-            >
-              {aspsps.map(({ name, country }) => (
-                <MenuItem
-                  key={`${country}-${name}`}
-                  value={`${country}-${name}`}
-                >
-                  {name} ({country})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              multiline
+              required
+            />
 
-          <FormControl fullWidth required>
-            <InputLabel id="psu-type-label">PSU Type</InputLabel>
-            <Select
-              labelId="psu-type-label"
-              id="psu-type-select"
-              label="PSU Type *"
-              value={data.enablebanking?.psuType || ''}
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload private key
+              <VisuallyHiddenInput
+                type="file"
+                onChange={(event) => {
+                  if (event.target.files?.length) {
+                    const [file] = event.target.files;
+                    const reader = new FileReader();
+                    reader.readAsText(file);
+                    reader.onload = () => {
+                      const content = reader.result?.toString() ?? '';
+                      if (!content.startsWith('-----BEGIN PRIVATE KEY-----')) {
+                        toast.error(
+                          'The uploaded file does not seem to contain a private key',
+                        );
+                        return;
+                      }
+                      handleChange('privateKey', content || undefined);
+                      if (!data.appID) {
+                        handleChange(
+                          'appID',
+                          (file.name.includes('.')
+                            ? file.name.split('.').slice(0, -1).join('.')
+                            : file.name) || undefined,
+                        );
+                      }
+                    };
+                    reader.onerror = () => {
+                      toast.error('Error loading file');
+                    };
+                  }
+                  event.target.value = '';
+                }}
+              />
+            </Button>
+
+            <TextField
+              id="app-id"
+              label="Application ID"
+              name="app-id"
+              value={data.appID ?? ''}
               onChange={(event) => {
-                onChange(
-                  ['enablebanking', 'psuType'],
-                  event.target.value || undefined,
-                );
+                handleChange('appID', event.target.value || undefined);
               }}
-            >
-              {psuTypes.map((psuType) => (
-                <MenuItem key={psuType} value={psuType}>
-                  {psuType}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </>
-      )}
+              required
+            />
+          </Stack>
+        </form>
+      </AccordionDetails>
 
-      <NumberField
-        id="token-validity-days"
-        label="Token validity (in days)"
-        helperText="Select how many days the session should be valid, meaning that it needs to be renewed after the specified time. You should keep this unchanged in most cases."
-        name="token-validity-days"
-        min={1}
-        step={1}
-        value={data.enablebanking?.tokenValidityDays || null}
-        onValueChange={(value) => {
-          onChange(['enablebanking', 'tokenValidityDays'], value || undefined);
-        }}
-        required
-      />
+      <AccordionActions>
+        <Button onClick={onReset}>Cancel</Button>
+
+        <Button type="submit" form="add-source" startIcon={<AddIcon />}>
+          Add source
+        </Button>
+      </AccordionActions>
     </>
   );
 }

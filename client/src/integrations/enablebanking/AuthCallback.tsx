@@ -14,7 +14,6 @@ const headers = { 'Content-Type': 'application/json' };
 
 export default function AuthCallback() {
   const [search] = useSearchParams();
-
   const state = search.get('state');
   const code = search.get('code');
   const error = search.get('error');

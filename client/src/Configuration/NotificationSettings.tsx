@@ -111,12 +111,10 @@ export default function NotificationSettings() {
         toast.promise(promise, {
           loading: 'Saving changes…',
           success: 'Changes saved successfully',
-          error: (error) => {
-            console.debug('Saving changes failed:', error);
-            return `Error saving changes: ${
+          error: (error) =>
+            `Error saving changes: ${
               error?.message ?? error ?? 'Unexpected error'
-            }`;
-          },
+            }`,
         });
       }}
     >

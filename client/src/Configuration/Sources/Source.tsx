@@ -1,107 +1,44 @@
-import type { FetchProviderType } from '@civet/common';
-import { useConfigContext } from '@civet/core';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 import type { output } from 'zod';
 import EnableBankingSource from '@/integrations/enablebanking/Source';
-import SourceSchema from '@shared/schema/Source';
+import type SourceResponse from '@shared/schema/SourceResponse';
+
+const components = {
+  enablebanking: EnableBankingSource,
+};
 
 export default function Source({
-  id,
   data,
-  notify,
+  onNotify,
 }: {
-  id: string;
-  data: output<typeof SourceSchema>;
-  notify: () => void;
+  data: output<typeof SourceResponse>;
+  onNotify: () => void;
 }) {
-  const { dataProvider } = useConfigContext<FetchProviderType>();
+  const navigate = useNavigate();
 
-  const [deleteRequested, setDeleteRequested] = useState(false);
-  const _delete = async () => {
-    await dataProvider!.request(`v1/sources/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-    });
-
-    notify();
-  };
+  const Component = components[data.type];
 
   return (
-    <>
-      {data.type !== 'enablebanking' ? null : (
-        <EnableBankingSource
-          id={id}
-          data={data}
-          notify={notify}
-          deleteAction={
-            <IconButton
-              aria-label="delete"
-              onClick={() => {
-                setDeleteRequested(true);
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          }
-        />
-      )}
-
-      <Dialog
-        open={deleteRequested}
-        onClose={() => {
-          setDeleteRequested(false);
-        }}
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
-        role="alertdialog"
-      >
-        <DialogTitle id="delete-dialog-title">Delete source?</DialogTitle>
-
-        <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Confirm that you want to delete "{data.name ?? id}". This cannot be
-            undone.
-          </DialogContentText>
-        </DialogContent>
-
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setDeleteRequested(false);
-            }}
-            autoFocus
-          >
-            Cancel
-          </Button>
-
-          <Button
-            onClick={() => {
-              setDeleteRequested(false);
-
-              const promise = _delete();
-
-              toast.promise(promise, {
-                loading: 'Deleting source…',
-                success: 'Source deleted successfully',
-                error: (error) => {
-                  console.debug('Error deleting source:', error);
-                  return `Error deleting source: ${error?.message ?? error ?? 'Unexpected error'}`;
-                },
-              });
-            }}
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+    <Component
+      data={data}
+      editAction={
+        <IconButton
+          aria-label="edit"
+          onClick={() => {
+            navigate({
+              pathname: '/',
+              search: new URLSearchParams({
+                edit: `source:${encodeURIComponent(data.id)}`,
+              }).toString(),
+            });
+          }}
+        >
+          <EditIcon />
+        </IconButton>
+      }
+      onNotify={onNotify}
+    />
   );
 }

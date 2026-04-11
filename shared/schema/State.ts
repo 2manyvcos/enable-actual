@@ -1,8 +1,9 @@
-import { record, strictObject, string } from 'zod';
+import { literal, record, strictObject, string } from 'zod';
 import NotificationSettings from './NotificationSettings.ts';
-import Source from './Source.ts';
+import SourceState from './SourceState.ts';
 
 export default strictObject({
-  sources: record(string(), Source.optional()).default({}),
+  version: literal(1).default(1),
+  sources: record(string(), SourceState.optional()).default({}),
   notifications: NotificationSettings.prefault({}),
 });

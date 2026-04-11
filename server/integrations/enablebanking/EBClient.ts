@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
 
+export type EBApplicationResponse = {
+  active: boolean;
+};
+
 export type EBASPSPsResponse = {
   aspsps: {
     name: string;
@@ -144,6 +148,23 @@ export default class EBClient {
     }
   }
 
+  async getApplication(): Promise<EBApplicationResponse> {
+    const jwt = this.createJWT();
+
+    const res = await fetch(`${this.api}/application`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+
+    if (!res.ok) {
+      await throwStatus(res, 'Application request failed');
+    }
+
+    return (await res.json()) as EBApplicationResponse;
+  }
+
   async getASPSPs({
     country,
   }: {
@@ -153,7 +174,7 @@ export default class EBClient {
 
     const search = new URLSearchParams();
     if (country) search.set('country', country);
-    const res = await fetch(`${this.api}/aspsps`, {
+    const res = await fetch(`${this.api}/aspsps?${search.toString()}`, {
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${jwt}`,

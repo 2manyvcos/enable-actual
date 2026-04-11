@@ -1,5 +1,6 @@
 # TODO: v2
 
+- auto authorize on initial setup
 - implement cron schedule for session expiry alerts
 - add target configuration UI (for actual budget)
 - add sync configuration UI (account mapping, schedule, initial days, overscan days, offset days, transactions cleared)

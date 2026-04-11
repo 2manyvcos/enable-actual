@@ -6,61 +6,60 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import { type ReactNode } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 import { type output } from 'zod';
 import type EnableBankingAuthorizationRequest from '@shared/schema/EnableBankingAuthorizationRequest';
-import SourceSchema from '@shared/schema/Source';
+import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import { addToDate, startOfDate } from '@shared/utils';
 
 export default function Source({
-  id,
   data,
-  notify: _notify,
-  deleteAction,
+  editAction,
+  onNotify: _,
 }: {
-  id: string;
-  data: output<typeof SourceSchema>;
-  notify: () => void;
-  deleteAction: ReactNode;
+  data: output<typeof EnableBankingSourceResponse>;
+  editAction: ReactNode;
+  onNotify: () => void;
 }) {
+  const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
   const auth = async () => {
     const { url } = await dataProvider!.request<
       output<typeof EnableBankingAuthorizationRequest>
-    >(`v1/enablebanking/auth/${encodeURIComponent(id)}`, { method: 'POST' });
+    >(`v1/sources/${encodeURIComponent(data.id)}/enablebanking/auth`, {
+      method: 'POST',
+    });
 
     window.location.href = url;
   };
 
-  const sessionValidUntil = !data.enablebanking?.sessionValidUntil
+  const sessionValidUntil = !data.sessionValidUntil
     ? undefined
-    : startOfDate(data.enablebanking.sessionValidUntil);
+    : startOfDate(data.sessionValidUntil);
   const today = startOfDate(new Date());
 
   return (
-    <ListItem secondaryAction={deleteAction}>
+    <ListItem secondaryAction={editAction}>
       <ListItemText
-        primary={data.name ?? id}
+        primary={data.name ?? data.id}
         secondary={
           <>
             Enable Banking |{' '}
-            {!data.enablebanking?.sessionID ? (
+            {!data.sessionID ? (
               <Typography variant="inherit" component="span" color="warning">
                 No active session
               </Typography>
-            ) : !data.enablebanking.sessionValidUntil ? (
+            ) : !sessionValidUntil ? (
               <Typography variant="inherit" component="span" color="warning">
                 Session expiry details unavailable
               </Typography>
-            ) : sessionValidUntil! <= today ? (
+            ) : sessionValidUntil <= today ? (
               <Typography variant="inherit" component="span" color="error">
                 Session expired{' '}
                 {(() => {
                   const days = Math.floor(
-                    Math.max(
-                      0,
-                      today.getTime() - sessionValidUntil!.getTime(),
-                    ) /
+                    Math.max(0, today.getTime() - sessionValidUntil.getTime()) /
                       (24 * 60 * 60 * 1000),
                   );
                   switch (days) {
@@ -78,18 +77,15 @@ export default function Source({
                 variant="inherit"
                 component="span"
                 color={
-                  sessionValidUntil! > addToDate(today, 7)
-                    ? 'success'
-                    : 'warning'
+                  sessionValidUntil <= addToDate(today, 7)
+                    ? 'warning'
+                    : 'success'
                 }
               >
                 Session expires{' '}
                 {(() => {
                   const days = Math.floor(
-                    Math.max(
-                      0,
-                      sessionValidUntil!.getTime() - today.getTime(),
-                    ) /
+                    Math.max(0, sessionValidUntil.getTime() - today.getTime()) /
                       (24 * 60 * 60 * 1000),
                   );
                   switch (days) {
@@ -105,26 +101,48 @@ export default function Source({
         }
       />
 
-      <Button
-        sx={{ marginInline: 2 }}
-        onClick={() => {
-          const promise = auth();
+      {data.setupRequired ? (
+        <Button
+          color="warning"
+          sx={{ marginInline: 2 }}
+          onClick={() => {
+            navigate({
+              pathname: '/',
+              search: new URLSearchParams({
+                edit: `source:${encodeURIComponent(data.id)}`,
+              }).toString(),
+            });
+          }}
+        >
+          Setup
+        </Button>
+      ) : (
+        <Button
+          color={
+            !data.sessionID ||
+            !sessionValidUntil ||
+            sessionValidUntil <= addToDate(today, 7)
+              ? 'warning'
+              : undefined
+          }
+          sx={{ marginInline: 2 }}
+          onClick={() => {
+            const promise = auth();
 
-          toast.promise(promise, {
-            loading: 'Requesting authorization…',
-            success:
-              'Authorization requested successfully - you should be redirected now',
-            error: (error) => {
-              console.debug('Requesting authorization failed:', error);
-              return `Error requesting authorization: ${
-                error?.message ?? error ?? 'Unexpected error'
-              }`;
-            },
-          });
-        }}
-      >
-        {data.enablebanking?.sessionID ? 'Reauthorize' : 'Authorize'}
-      </Button>
+            toast.promise(promise, {
+              loading: 'Requesting authorization…',
+              success:
+                'Authorization requested successfully - you should be redirected now',
+              error: (error) =>
+                `Error requesting authorization: ${
+                  error?.message ?? error ?? 'Unexpected error'
+                }`,
+            });
+          }}
+        >
+          {data.sessionID ? 'Reauthorize' : 'Authorize'}
+        </Button>
+      )}
     </ListItem>
   );
 }

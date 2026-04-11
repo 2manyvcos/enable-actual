@@ -3,26 +3,34 @@ import { updateIn } from 'immutable';
 import jwt from 'jsonwebtoken';
 import { v7 as uuid } from 'uuid';
 import { type output } from 'zod';
-import type EnableBankingASPSP from '../../../shared/schema/EnableBankingASPSP.ts';
-import type EnableBankingAuthorizationRequest from '../../../shared/schema/EnableBankingAuthorizationRequest.ts';
-import EnableBankingSessionRequest from '../../../shared/schema/EnableBankingSessionRequest.ts';
-import type IDResponse from '../../../shared/schema/IDResponse.ts';
-import type Source from '../../../shared/schema/Source.ts';
-import { ENABLEBANKING_API, PUBLIC_URL } from '../../config.ts';
-import { loadState, putState } from '../../state.ts';
-import EBClient, { EBError } from './EBClient.ts';
+import type EnableBankingASPSP from '../../../../shared/schema/EnableBankingASPSP.ts';
+import type EnableBankingAuthorizationRequest from '../../../../shared/schema/EnableBankingAuthorizationRequest.ts';
+import EnableBankingSessionRequest from '../../../../shared/schema/EnableBankingSessionRequest.ts';
+import type IDResponse from '../../../../shared/schema/IDResponse.ts';
+import type SourceState from '../../../../shared/schema/SourceState.ts';
+import { ENABLEBANKING_API, PUBLIC_URL } from '../../../config.ts';
+import { loadState, putState } from '../../../state.ts';
+import EBClient, { EBError } from '../EBClient.ts';
 
 const stateSecret = uuid();
 
-export async function getEnableBankingASPSPs(
+export async function getSourcesByIDEnableBankingASPSPs(
   req: Request,
   res: Response,
 ): Promise<void> {
-  const appID = req.query.appID?.toString();
-  const privateKey = req.query.privateKey?.toString();
+  const sourceID = req.params.sourceID.toString();
   const country = req.query.country?.toString();
 
-  if (!appID || !privateKey) {
+  const { sources } = loadState();
+
+  if (!Object.hasOwn(sources, sourceID)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const source = sources[sourceID];
+
+  if (source?.type !== 'enablebanking') {
     res.sendStatus(400);
     return;
   }
@@ -30,8 +38,8 @@ export async function getEnableBankingASPSPs(
   try {
     const client = new EBClient({
       api: ENABLEBANKING_API,
-      appID,
-      privateKey,
+      appID: source.appID,
+      privateKey: source.privateKey,
     });
 
     const { aspsps } = await client.getASPSPs({ country });
@@ -57,7 +65,7 @@ export async function getEnableBankingASPSPs(
   }
 }
 
-export async function postEnableBankingAuthBySourceID(
+export async function postSourcesByIDEnableBankingAuth(
   req: Request,
   res: Response,
 ): Promise<void> {
@@ -72,7 +80,13 @@ export async function postEnableBankingAuthBySourceID(
 
   const source = sources[sourceID];
 
-  if (source?.type !== 'enablebanking' || !source.enablebanking) {
+  if (
+    source?.type !== 'enablebanking' ||
+    !source.tokenValidityDays ||
+    !source.bankCountry ||
+    !source.bankName ||
+    !source.psuType
+  ) {
     res.sendStatus(400);
     return;
   }
@@ -80,8 +94,8 @@ export async function postEnableBankingAuthBySourceID(
   try {
     const client = new EBClient({
       api: ENABLEBANKING_API,
-      appID: source.enablebanking.appID,
-      privateKey: source.enablebanking.privateKey,
+      appID: source.appID,
+      privateKey: source.privateKey,
     });
 
     const state = jwt.sign({ iss: PUBLIC_URL, sub: sourceID }, stateSecret, {
@@ -90,11 +104,10 @@ export async function postEnableBankingAuthBySourceID(
 
     const { url } = await client.initAuth({
       state,
-      tokenValidity:
-        source.enablebanking.tokenValidityDays * 24 * 60 * 60 * 1000,
-      bankName: source.enablebanking.bankName,
-      bankCountry: source.enablebanking.bankCountry,
-      psuType: source.enablebanking.psuType,
+      tokenValidity: source.tokenValidityDays * 24 * 60 * 60 * 1000,
+      bankCountry: source.bankCountry,
+      bankName: source.bankName,
+      psuType: source.psuType,
       redirectURL: new URL('enablebanking/callback', PUBLIC_URL).href,
     });
 
@@ -150,7 +163,7 @@ export async function postEnableBankingSession(
 
   const source = sources[sourceID];
 
-  if (source?.type !== 'enablebanking' || !source.enablebanking) {
+  if (source?.type !== 'enablebanking') {
     res.sendStatus(400);
     return;
   }
@@ -158,8 +171,8 @@ export async function postEnableBankingSession(
   try {
     const client = new EBClient({
       api: ENABLEBANKING_API,
-      appID: source.enablebanking.appID,
-      privateKey: source.enablebanking.privateKey,
+      appID: source.appID,
+      privateKey: source.privateKey,
     });
 
     const { sessionID, validUntil } = await client.authorizeSession({
@@ -169,11 +182,12 @@ export async function postEnableBankingSession(
     putState((prev) =>
       updateIn(
         prev,
-        ['sources', sourceID, 'enablebanking'],
-        (
-          prev: output<typeof Source>['enablebanking'],
-        ): output<typeof Source>['enablebanking'] => {
-          if (!prev) throw new Error('source gone');
+        ['sources', sourceID],
+        (prev: output<typeof SourceState>): output<typeof SourceState> => {
+          if (!prev || prev.type !== 'enablebanking') {
+            throw new Error('source gone');
+          }
+
           return {
             ...prev,
             sessionID,

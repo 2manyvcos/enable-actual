@@ -2,10 +2,10 @@ import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { PUBLIC_URL } from '../config.ts';
 import {
-  getEnableBankingASPSPs,
-  postEnableBankingAuthBySourceID,
+  getSourcesByIDEnableBankingASPSPs,
   postEnableBankingSession,
-} from '../integrations/enablebanking/api.ts';
+  postSourcesByIDEnableBankingAuth,
+} from '../integrations/enablebanking/api/routes.ts';
 import {
   getNotificationSettings,
   putNotificationSettings,
@@ -31,16 +31,18 @@ router.post('/v1/sources', postSources);
 router.get('/v1/sources/:sourceID', getSourcesByID);
 router.put('/v1/sources/:sourceID', putSourcesByID);
 router.delete('/v1/sources/:sourceID', deleteSourcesByID);
+router.get(
+  '/v1/sources/:sourceID/enablebanking/aspsps',
+  getSourcesByIDEnableBankingASPSPs,
+);
+router.post(
+  '/v1/sources/:sourceID/enablebanking/auth',
+  postSourcesByIDEnableBankingAuth,
+);
 
 router.get('/v1/notification-settings', getNotificationSettings);
 router.put('/v1/notification-settings', putNotificationSettings);
 
-router.get('/v1/enablebanking/aspsps', getEnableBankingASPSPs);
-
-router.post(
-  '/v1/enablebanking/auth/:sourceID',
-  postEnableBankingAuthBySourceID,
-);
 router.post('/v1/enablebanking/session', postEnableBankingSession);
 
 router.all('{*splat}', (_req, res) => {
