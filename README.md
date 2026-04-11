@@ -12,6 +12,7 @@
 - send consolidated sync notification (with link to import history)
 - add quick fixes UI (expiring / missing sessions, unavailable account IDs / budget IDs, sync errors)
 - implement data migration
+- add setup guides (quick action if no source / target / sync schedule is configured yet; note / link after successful auth with follow-up steps)
 - handle pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
 - add debug logs
 - update readme
