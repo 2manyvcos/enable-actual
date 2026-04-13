@@ -117,7 +117,7 @@ export default function AddSource({
           <Stack
             component="fieldset"
             spacing={2}
-            sx={{ margin: 0, padding: 0, border: 'none' }}
+            sx={{ margin: 0, padding: 0, border: 'none', minWidth: 0 }}
           >
             <Alert
               severity="info"
