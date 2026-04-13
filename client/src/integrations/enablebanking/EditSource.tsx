@@ -13,11 +13,11 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { useMemo, useState, type ReactNode } from 'react';
-import toast from 'react-hot-toast';
 import type { input, output } from 'zod';
 import NumberField from '@/NumberField';
+import { putSourcesByID } from '@/data/sources';
+import { postSourcesByIDEnableBankingAuth } from '@/data/sources-enablebanking';
 import type EnableBankingASPSP from '@shared/schema/EnableBankingASPSP';
-import type EnableBankingAuthorizationRequest from '@shared/schema/EnableBankingAuthorizationRequest';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import type EnableBankingSourceUpdate from '@shared/schema/EnableBankingSourceUpdate';
 
@@ -42,34 +42,6 @@ export default function EditSource({
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
     setData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const update = async () => {
-    await dataProvider!.request(`v1/sources/${encodeURIComponent(source.id)}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'enablebanking',
-        name: data.name,
-        bankCountry: data.bankCountry!,
-        bankName: data.bankName!,
-        psuType: data.psuType!,
-        tokenValidityDays: data.tokenValidityDays!,
-      } satisfies input<typeof EnableBankingSourceUpdate>),
-    });
-
-    onSuccess();
-    onClose();
-  };
-
-  const auth = async () => {
-    const { url } = await dataProvider!.request<
-      output<typeof EnableBankingAuthorizationRequest>
-    >(`v1/sources/${encodeURIComponent(source.id)}/enablebanking/auth`, {
-      method: 'POST',
-    });
-
-    window.location.href = url;
   };
 
   const aspspResource = useResource<
@@ -119,28 +91,30 @@ export default function EditSource({
           onSubmit={async (event) => {
             event.preventDefault();
 
-            const promise = update();
-
-            await toast.promise(promise, {
-              loading: 'Saving changes…',
-              success: 'Changes saved successfully',
-              error: (error) =>
-                `Error saving changes: ${error?.message ?? error ?? 'Unexpected error'}`,
+            await putSourcesByID({
+              dataProvider: dataProvider!,
+              sourceID: source.id,
+              data: {
+                type: 'enablebanking',
+                name: data.name,
+                bankCountry: data.bankCountry!,
+                bankName: data.bankName!,
+                psuType: data.psuType!,
+                tokenValidityDays: data.tokenValidityDays!,
+              },
             });
 
-            if (!source.sessionID) {
-              const promise = auth();
+            onSuccess();
+            onClose();
 
-              toast.promise(promise, {
-                loading: 'Requesting authorization…',
-                success:
-                  'Authorization requested successfully - you should be redirected now',
-                error: (error) =>
-                  `Error requesting authorization: ${
-                    error?.message ?? error ?? 'Unexpected error'
-                  }`,
-              });
-            }
+            if (source.sessionID) return;
+
+            const { url } = await postSourcesByIDEnableBankingAuth({
+              dataProvider: dataProvider!,
+              sourceID: source.id,
+            });
+
+            window.location.href = url;
           }}
         >
           <Stack

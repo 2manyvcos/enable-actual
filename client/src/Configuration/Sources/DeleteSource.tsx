@@ -7,8 +7,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import toast from 'react-hot-toast';
 import type { output } from 'zod';
+import { deleteSourcesByID } from '@/data/sources';
 import type SourceResponse from '@shared/schema/SourceResponse';
 
 export default function DeleteSource({
@@ -23,16 +23,6 @@ export default function DeleteSource({
   onClose: () => void;
 }) {
   const { dataProvider } = useConfigContext<FetchProviderType>();
-
-  const _delete = async () => {
-    onClose();
-
-    await dataProvider!.request(`v1/sources/${encodeURIComponent(data.id)}`, {
-      method: 'DELETE',
-    });
-
-    onSuccess();
-  };
 
   return (
     <Dialog
@@ -58,15 +48,15 @@ export default function DeleteSource({
 
         <Button
           color="error"
-          onClick={() => {
-            const promise = _delete();
+          onClick={async () => {
+            onClose();
 
-            toast.promise(promise, {
-              loading: 'Deleting source…',
-              success: 'Source deleted successfully',
-              error: (error) =>
-                `Error deleting source: ${error?.message ?? error ?? 'Unexpected error'}`,
+            await deleteSourcesByID({
+              dataProvider: dataProvider!,
+              sourceID: data.id,
             });
+
+            onSuccess();
           }}
           startIcon={<DeleteIcon />}
         >

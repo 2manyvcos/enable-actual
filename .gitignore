@@ -14,8 +14,8 @@ npm-debug.log*
 __debug_*
 
 # Application data
-client/dist
-.env
-.env.server
-data
-private.pem
+/client/dist
+/.env
+/.env.server
+/data
+*.pem

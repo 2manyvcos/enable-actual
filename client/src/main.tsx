@@ -6,8 +6,8 @@ import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import App from '@/App';
 import Configuration from '@/Configuration';
-import Data from '@/Data';
 import PageNotFound from '@/PageNotFound';
+import Data from '@/data/Data';
 import EnableBankingAuthCallback from '@/integrations/enablebanking/AuthCallback';
 
 import '@fontsource/roboto/300.css';

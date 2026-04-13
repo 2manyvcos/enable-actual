@@ -12,10 +12,11 @@ import { styled } from '@mui/material/styles';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
-import type { input, output } from 'zod';
+import type { input } from 'zod';
 import Md from '@/Md';
+import { editSource } from '@/actions/sources';
+import { postSources } from '@/data/sources';
 import EnableBankingSourceRequest from '@shared/schema/EnableBankingSourceRequest';
-import type IDResponse from '@shared/schema/IDResponse';
 
 const setupInstructions = `
 ### Enable Banking Configuration
@@ -89,48 +90,28 @@ export default function AddSource({
     setData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const create = async () => {
-    const { id } = await dataProvider!.request<output<typeof IDResponse>>(
-      'v1/sources',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'enablebanking',
-          appID: data.appID!,
-          privateKey: data.privateKey!,
-          name: data.name,
-        } satisfies input<typeof EnableBankingSourceRequest>),
-      },
-    );
-
-    onSuccess();
-    onReset();
-
-    navigate({
-      pathname: '/',
-      search: new URLSearchParams({
-        edit: `source:${encodeURIComponent(id)}`,
-      }).toString(),
-    });
-  };
-
   return (
     <>
       <AccordionDetails>
         <form
           id="add-source"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
 
-            const promise = create();
-
-            toast.promise(promise, {
-              loading: 'Creating source…',
-              success: 'Source created successfully',
-              error: (error) =>
-                `Error creating source: ${error?.message ?? error ?? 'Unexpected error'}`,
+            const { id } = await postSources({
+              dataProvider: dataProvider!,
+              data: {
+                type: 'enablebanking',
+                appID: data.appID!,
+                privateKey: data.privateKey!,
+                name: data.name,
+              },
             });
+
+            onSuccess();
+            onReset();
+
+            editSource({ navigate, sourceID: id });
           }}
         >
           <Stack

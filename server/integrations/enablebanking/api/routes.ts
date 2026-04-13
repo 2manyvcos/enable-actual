@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { v7 as uuid } from 'uuid';
 import { type output } from 'zod';
 import type EnableBankingASPSP from '../../../../shared/schema/EnableBankingASPSP.ts';
-import type EnableBankingAuthorizationRequest from '../../../../shared/schema/EnableBankingAuthorizationRequest.ts';
+import type EnableBankingAuthRequest from '../../../../shared/schema/EnableBankingAuthRequest.ts';
 import EnableBankingSessionRequest from '../../../../shared/schema/EnableBankingSessionRequest.ts';
 import type IDResponse from '../../../../shared/schema/IDResponse.ts';
 import type SourceState from '../../../../shared/schema/SourceState.ts';
@@ -111,9 +111,7 @@ export async function postSourcesByIDEnableBankingAuth(
       redirectURL: new URL('enablebanking/callback', PUBLIC_URL).href,
     });
 
-    res.send({ url } satisfies output<
-      typeof EnableBankingAuthorizationRequest
-    >);
+    res.send({ url } satisfies output<typeof EnableBankingAuthRequest>);
   } catch (error) {
     if (error instanceof EBError && error.responsible === 'client') {
       res.sendStatus(400);

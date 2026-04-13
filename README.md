@@ -1,8 +1,5 @@
 # TODO: v2
 
-- separate backend actions into separate file (e.g. auth; include toast)
-- separate client actions into separate file (e.g. edit source)
-
 - implement cron schedule for session expiry alerts
 - add target configuration UI (for actual budget)
 - add sync configuration UI (account mapping, schedule, initial days, overscan days, offset days, transactions cleared)

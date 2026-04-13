@@ -21,9 +21,9 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { setIn } from 'immutable';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 import type { input, output } from 'zod';
 import NumberField from '@/NumberField';
+import { putNotificationSettings } from '@/data/notification-settings';
 import NotificationSettingsSchema from '@shared/schema/NotificationSettings';
 
 export default function NotificationSettings() {
@@ -58,20 +58,6 @@ export default function NotificationSettings() {
 
   const [ntfyPasswordVisible, setNtfyPasswordVisible] = useState(false);
 
-  const save = async () => {
-    await resource.dataProvider.request('v1/notification-settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(
-        state! satisfies input<typeof NotificationSettingsSchema>,
-      ),
-    });
-
-    const { revision } = await resource.notify();
-
-    setResetStateAfterRevision(revision);
-  };
-
   if (resource.isLoading && resource.isInitial) {
     return (
       <Stack spacing={2}>
@@ -101,21 +87,19 @@ export default function NotificationSettings() {
 
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
 
         if (!state) return;
 
-        const promise = save();
-
-        toast.promise(promise, {
-          loading: 'Saving changes…',
-          success: 'Changes saved successfully',
-          error: (error) =>
-            `Error saving changes: ${
-              error?.message ?? error ?? 'Unexpected error'
-            }`,
+        await putNotificationSettings({
+          dataProvider: resource.dataProvider,
+          data: state,
         });
+
+        const { revision } = await resource.notify();
+
+        setResetStateAfterRevision(revision);
       }}
     >
       <Stack

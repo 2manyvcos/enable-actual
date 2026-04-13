@@ -2,6 +2,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import { useNavigate } from 'react-router';
 import type { output } from 'zod';
+import { editSource } from '@/actions/sources';
 import EnableBankingSource from '@/integrations/enablebanking/Source';
 import type SourceResponse from '@shared/schema/SourceResponse';
 
@@ -25,12 +26,7 @@ export default function Source({
         <IconButton
           aria-label="edit"
           onClick={() => {
-            navigate({
-              pathname: '/',
-              search: new URLSearchParams({
-                edit: `source:${encodeURIComponent(data.id)}`,
-              }).toString(),
-            });
+            editSource({ navigate, sourceID: data.id });
           }}
         >
           <EditIcon />

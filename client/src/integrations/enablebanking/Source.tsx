@@ -5,10 +5,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import { type ReactNode } from 'react';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import { type output } from 'zod';
-import type EnableBankingAuthorizationRequest from '@shared/schema/EnableBankingAuthorizationRequest';
+import { editSource } from '@/actions/sources';
+import { postSourcesByIDEnableBankingAuth } from '@/data/sources-enablebanking';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import { addToDate, startOfDate } from '@shared/utils';
 
@@ -21,16 +21,6 @@ export default function Source({
 }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
-
-  const auth = async () => {
-    const { url } = await dataProvider!.request<
-      output<typeof EnableBankingAuthorizationRequest>
-    >(`v1/sources/${encodeURIComponent(data.id)}/enablebanking/auth`, {
-      method: 'POST',
-    });
-
-    window.location.href = url;
-  };
 
   const sessionValidUntil = !data.sessionValidUntil
     ? undefined
@@ -104,12 +94,7 @@ export default function Source({
           color="warning"
           sx={{ marginInline: 2 }}
           onClick={() => {
-            navigate({
-              pathname: '/',
-              search: new URLSearchParams({
-                edit: `source:${encodeURIComponent(data.id)}`,
-              }).toString(),
-            });
+            editSource({ navigate, sourceID: data.id });
           }}
         >
           Setup
@@ -124,18 +109,13 @@ export default function Source({
               : undefined
           }
           sx={{ marginInline: 2 }}
-          onClick={() => {
-            const promise = auth();
-
-            toast.promise(promise, {
-              loading: 'Requesting authorization…',
-              success:
-                'Authorization requested successfully - you should be redirected now',
-              error: (error) =>
-                `Error requesting authorization: ${
-                  error?.message ?? error ?? 'Unexpected error'
-                }`,
+          onClick={async () => {
+            const { url } = await postSourcesByIDEnableBankingAuth({
+              dataProvider: dataProvider!,
+              sourceID: data.id,
             });
+
+            window.location.href = url;
           }}
         >
           {data.sessionID ? 'Reauthorize' : 'Authorize'}
