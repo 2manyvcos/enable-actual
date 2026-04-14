@@ -8,7 +8,7 @@ import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { type output } from 'zod';
 import { editSource } from '@/actions/sources';
-import { postSourcesByIDEnableBankingAuth } from '@/data/sources-enablebanking';
+import { postSourcesByIDEnableBankingAuth } from '@/api/sources-enablebanking';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import { addToDate, startOfDate } from '@shared/utils';
 

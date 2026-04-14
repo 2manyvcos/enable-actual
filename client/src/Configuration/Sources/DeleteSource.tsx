@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import type { output } from 'zod';
-import { deleteSourcesByID } from '@/data/sources';
+import { deleteSourcesByID } from '@/api/sources';
 import type SourceResponse from '@shared/schema/SourceResponse';
 
 export default function DeleteSource({

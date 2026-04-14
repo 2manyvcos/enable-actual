@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router';
 import type { input } from 'zod';
 import Md from '@/Md';
 import { editSource } from '@/actions/sources';
-import { postSources } from '@/data/sources';
+import { postSources } from '@/api/sources';
 import EnableBankingSourceRequest from '@shared/schema/EnableBankingSourceRequest';
 
 const setupInstructions = `
