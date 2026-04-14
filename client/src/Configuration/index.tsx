@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { useState, type SyntheticEvent } from 'react';
 import NotificationSettings from './NotificationSettings';
 import Sources from './Sources';
+import Targets from './Targets';
 
 export default function Configuration() {
   const [expanded, setExpanded] = useState<string | false>(false);
@@ -32,6 +33,23 @@ export default function Configuration() {
 
         <AccordionDetails>
           <Sources />
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion
+        expanded={expanded === 'targets'}
+        onChange={handleChange('targets')}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="targets-content"
+          id="targets-header"
+        >
+          <Typography component="span">Targets</Typography>
+        </AccordionSummary>
+
+        <AccordionDetails>
+          <Targets />
         </AccordionDetails>
       </Accordion>
 

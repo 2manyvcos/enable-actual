@@ -20,6 +20,6 @@ export async function putNotificationSettings({
     loading: 'Saving changes…',
     success: 'Changes saved successfully',
     error: (error) =>
-      `Error saving changes: ${error?.message ?? error ?? 'Unexpected error'}`,
+      `Error saving changes: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
 }

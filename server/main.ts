@@ -6,7 +6,6 @@ import express from 'express';
 import apiRouter from './api/router.ts';
 import {
   LISTEN_ADDRESS,
-  LOG_LEVEL,
   PORT,
   SSL_CERTIFICATE_FILE,
   SSL_PRIVATE_KEY_FILE,
@@ -14,8 +13,7 @@ import {
 import resolveClientTemplate from './resolveClientTemplate.ts';
 import { loadState } from './state.ts';
 
-if (!['debug', 'info'].includes(LOG_LEVEL)) console.info = () => {};
-if (!['debug'].includes(LOG_LEVEL)) console.debug = () => {};
+import './applyLogLevel.ts';
 
 // prevent server startup if state file is invalid
 try {

@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { type output } from 'zod';
 import State from '../shared/schema/State.ts';
 import { DATA_DIR, STATE_FILE } from './config.ts';
@@ -6,9 +6,9 @@ import { DATA_DIR, STATE_FILE } from './config.ts';
 export function loadState(): output<typeof State> {
   let raw: unknown = {};
 
-  if (fs.existsSync(STATE_FILE)) {
+  if (existsSync(STATE_FILE)) {
     try {
-      raw = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      raw = JSON.parse(readFileSync(STATE_FILE, 'utf8'));
     } catch (error) {
       console.debug('Error loading existing state:', error);
     }
@@ -22,11 +22,11 @@ export function putState(
     | Partial<output<typeof State>>
     | ((state: output<typeof State>) => output<typeof State>),
 ): void {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  mkdirSync(DATA_DIR, { recursive: true });
 
   const currentState = loadState();
 
-  fs.writeFileSync(
+  writeFileSync(
     STATE_FILE,
     JSON.stringify(
       typeof nextState === 'function'

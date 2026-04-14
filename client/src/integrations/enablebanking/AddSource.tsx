@@ -21,7 +21,7 @@ import EnableBankingSourceRequest from '@shared/schema/EnableBankingSourceReques
 const setupInstructions = `
 ### Enable Banking Configuration
 
-The following steps are required before adding an Enable Banking account.
+The following steps are required before adding an Enable Banking source.
 
 1. Visit [https://enablebanking.com](https://enablebanking.com) and create an account (if you don't already have one)
 
@@ -102,9 +102,9 @@ export default function AddSource({
               dataProvider: dataProvider!,
               data: {
                 type: 'enablebanking',
+                name: data.name,
                 appID: data.appID!,
                 privateKey: data.privateKey!,
-                name: data.name,
               },
             });
 

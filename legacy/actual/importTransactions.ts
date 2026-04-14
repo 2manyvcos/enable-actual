@@ -1,6 +1,6 @@
 import api, { type ImportTransactionsOpts } from '@actual-app/api';
 import type { ImportTransactionEntity } from '@actual-app/api/@types/loot-core/src/types/models';
-import fs from 'fs';
+import { mkdirSync } from 'fs';
 import type { Transaction } from '../common.ts';
 import {
   ACTUAL_ACCOUNT_ID,
@@ -15,7 +15,7 @@ import notify from '../notify.ts';
 export default async function importTransactions(
   transactions: Transaction[],
 ): Promise<void> {
-  fs.mkdirSync(ACTUAL_DATA_DIR, { recursive: true });
+  mkdirSync(ACTUAL_DATA_DIR, { recursive: true });
 
   await api.init({
     dataDir: ACTUAL_DATA_DIR,

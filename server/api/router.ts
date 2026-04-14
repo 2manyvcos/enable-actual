@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { PUBLIC_URL } from '../config.ts';
+import { getTargetsByIDActualBudgetBudgets } from '../integrations/actualbudget/api/routes.ts';
 import {
   getSourcesByIDEnableBankingASPSPs,
   postEnableBankingSession,
@@ -17,6 +18,13 @@ import {
   postSources,
   putSourcesByID,
 } from './sources.ts';
+import {
+  deleteTargetsByID,
+  getTargets,
+  getTargetsByID,
+  postTargets,
+  putTargetsByID,
+} from './targets.ts';
 
 const router = express.Router();
 router.use(cors({ origin: new URL(PUBLIC_URL).origin }));
@@ -38,6 +46,16 @@ router.get(
 router.post(
   '/v1/sources/:sourceID/enablebanking/auth',
   postSourcesByIDEnableBankingAuth,
+);
+
+router.get('/v1/targets', getTargets);
+router.post('/v1/targets', postTargets);
+router.get('/v1/targets/:targetID', getTargetsByID);
+router.put('/v1/targets/:targetID', putTargetsByID);
+router.delete('/v1/targets/:targetID', deleteTargetsByID);
+router.get(
+  '/v1/targets/:targetID/actualbudget/budgets',
+  getTargetsByIDActualBudgetBudgets,
 );
 
 router.get('/v1/notification-settings', getNotificationSettings);

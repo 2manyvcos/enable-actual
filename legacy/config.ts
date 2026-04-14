@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { existsSync } from 'fs';
 import path from 'path';
 
 export const APP_NAME = process.env.APP_NAME ?? 'Enable Actual';
@@ -57,7 +57,7 @@ export const EB_PRIVATE_KEY = process.env.EB_PRIVATE_KEY;
 export const EB_PRIVATE_KEY_FILE =
   process.env.EB_PRIVATE_KEY_FILE ??
   path.join(import.meta.dirname, '../private.pem');
-if (!EB_PRIVATE_KEY && !fs.existsSync(EB_PRIVATE_KEY_FILE)) {
+if (!EB_PRIVATE_KEY && !existsSync(EB_PRIVATE_KEY_FILE)) {
   console.error(
     'Error: Enable Banking Private key is missing, please check that either EB_PRIVATE_KEY or EB_PRIVATE_KEY_FILE is set.',
   );

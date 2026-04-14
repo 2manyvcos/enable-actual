@@ -2,18 +2,18 @@ import type { FetchProviderType } from '@civet/common';
 import toast from 'react-hot-toast';
 import type { input, output } from 'zod';
 import type IDResponse from '@shared/schema/IDResponse';
-import type SourceRequest from '@shared/schema/SourceRequest';
-import type SourceUpdate from '@shared/schema/SourceUpdate';
+import type TargetRequest from '@shared/schema/TargetRequest';
+import type TargetUpdate from '@shared/schema/TargetUpdate';
 
-export async function postSources({
+export async function postTargets({
   dataProvider,
   data,
 }: {
   dataProvider: FetchProviderType;
-  data: input<typeof SourceRequest>;
+  data: input<typeof TargetRequest>;
 }): Promise<output<typeof IDResponse>> {
   const promise = dataProvider.request<output<typeof IDResponse>>(
-    'v1/sources',
+    'v1/targets',
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -22,24 +22,24 @@ export async function postSources({
   );
 
   return toast.promise(promise, {
-    loading: 'Creating source…',
-    success: 'Source created successfully',
+    loading: 'Creating target…',
+    success: 'Target created successfully',
     error: (error) =>
-      `Error creating source: ${(error?.message ?? error) || 'Unexpected error'}`,
+      `Error creating target: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
 }
 
-export async function putSourcesByID({
+export async function putTargetsByID({
   dataProvider,
-  sourceID,
+  targetID,
   data,
 }: {
   dataProvider: FetchProviderType;
-  sourceID: string;
-  data: input<typeof SourceUpdate>;
+  targetID: string;
+  data: input<typeof TargetUpdate>;
 }): Promise<void> {
   const promise = dataProvider.request<void>(
-    `v1/sources/${encodeURIComponent(sourceID)}`,
+    `v1/targets/${encodeURIComponent(targetID)}`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -55,22 +55,22 @@ export async function putSourcesByID({
   });
 }
 
-export async function deleteSourcesByID({
+export async function deleteTargetsByID({
   dataProvider,
-  sourceID,
+  targetID,
 }: {
   dataProvider: FetchProviderType;
-  sourceID: string;
+  targetID: string;
 }): Promise<void> {
   const promise = dataProvider.request<void>(
-    `v1/sources/${encodeURIComponent(sourceID)}`,
+    `v1/targets/${encodeURIComponent(targetID)}`,
     { method: 'DELETE' },
   );
 
   return toast.promise(promise, {
-    loading: 'Deleting source…',
-    success: 'Source deleted successfully',
+    loading: 'Deleting target…',
+    success: 'Target deleted successfully',
     error: (error) =>
-      `Error deleting source: ${(error?.message ?? error) || 'Unexpected error'}`,
+      `Error deleting target: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
 }

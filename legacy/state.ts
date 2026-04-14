@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { DATA_DIR, STATE_FILE } from './config.ts';
 
 export type SourceState = {
@@ -19,9 +19,9 @@ export type State = {
 };
 
 export function loadState(): State {
-  if (fs.existsSync(STATE_FILE)) {
+  if (existsSync(STATE_FILE)) {
     try {
-      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      return JSON.parse(readFileSync(STATE_FILE, 'utf8'));
     } catch (error) {
       console.error(
         `Error loading existing state: ${(error as Error).message ?? error}`,
@@ -35,11 +35,11 @@ export function loadState(): State {
 export function putState(
   data: Partial<State> | ((prevState: State) => State),
 ): void {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  mkdirSync(DATA_DIR, { recursive: true });
 
   const currentState = loadState();
 
-  fs.writeFileSync(
+  writeFileSync(
     STATE_FILE,
     JSON.stringify(
       typeof data === 'function'

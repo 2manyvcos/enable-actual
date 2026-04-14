@@ -21,7 +21,7 @@ export async function postSourcesByIDEnableBankingAuth({
       'Authorization requested successfully - you should be redirected now',
     error: (error) =>
       `Error requesting authorization: ${
-        error?.message ?? error ?? 'Unexpected error'
+        (error?.message ?? error) || 'Unexpected error'
       }`,
   });
 }
