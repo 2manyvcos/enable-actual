@@ -5,16 +5,6 @@ import ActualBudgetTargetState from '../../../../shared/schema/ActualBudgetTarge
 import type ActualBudgetTargetUpdate from '../../../../shared/schema/ActualBudgetTargetUpdate.ts';
 import ABClient from '../ABClient.ts';
 
-function getHostname(url: string): string | undefined {
-  if (!url) return undefined;
-
-  try {
-    return new URL(url).host;
-  } catch {
-    return undefined;
-  }
-}
-
 export function getActualBudgetTargetResponse(
   id: string,
   {
@@ -28,7 +18,7 @@ export function getActualBudgetTargetResponse(
   return ActualBudgetTargetResponse.decode({
     id,
     type: 'actualbudget',
-    name: name || [getHostname(url)].filter(Boolean).join(' ') || undefined,
+    name,
     url,
     hasPassword: !!password,
     budgetID,
@@ -62,13 +52,14 @@ export async function applyActualBudgetTargetUpdate(
     budgetPassword: prevBudgetPassword,
   }: output<typeof ActualBudgetTargetState>,
   {
-    name,
+    name: nextName,
     url,
     password: nextPassword,
     budgetID,
     budgetPassword: nextBudgetPassword,
   }: output<typeof ActualBudgetTargetUpdate>,
 ): Promise<output<typeof ActualBudgetTargetState>> {
+  let name = nextName;
   const password =
     nextPassword !== undefined ? (nextPassword || undefined)! : prevPassword;
   const budgetPassword =
@@ -77,6 +68,14 @@ export async function applyActualBudgetTargetUpdate(
       : prevBudgetPassword;
 
   const client = new ABClient({ url, password });
+
+  if (!name) {
+    const budgets = await client.getBudgets();
+    const budget = budgets.find(
+      ({ state, groupId: id }) => state === 'remote' && id === budgetID,
+    );
+    name = budget?.name;
+  }
 
   await client.downloadBudget({ budgetID, budgetPassword });
 

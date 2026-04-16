@@ -22,12 +22,7 @@ export function getEnableBankingSourceResponse(
   return EnableBankingSourceResponse.decode({
     id,
     type: 'enablebanking',
-    name:
-      name ||
-      [bankName, !bankCountry ? undefined : `(${bankCountry})`]
-        .filter(Boolean)
-        .join(' ') ||
-      undefined,
+    name,
     appID,
     bankCountry,
     bankName,
@@ -64,12 +59,15 @@ export async function applyEnableBankingSourceRequest({
   });
 }
 
-export function applyEnableBankingSourceUpdate(
+export async function applyEnableBankingSourceUpdate(
   {
     appID,
     privateKey,
-    sessionID,
-    sessionValidUntil,
+    bankCountry: prevBankCountry,
+    bankName: prevBankName,
+    psuType: prevPsuType,
+    sessionID: prevSessionID,
+    sessionValidUntil: prevSessionValidUntil,
   }: output<typeof EnableBankingSourceState>,
   {
     name,
@@ -78,10 +76,24 @@ export function applyEnableBankingSourceUpdate(
     psuType,
     tokenValidityDays,
   }: output<typeof EnableBankingSourceUpdate>,
-): output<typeof EnableBankingSourceState> {
+): Promise<output<typeof EnableBankingSourceState>> {
+  let sessionID;
+  let sessionValidUntil;
+  if (
+    prevBankCountry &&
+    prevBankCountry === bankCountry &&
+    prevBankName &&
+    prevBankName === bankName &&
+    prevPsuType &&
+    prevPsuType === psuType
+  ) {
+    sessionID = prevSessionID;
+    sessionValidUntil = prevSessionValidUntil;
+  }
+
   return EnableBankingSourceState.decode({
     type: 'enablebanking',
-    name,
+    name: name || `${bankName} (${bankCountry})`,
     appID,
     privateKey,
     bankCountry,
