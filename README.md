@@ -2,7 +2,6 @@
 
 - implement cron schedule for session expiry alerts
 - add meaningful errors (including strict HTTP codes)
-- add sync configuration UI (account mapping, schedule, initial days, overscan days, offset days)
 - implement sync
 - add import history UI
 - send consolidated sync notification (with link to import history)
