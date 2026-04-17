@@ -173,7 +173,7 @@ export async function postEnableBankingSession(
       privateKey: source.privateKey,
     });
 
-    const { sessionID, validUntil } = await client.authorizeSession({
+    const { sessionID, validUntil, accounts } = await client.authorizeSession({
       code: request.code,
     });
 
@@ -190,6 +190,15 @@ export async function postEnableBankingSession(
             ...prev,
             sessionID,
             sessionValidUntil: new Date(validUntil),
+            availableAccounts: accounts
+              .filter(({ uid }) => uid)
+              .map(({ uid, name: accountName, details, account_id }) => {
+                let name = accountName ?? '';
+                if (details) name += ` | ${details}`;
+                if (account_id?.iban) name += ` (IBAN ${account_id.iban})`;
+                else name += ` (UID ${uid})`;
+                return { id: uid!, name };
+              }),
           };
         },
       ),

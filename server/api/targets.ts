@@ -3,6 +3,7 @@ import { removeIn, setIn } from 'immutable';
 import { v7 as uuid } from 'uuid';
 import type { output } from 'zod';
 import IDResponse from '../../shared/schema/IDResponse.ts';
+import type TargetAccount from '../../shared/schema/TargetAccount.ts';
 import TargetRequest from '../../shared/schema/TargetRequest.ts';
 import type TargetResponse from '../../shared/schema/TargetResponse.ts';
 import type TargetState from '../../shared/schema/TargetState.ts';
@@ -10,6 +11,7 @@ import TargetUpdate from '../../shared/schema/TargetUpdate.ts';
 import {
   applyActualBudgetTargetRequest,
   applyActualBudgetTargetUpdate,
+  getActualBudgetTargetAccounts,
   getActualBudgetTargetResponse,
 } from '../integrations/actualbudget/api/targets.ts';
 import { loadState, putState } from '../state.ts';
@@ -155,4 +157,35 @@ export function deleteTargetsByID(req: Request, res: Response): void {
   putState((prev) => removeIn(prev, ['targets', targetID]));
 
   res.sendStatus(200);
+}
+
+export async function getTargetsByIDAccounts(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const targetID = req.params.targetID.toString();
+
+  const { targets } = loadState();
+
+  if (!Object.hasOwn(targets, targetID)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const target = targets[targetID]!;
+
+  let response: output<typeof TargetAccount>[];
+  try {
+    switch (target.type) {
+      case 'actualbudget':
+        response = await getActualBudgetTargetAccounts(targetID, target!);
+        break;
+    }
+  } catch (error) {
+    console.debug('Implementation rejection:', error);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.send(response);
 }

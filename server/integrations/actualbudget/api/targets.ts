@@ -3,6 +3,7 @@ import type ActualBudgetTargetRequest from '../../../../shared/schema/ActualBudg
 import ActualBudgetTargetResponse from '../../../../shared/schema/ActualBudgetTargetResponse.ts';
 import ActualBudgetTargetState from '../../../../shared/schema/ActualBudgetTargetState.ts';
 import type ActualBudgetTargetUpdate from '../../../../shared/schema/ActualBudgetTargetUpdate.ts';
+import type TargetAccount from '../../../../shared/schema/TargetAccount.ts';
 import ABClient from '../ABClient.ts';
 
 export function getActualBudgetTargetResponse(
@@ -15,15 +16,18 @@ export function getActualBudgetTargetResponse(
     budgetPassword,
   }: output<typeof ActualBudgetTargetState>,
 ): output<typeof ActualBudgetTargetResponse> {
+  const setupRequired = !budgetID;
+
   return ActualBudgetTargetResponse.decode({
     id,
     type: 'actualbudget',
     name,
+    available: !setupRequired,
     url,
     hasPassword: !!password,
     budgetID,
     hasBudgetPassword: !!budgetPassword,
-    setupRequired: !budgetID,
+    setupRequired,
   });
 }
 
@@ -87,4 +91,28 @@ export async function applyActualBudgetTargetUpdate(
     budgetID,
     budgetPassword,
   });
+}
+
+export async function getActualBudgetTargetAccounts(
+  _id: string,
+  {
+    url,
+    password,
+    budgetID,
+    budgetPassword,
+  }: output<typeof ActualBudgetTargetState>,
+): Promise<output<typeof TargetAccount>[]> {
+  if (!budgetID) throw new Error('Setup required');
+
+  const client = new ABClient({ url, password });
+
+  const accounts = await client.getAccounts({ budgetID, budgetPassword });
+
+  return accounts
+    .filter(({ id }) => id)
+    .map(({ id, name: accountName, offbudget }) => {
+      let name = accountName;
+      if (offbudget) name += ` (Off budget)`;
+      return { id: id!, name };
+    });
 }

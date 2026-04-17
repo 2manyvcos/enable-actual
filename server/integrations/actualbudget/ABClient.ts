@@ -3,12 +3,14 @@ import { Worker } from 'worker_threads';
 import { v7 as uuid } from 'uuid';
 import {
   ABError,
+  type ABAccount,
   type ABBudgetConfig,
   type ABBudgetFile,
   type ABConfig,
   type ABErrorResponsible,
   type ABFnAuth,
   type ABFnDownloadBudget,
+  type ABFnGetAccounts,
   type ABFnGetBudgets,
 } from './ABClient.types.ts';
 
@@ -43,6 +45,10 @@ export default class ABClient {
       this.config,
       budgetConfig,
     );
+  }
+
+  getAccounts(budgetConfig: ABBudgetConfig): Promise<ABAccount[]> {
+    return this.send<ABFnGetAccounts>('getAccounts', this.config, budgetConfig);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

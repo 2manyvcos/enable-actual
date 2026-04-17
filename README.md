@@ -1,6 +1,7 @@
 # TODO: v2
 
 - implement cron schedule for session expiry alerts
+- add meaningful errors (including strict HTTP codes)
 - add target configuration UI (for actual budget)
 - add sync configuration UI (account mapping, schedule, initial days, overscan days, offset days, transactions cleared)
 - add payee mapping UI

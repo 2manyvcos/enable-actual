@@ -3,6 +3,7 @@ import { removeIn, setIn } from 'immutable';
 import { v7 as uuid } from 'uuid';
 import type { output } from 'zod';
 import IDResponse from '../../shared/schema/IDResponse.ts';
+import type SourceAccount from '../../shared/schema/SourceAccount.ts';
 import SourceRequest from '../../shared/schema/SourceRequest.ts';
 import type SourceResponse from '../../shared/schema/SourceResponse.ts';
 import type SourceState from '../../shared/schema/SourceState.ts';
@@ -10,6 +11,7 @@ import SourceUpdate from '../../shared/schema/SourceUpdate.ts';
 import {
   applyEnableBankingSourceRequest,
   applyEnableBankingSourceUpdate,
+  getEnableBankingSourceAccounts,
   getEnableBankingSourceResponse,
 } from '../integrations/enablebanking/api/sources.ts';
 import { loadState, putState } from '../state.ts';
@@ -155,4 +157,35 @@ export function deleteSourcesByID(req: Request, res: Response): void {
   putState((prev) => removeIn(prev, ['sources', sourceID]));
 
   res.sendStatus(200);
+}
+
+export async function getSourcesByIDAccounts(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const sourceID = req.params.sourceID.toString();
+
+  const { sources } = loadState();
+
+  if (!Object.hasOwn(sources, sourceID)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const source = sources[sourceID]!;
+
+  let response: output<typeof SourceAccount>[];
+  try {
+    switch (source.type) {
+      case 'enablebanking':
+        response = await getEnableBankingSourceAccounts(sourceID, source!);
+        break;
+    }
+  } catch (error) {
+    console.debug('Implementation rejection:', error);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.send(response);
 }

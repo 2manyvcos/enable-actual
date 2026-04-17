@@ -9,6 +9,7 @@ import {
   type ABConfig,
   type ABFnAuth,
   type ABFnDownloadBudget,
+  type ABFnGetAccounts,
   type ABFnGetBudgets,
 } from './ABClient.types.ts';
 
@@ -28,22 +29,49 @@ async function init({ serverURL, password }: ABConfig): Promise<void> {
 }
 
 const auth: ABFnAuth = async (config) => {
-  await init(config);
+  try {
+    await init(config);
+  } finally {
+    await api.shutdown();
+  }
 };
 
 const getBudgets: ABFnGetBudgets = async (config) => {
-  await init(config);
+  try {
+    await init(config);
 
-  return api.getBudgets();
+    return api.getBudgets();
+  } finally {
+    await api.shutdown();
+  }
 };
 
 const downloadBudget: ABFnDownloadBudget = async (
   config,
   { budgetID, budgetPassword },
 ) => {
-  await init(config);
+  try {
+    await init(config);
 
-  await api.downloadBudget(budgetID, { password: budgetPassword });
+    await api.downloadBudget(budgetID, { password: budgetPassword });
+  } finally {
+    await api.shutdown();
+  }
+};
+
+const getAccounts: ABFnGetAccounts = async (
+  config,
+  { budgetID, budgetPassword },
+) => {
+  try {
+    await init(config);
+
+    await api.downloadBudget(budgetID, { password: budgetPassword });
+
+    return api.getAccounts();
+  } finally {
+    await api.shutdown();
+  }
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
@@ -51,6 +79,7 @@ const methods: { [method: string]: Function } = {
   auth,
   getBudgets,
   downloadBudget,
+  getAccounts,
 };
 
 let queue = Promise.resolve();

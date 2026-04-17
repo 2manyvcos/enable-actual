@@ -25,6 +25,13 @@ export type ABBudgetFile = {
   id?: string;
 };
 
+export type ABAccount = {
+  id?: string;
+  name: string;
+  offbudget?: boolean;
+  closed?: boolean;
+};
+
 export type ABErrorResponsible = 'client' | 'server';
 
 export class ABError extends Error {
@@ -46,4 +53,8 @@ export interface ABFnGetBudgets {
 
 export interface ABFnDownloadBudget {
   (config: ABConfig, budgetConfig: ABBudgetConfig): Promise<void>;
+}
+
+export interface ABFnGetAccounts {
+  (config: ABConfig, budgetConfig: ABBudgetConfig): Promise<ABAccount[]>;
 }

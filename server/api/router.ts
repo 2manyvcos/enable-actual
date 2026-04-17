@@ -15,6 +15,7 @@ import {
   deleteSourcesByID,
   getSources,
   getSourcesByID,
+  getSourcesByIDAccounts,
   postSources,
   putSourcesByID,
 } from './sources.ts';
@@ -22,6 +23,7 @@ import {
   deleteTargetsByID,
   getTargets,
   getTargetsByID,
+  getTargetsByIDAccounts,
   postTargets,
   putTargetsByID,
 } from './targets.ts';
@@ -39,6 +41,7 @@ router.post('/v1/sources', postSources);
 router.get('/v1/sources/:sourceID', getSourcesByID);
 router.put('/v1/sources/:sourceID', putSourcesByID);
 router.delete('/v1/sources/:sourceID', deleteSourcesByID);
+router.get('/v1/sources/:sourceID/accounts', getSourcesByIDAccounts);
 router.get(
   '/v1/sources/:sourceID/enablebanking/aspsps',
   getSourcesByIDEnableBankingASPSPs,
@@ -53,6 +56,7 @@ router.post('/v1/targets', postTargets);
 router.get('/v1/targets/:targetID', getTargetsByID);
 router.put('/v1/targets/:targetID', putTargetsByID);
 router.delete('/v1/targets/:targetID', deleteTargetsByID);
+router.get('/v1/targets/:targetID/accounts', getTargetsByIDAccounts);
 router.get(
   '/v1/targets/:targetID/actualbudget/budgets',
   getTargetsByIDActualBudgetBudgets,

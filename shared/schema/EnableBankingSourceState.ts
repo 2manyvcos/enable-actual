@@ -1,4 +1,5 @@
-import { coerce, literal, number, strictObject, string } from 'zod';
+import { array, coerce, literal, number, strictObject, string } from 'zod';
+import SourceAccount from './SourceAccount.ts';
 
 export default strictObject({
   type: literal('enablebanking'),
@@ -11,4 +12,5 @@ export default strictObject({
   tokenValidityDays: number().int().nonnegative().optional(),
   sessionID: string().optional(),
   sessionValidUntil: coerce.date<string | Date>().optional(),
+  availableAccounts: array(SourceAccount).optional(),
 });

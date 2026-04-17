@@ -4,6 +4,7 @@ export default strictObject({
   id: string(),
   type: literal('enablebanking'),
   name: string().optional(),
+  available: boolean(),
   appID: string(),
   bankCountry: string().optional(),
   bankName: string().optional(),

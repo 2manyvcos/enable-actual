@@ -3,6 +3,7 @@ import type EnableBankingSourceRequest from '../../../../shared/schema/EnableBan
 import EnableBankingSourceResponse from '../../../../shared/schema/EnableBankingSourceResponse.ts';
 import EnableBankingSourceState from '../../../../shared/schema/EnableBankingSourceState.ts';
 import type EnableBankingSourceUpdate from '../../../../shared/schema/EnableBankingSourceUpdate.ts';
+import type SourceAccount from '../../../../shared/schema/SourceAccount.ts';
 import { ENABLEBANKING_API } from '../../../config.ts';
 import EBClient from '../EBClient.ts';
 
@@ -19,10 +20,14 @@ export function getEnableBankingSourceResponse(
     sessionValidUntil,
   }: output<typeof EnableBankingSourceState>,
 ): output<typeof EnableBankingSourceResponse> {
+  const setupRequired =
+    !bankCountry || !bankName || !psuType || !tokenValidityDays;
+
   return EnableBankingSourceResponse.decode({
     id,
     type: 'enablebanking',
     name,
+    available: !setupRequired && !!sessionID,
     appID,
     bankCountry,
     bankName,
@@ -30,7 +35,7 @@ export function getEnableBankingSourceResponse(
     tokenValidityDays,
     sessionID,
     sessionValidUntil,
-    setupRequired: !bankCountry || !bankName || !psuType || !tokenValidityDays,
+    setupRequired,
   });
 }
 
@@ -103,4 +108,15 @@ export async function applyEnableBankingSourceUpdate(
     sessionID,
     sessionValidUntil,
   });
+}
+
+export async function getEnableBankingSourceAccounts(
+  _id: string,
+  { sessionID, availableAccounts }: output<typeof EnableBankingSourceState>,
+): Promise<output<typeof SourceAccount>[]> {
+  if (!sessionID || !availableAccounts) {
+    throw new Error('Setup required');
+  }
+
+  return availableAccounts;
 }
