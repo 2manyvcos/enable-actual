@@ -14,9 +14,9 @@ import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { input } from 'zod';
-import Md from '@/Md';
 import { editTarget } from '@/actions/targets';
 import { postTargets } from '@/api/targets';
+import Md from '@/components/Md';
 import ActualBudgetTargetRequest from '@shared/schema/ActualBudgetTargetRequest';
 
 const setupInstructions = `

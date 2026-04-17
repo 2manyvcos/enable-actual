@@ -115,7 +115,7 @@ export default function Source({
               sourceID: data.id,
             });
 
-            window.location.href = url;
+            window.location.assign(url);
           }}
         >
           {data.sessionID ? 'Reauthorize' : 'Authorize'}

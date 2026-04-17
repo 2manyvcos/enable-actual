@@ -203,8 +203,10 @@ export default function EditTarget({
                     {`${budgetResource.error.message ?? budgetResource.error}`}
                   </Alert>
                 )}
+
                 <FormControl fullWidth required>
                   <InputLabel id="budget-id-label">Budget</InputLabel>
+
                   <Select
                     labelId="budget-id-label"
                     id="budget-id-select"
@@ -222,6 +224,7 @@ export default function EditTarget({
                     ))}
                   </Select>
                 </FormControl>
+
                 {!budgetResource.data?.find(({ id }) => id === data.budgetID)
                   ?.encrypted ? null : (
                   <TextField

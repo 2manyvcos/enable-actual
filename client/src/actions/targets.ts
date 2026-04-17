@@ -1,5 +1,12 @@
 import type { NavigateFunction } from 'react-router';
 
+export function gotoTargets({ navigate }: { navigate: NavigateFunction }) {
+  navigate({
+    pathname: '/',
+    hash: 'targets',
+  });
+}
+
 export function editTarget({
   navigate,
   targetID,
@@ -9,6 +16,7 @@ export function editTarget({
 }) {
   navigate({
     pathname: '/',
+    hash: 'targets',
     search: new URLSearchParams({
       edit: `target:${encodeURIComponent(targetID)}`,
     }).toString(),

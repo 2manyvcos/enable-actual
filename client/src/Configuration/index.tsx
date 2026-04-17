@@ -4,17 +4,21 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import { useState, type SyntheticEvent } from 'react';
+import { type SyntheticEvent } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import NotificationSettings from './NotificationSettings';
+import Schedules from './Schedules';
 import Sources from './Sources';
 import Targets from './Targets';
 
 export default function Configuration() {
-  const [expanded, setExpanded] = useState<string | false>(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const expanded = location.hash.substring('#'.length);
 
   const handleChange =
     (panel: string) => (_event: SyntheticEvent, isExpanded: boolean) => {
-      setExpanded(isExpanded ? panel : false);
+      navigate({ hash: isExpanded ? panel : undefined }, { replace: true });
     };
 
   return (
@@ -50,6 +54,23 @@ export default function Configuration() {
 
         <AccordionDetails>
           <Targets />
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion
+        expanded={expanded === 'schedules'}
+        onChange={handleChange('schedules')}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="schedules-content"
+          id="schedules-header"
+        >
+          <Typography component="span">Schedules</Typography>
+        </AccordionSummary>
+
+        <AccordionDetails>
+          <Schedules />
         </AccordionDetails>
       </Accordion>
 

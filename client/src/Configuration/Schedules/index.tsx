@@ -7,26 +7,26 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import { useNavigate, useSearchParams } from 'react-router';
 import { type output } from 'zod';
-import { gotoTargets } from '@/actions/targets';
-import type TargetResponse from '@shared/schema/TargetResponse';
-import AddTarget from './AddTarget';
-import EditTarget from './EditTarget';
-import Target from './Target';
+import { gotoSchedules } from '@/actions/schedules';
+import type ScheduleResponse from '@shared/schema/ScheduleResponse';
+import AddSchedule from './AddSchedule';
+import EditSchedule from './EditSchedule';
+import Schedule from './Schedule';
 
-export default function Targets() {
+export default function Schedules() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const edit = searchParams.get('edit');
-  const editID = edit?.startsWith('target:')
-    ? edit.substring('target:'.length)
+  const editID = edit?.startsWith('schedule:')
+    ? edit.substring('schedule:'.length)
     : undefined;
 
   const resource = useResource<
     FetchProviderType,
-    output<typeof TargetResponse>[] | undefined
+    output<typeof ScheduleResponse>[] | undefined
   >({
-    name: 'v1/targets',
+    name: 'v1/schedules',
     query: undefined,
   });
 
@@ -58,20 +58,20 @@ export default function Targets() {
   return (
     <Stack spacing={2}>
       <List>
-        {resource.data?.map((target) => (
-          <Target key={target.id} data={target} />
+        {resource.data?.map((schedule) => (
+          <Schedule key={schedule.id} data={schedule} />
         ))}
       </List>
 
-      <AddTarget onSuccess={resource.notify} />
+      <AddSchedule onSuccess={resource.notify} />
 
-      <EditTarget
+      <EditSchedule
         data={
           !editID ? undefined : resource.data?.find(({ id }) => id === editID)
         }
         onSuccess={resource.notify}
         onClose={() => {
-          gotoTargets({ navigate });
+          gotoSchedules({ navigate });
         }}
       />
     </Stack>

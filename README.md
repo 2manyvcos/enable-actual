@@ -2,9 +2,7 @@
 
 - implement cron schedule for session expiry alerts
 - add meaningful errors (including strict HTTP codes)
-- add target configuration UI (for actual budget)
-- add sync configuration UI (account mapping, schedule, initial days, overscan days, offset days, transactions cleared)
-- add payee mapping UI
+- add sync configuration UI (account mapping, schedule, initial days, overscan days, offset days)
 - implement sync
 - add import history UI
 - send consolidated sync notification (with link to import history)

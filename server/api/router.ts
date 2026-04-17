@@ -12,6 +12,13 @@ import {
   putNotificationSettings,
 } from './notification-settings.ts';
 import {
+  deleteSchedulesByID,
+  getSchedules,
+  getSchedulesByID,
+  postSchedules,
+  putSchedulesByID,
+} from './schedules.ts';
+import {
   deleteSourcesByID,
   getSources,
   getSourcesByID,
@@ -61,6 +68,12 @@ router.get(
   '/v1/targets/:targetID/actualbudget/budgets',
   getTargetsByIDActualBudgetBudgets,
 );
+
+router.get('/v1/schedules', getSchedules);
+router.post('/v1/schedules', postSchedules);
+router.get('/v1/schedules/:scheduleID', getSchedulesByID);
+router.put('/v1/schedules/:scheduleID', putSchedulesByID);
+router.delete('/v1/schedules/:scheduleID', deleteSchedulesByID);
 
 router.get('/v1/notification-settings', getNotificationSettings);
 router.put('/v1/notification-settings', putNotificationSettings);

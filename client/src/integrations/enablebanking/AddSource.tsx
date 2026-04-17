@@ -13,9 +13,9 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import type { input } from 'zod';
-import Md from '@/Md';
 import { editSource } from '@/actions/sources';
 import { postSources } from '@/api/sources';
+import Md from '@/components/Md';
 import EnableBankingSourceRequest from '@shared/schema/EnableBankingSourceRequest';
 
 const setupInstructions = `

@@ -5,17 +5,19 @@ import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { type output } from 'zod';
+import { gotoSources } from '@/actions/sources';
 import type SourceResponse from '@shared/schema/SourceResponse';
 import AddSource from './AddSource';
 import EditSource from './EditSource';
 import Source from './Source';
 
 export default function Sources() {
-  const [search, setSearch] = useSearchParams();
-  const edit = search.get('edit');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
+  const edit = searchParams.get('edit');
   const editID = edit?.startsWith('source:')
     ? edit.substring('source:'.length)
     : undefined;
@@ -69,10 +71,7 @@ export default function Sources() {
         }
         onSuccess={resource.notify}
         onClose={() => {
-          setSearch((search) => {
-            search.delete('edit');
-            return search;
-          });
+          gotoSources({ navigate });
         }}
       />
     </Stack>

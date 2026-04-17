@@ -14,9 +14,9 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { useMemo, useState, type ReactNode } from 'react';
 import type { input, output } from 'zod';
-import NumberField from '@/NumberField';
 import { putSourcesByID } from '@/api/sources';
 import { postSourcesByIDEnableBankingAuth } from '@/api/sources-enablebanking';
+import NumberField from '@/components/NumberField';
 import type EnableBankingASPSP from '@shared/schema/EnableBankingASPSP';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import type EnableBankingSourceUpdate from '@shared/schema/EnableBankingSourceUpdate';
@@ -114,7 +114,7 @@ export default function EditSource({
               sourceID: source.id,
             });
 
-            window.location.href = url;
+            window.location.assign(url);
           }}
         >
           <Stack
@@ -162,6 +162,7 @@ export default function EditSource({
 
                 <FormControl fullWidth required>
                   <InputLabel id="bank-country-label">Bank Country</InputLabel>
+
                   <Select
                     labelId="bank-country-label"
                     id="bank-country-select"
@@ -184,6 +185,7 @@ export default function EditSource({
 
                 <FormControl fullWidth required>
                   <InputLabel id="bank-name-label">Bank Name</InputLabel>
+
                   <Select
                     labelId="bank-name-label"
                     id="bank-name-select"
@@ -223,6 +225,7 @@ export default function EditSource({
 
                 <FormControl fullWidth required>
                   <InputLabel id="psu-type-label">PSU Type</InputLabel>
+
                   <Select
                     labelId="psu-type-label"
                     id="psu-type-select"

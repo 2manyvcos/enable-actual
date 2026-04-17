@@ -22,8 +22,8 @@ import Typography from '@mui/material/Typography';
 import { setIn } from 'immutable';
 import { useState } from 'react';
 import type { input, output } from 'zod';
-import NumberField from '@/NumberField';
 import { putNotificationSettings } from '@/api/notification-settings';
+import NumberField from '@/components/NumberField';
 import NotificationSettingsSchema from '@shared/schema/NotificationSettings';
 
 export default function NotificationSettings() {

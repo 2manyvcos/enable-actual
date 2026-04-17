@@ -30,7 +30,7 @@ export default function EditSource({
       <Dialog open={!!data} onClose={onClose}>
         <DialogTitle>Edit source</DialogTitle>
 
-        {Component ? (
+        {!Component ? null : (
           <Component
             data={data!}
             onSuccess={onSuccess}
@@ -47,7 +47,7 @@ export default function EditSource({
               </Button>
             }
           />
-        ) : undefined}
+        )}
       </Dialog>
 
       {!data ? null : (
