@@ -11,6 +11,7 @@ import {
   SSL_PRIVATE_KEY_FILE,
 } from './config.ts';
 import resolveClientTemplate from './resolveClientTemplate.ts';
+import { startScheduler } from './scheduler/scheduler.ts';
 import { loadState } from './state.ts';
 
 import './applyLogLevel.ts';
@@ -23,6 +24,8 @@ try {
     `Error loading state: ${(error as Error)?.message ?? error?.toString()}`,
   );
 }
+
+startScheduler();
 
 const app = express();
 

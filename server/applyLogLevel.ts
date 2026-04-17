@@ -1,13 +1,21 @@
 import { LOG_LEVEL } from './config.ts';
 
 if (['debug', 'info'].includes(LOG_LEVEL)) {
-  console.info = console.info.bind(console, '[INFO]');
+  const base = console.info;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  console.info = (...data: any[]) => {
+    base('[INFO]', new Date().toLocaleString(), '-', ...data);
+  };
 } else {
   console.info = () => {};
 }
 
 if (['debug'].includes(LOG_LEVEL)) {
-  console.debug = console.debug.bind(console, '[DEBUG]');
+  const base = console.debug;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  console.debug = (...data: any[]) => {
+    base('[DEBUG]', new Date().toLocaleString(), '-', ...data);
+  };
 } else {
   console.debug = () => {};
 }

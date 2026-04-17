@@ -8,6 +8,7 @@ import ScheduleRequest from '../../shared/schema/ScheduleRequest.ts';
 import ScheduleResponse from '../../shared/schema/ScheduleResponse.ts';
 import ScheduleState from '../../shared/schema/ScheduleState.ts';
 import ScheduleUpdate from '../../shared/schema/ScheduleUpdate.ts';
+import { updateSchedule } from '../scheduler/scheduler.ts';
 import { loadState, putState } from '../state.ts';
 
 function getScheduleResponse(
@@ -100,6 +101,8 @@ export async function postSchedules(
 
   putState((prev) => setIn(prev, ['schedules', scheduleID], schedule));
 
+  updateSchedule(scheduleID);
+
   res.send({ id: scheduleID } satisfies output<typeof IDResponse>);
 }
 
@@ -165,6 +168,8 @@ export async function putSchedulesByID(
 
   putState((prev) => setIn(prev, ['schedules', scheduleID], nextSchedule));
 
+  updateSchedule(scheduleID);
+
   res.sendStatus(200);
 }
 
@@ -179,6 +184,8 @@ export function deleteSchedulesByID(req: Request, res: Response): void {
   }
 
   putState((prev) => removeIn(prev, ['schedules', scheduleID]));
+
+  updateSchedule(scheduleID);
 
   res.sendStatus(200);
 }
