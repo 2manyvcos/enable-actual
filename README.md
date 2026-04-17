@@ -4,6 +4,7 @@
 - add meaningful errors (including strict HTTP codes)
 - implement sync
 - add import history UI
+- add payee mapping? (maybe there is an official source?)
 - send consolidated sync notification (with link to import history)
 - add quick fixes UI (expiring / missing sessions, unavailable account IDs / budget IDs, sync errors)
 - implement data migration
