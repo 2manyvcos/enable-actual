@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import { set } from 'immutable';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { input } from 'zod';
@@ -57,7 +58,7 @@ export default function AddTarget({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    setData((prev) => set(prev, field, value));
   };
 
   const [passwordVisible, setPasswordVisible] = useState(false);

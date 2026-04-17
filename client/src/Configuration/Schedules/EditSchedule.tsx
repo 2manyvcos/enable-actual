@@ -9,10 +9,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import { set } from 'immutable';
 import { useState, type ReactNode } from 'react';
 import type { input, output } from 'zod';
 import { putSchedulesByID } from '@/api/schedules';
 import NumberField from '@/components/NumberField';
+import ScheduleAccountMappingSchema from '@shared/schema/ScheduleAccountMapping';
 import type ScheduleResponse from '@shared/schema/ScheduleResponse';
 import type ScheduleUpdate from '@shared/schema/ScheduleUpdate';
 import DeleteSchedule from './DeleteSchedule';
@@ -38,7 +40,7 @@ function Component({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    setData((prev) => set(prev, field, value));
   };
 
   return (
@@ -147,7 +149,10 @@ function Component({
             <ScheduleAccountMapping
               data={data.accounts ?? []}
               onChange={(value) => {
-                handleChange('accounts', value ?? undefined);
+                handleChange(
+                  'accounts',
+                  value as input<typeof ScheduleAccountMappingSchema>[],
+                );
               }}
             />
           </Stack>

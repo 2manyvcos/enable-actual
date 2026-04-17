@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { styled } from '@mui/material/styles';
+import { set } from 'immutable';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
@@ -87,7 +88,7 @@ export default function AddSource({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    setData((prev) => set(prev, field, value));
   };
 
   return (

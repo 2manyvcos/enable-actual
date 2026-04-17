@@ -12,6 +12,7 @@ import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import { set } from 'immutable';
 import { useMemo, useState, type ReactNode } from 'react';
 import type { input, output } from 'zod';
 import { putSourcesByID } from '@/api/sources';
@@ -41,7 +42,7 @@ export default function EditSource({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    setData((prev) => set(prev, field, value));
   };
 
   const aspspResource = useResource<

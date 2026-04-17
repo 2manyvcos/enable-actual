@@ -16,6 +16,7 @@ import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import { set } from 'immutable';
 import { useState, type ReactNode } from 'react';
 import type { input, output } from 'zod';
 import { putTargetsByID } from '@/api/targets';
@@ -43,7 +44,7 @@ export default function EditTarget({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    setData((prev) => set(prev, field, value));
   };
 
   const [passwordVisible, setPasswordVisible] = useState(false);

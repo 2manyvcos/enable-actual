@@ -77,7 +77,7 @@ export default function NumberField({
                 }}
               >
                 <BaseNumberField.Increment
-                  render={<IconButton size={size} aria-label="Increase" />}
+                  render={<IconButton size={size} aria-label="increase" />}
                 >
                   <KeyboardArrowUpIcon
                     fontSize={size}
@@ -86,7 +86,7 @@ export default function NumberField({
                 </BaseNumberField.Increment>
 
                 <BaseNumberField.Decrement
-                  render={<IconButton size={size} aria-label="Decrease" />}
+                  render={<IconButton size={size} aria-label="decrease" />}
                 >
                   <KeyboardArrowDownIcon
                     fontSize={size}

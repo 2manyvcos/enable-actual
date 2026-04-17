@@ -9,10 +9,12 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { set } from 'immutable';
 import { useState } from 'react';
 import type { input } from 'zod';
 import { postSchedules } from '@/api/schedules';
 import NumberField from '@/components/NumberField';
+import ScheduleAccountMappingSchema from '@shared/schema/ScheduleAccountMapping';
 import ScheduleRequest from '@shared/schema/ScheduleRequest';
 import ScheduleAccountMapping from './ScheduleAccountMapping';
 
@@ -35,7 +37,7 @@ function Component({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    setData((prev) => set(prev, field, value));
   };
 
   return (
@@ -143,7 +145,10 @@ function Component({
             <ScheduleAccountMapping
               data={data.accounts ?? []}
               onChange={(value) => {
-                handleChange('accounts', value ?? undefined);
+                handleChange(
+                  'accounts',
+                  value as input<typeof ScheduleAccountMappingSchema>[],
+                );
               }}
             />
           </Stack>
