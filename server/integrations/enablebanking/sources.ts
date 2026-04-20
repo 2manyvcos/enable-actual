@@ -4,6 +4,7 @@ import EnableBankingSourceResponse from '../../../shared/schema/EnableBankingSou
 import EnableBankingSourceState from '../../../shared/schema/EnableBankingSourceState.ts';
 import type EnableBankingSourceUpdate from '../../../shared/schema/EnableBankingSourceUpdate.ts';
 import type SourceAccount from '../../../shared/schema/SourceAccount.ts';
+import { startOfDate } from '../../../shared/utils.ts';
 import { ENABLEBANKING_API } from '../../config.ts';
 import EBClient from './EBClient.ts';
 
@@ -119,4 +120,17 @@ export async function getEnableBankingSourceAccounts(
   }
 
   return availableAccounts;
+}
+
+export function getEnableBankingSourceSessionExpiryDays(
+  _id: string,
+  { sessionID, sessionValidUntil }: output<typeof EnableBankingSourceState>,
+): number | undefined {
+  if (!sessionID || !sessionValidUntil) return undefined;
+
+  return Math.floor(
+    (startOfDate(sessionValidUntil).getTime() -
+      startOfDate(new Date()).getTime()) /
+      (24 * 60 * 60 * 1000),
+  );
 }
