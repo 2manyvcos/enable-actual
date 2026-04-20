@@ -3,14 +3,14 @@ import { updateIn } from 'immutable';
 import jwt from 'jsonwebtoken';
 import { v7 as uuid } from 'uuid';
 import { type output } from 'zod';
-import type EnableBankingASPSP from '../../../../shared/schema/EnableBankingASPSP.ts';
-import type EnableBankingAuthRequest from '../../../../shared/schema/EnableBankingAuthRequest.ts';
-import EnableBankingSessionRequest from '../../../../shared/schema/EnableBankingSessionRequest.ts';
-import type IDResponse from '../../../../shared/schema/IDResponse.ts';
-import type SourceState from '../../../../shared/schema/SourceState.ts';
-import { ENABLEBANKING_API, PUBLIC_URL } from '../../../config.ts';
-import { loadState, putState } from '../../../state.ts';
-import EBClient, { EBError } from '../EBClient.ts';
+import type EnableBankingASPSP from '../../../shared/schema/EnableBankingASPSP.ts';
+import type EnableBankingAuthRequest from '../../../shared/schema/EnableBankingAuthRequest.ts';
+import EnableBankingSessionRequest from '../../../shared/schema/EnableBankingSessionRequest.ts';
+import type IDResponse from '../../../shared/schema/IDResponse.ts';
+import type SourceState from '../../../shared/schema/SourceState.ts';
+import { ENABLEBANKING_API, PUBLIC_URL } from '../../config.ts';
+import { loadState, putState } from '../../state.ts';
+import EBClient, { EBError } from './EBClient.ts';
 
 const stateSecret = uuid();
 

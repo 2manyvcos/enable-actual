@@ -37,7 +37,11 @@ function Item({
 }: {
   data: Partial<input<typeof ScheduleAccountMappingSchema>>[];
   onChange: (
-    value: Partial<input<typeof ScheduleAccountMappingSchema>>[],
+    value:
+      | Partial<input<typeof ScheduleAccountMappingSchema>>[]
+      | ((
+          prev: Partial<input<typeof ScheduleAccountMappingSchema>>[],
+        ) => Partial<input<typeof ScheduleAccountMappingSchema>>[]),
   ) => void;
   index: number;
   sources: output<typeof SourceResponse>[];
@@ -49,7 +53,7 @@ function Item({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    onChange(setIn(items, [index, field], value));
+    onChange((prev) => setIn(prev, [index, field], value));
   };
 
   const sourceAccountResource = useResource<
@@ -84,7 +88,7 @@ function Item({
       }
     >
       <ListItemText>
-        <Stack spacing={2} sx={{ alignItems: 'center', marginRight: 2 }}>
+        <Stack spacing={2} sx={{ marginRight: 2 }}>
           <FormControl fullWidth>
             <InputLabel id="source-label">Source</InputLabel>
 
@@ -95,10 +99,11 @@ function Item({
               value={data.sourceID ?? ''}
               onChange={(event) => {
                 handleChange('sourceID', event.target.value || undefined);
+                handleChange('sourceAccountID', undefined);
               }}
             >
-              {sources.map(({ id, name }) => (
-                <MenuItem key={id} value={id}>
+              {sources.map(({ id, name, available }) => (
+                <MenuItem key={id} value={id} disabled={!available}>
                   {name || id}
                 </MenuItem>
               ))}
@@ -153,7 +158,7 @@ function Item({
             </>
           )}
 
-          <ArrowDownwardIcon />
+          <ArrowDownwardIcon sx={{ alignSelf: 'center' }} />
 
           <FormControl fullWidth>
             <InputLabel id="target-label">Target</InputLabel>
@@ -165,10 +170,11 @@ function Item({
               value={data.targetID ?? ''}
               onChange={(event) => {
                 handleChange('targetID', event.target.value || undefined);
+                handleChange('targetAccountID', undefined);
               }}
             >
-              {targets.map(({ id, name }) => (
-                <MenuItem key={id} value={id}>
+              {targets.map(({ id, name, available }) => (
+                <MenuItem key={id} value={id} disabled={!available}>
                   {name || id}
                 </MenuItem>
               ))}
@@ -234,7 +240,11 @@ export default function ScheduleAccountMapping({
 }: {
   data: Partial<input<typeof ScheduleAccountMappingSchema>>[];
   onChange: (
-    value: Partial<input<typeof ScheduleAccountMappingSchema>>[],
+    value:
+      | Partial<input<typeof ScheduleAccountMappingSchema>>[]
+      | ((
+          prev: Partial<input<typeof ScheduleAccountMappingSchema>>[],
+        ) => Partial<input<typeof ScheduleAccountMappingSchema>>[]),
   ) => void;
 }) {
   const sourceResource = useResource<

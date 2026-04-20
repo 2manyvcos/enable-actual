@@ -2,8 +2,14 @@ import { default as fetch } from 'node-fetch';
 import { APP_NAME, PUBLIC_URL } from './config.ts';
 import { loadState } from './state.ts';
 
-export default function notify(message: string, url?: string): void {
-  console.log(`\n\n! ${message}${url ? ` - ${url}` : ''}\n\n`);
+export default function notify({
+  message,
+  action,
+}: {
+  message: string;
+  action?: string;
+}): void {
+  console.log(`\n\n! ${message}${action ? ` - ${action}` : ''}\n\n`);
 
   const {
     notifications: { ntfy },
@@ -12,7 +18,7 @@ export default function notify(message: string, url?: string): void {
   if (ntfy.enabled && ntfy.url) {
     const headers = new Headers({
       Title: APP_NAME,
-      Click: url ?? PUBLIC_URL,
+      Click: action ?? PUBLIC_URL,
     });
 
     if (ntfy.username && ntfy.password) {

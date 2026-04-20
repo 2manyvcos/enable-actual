@@ -1,12 +1,12 @@
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { PUBLIC_URL } from '../config.ts';
-import { getTargetsByIDActualBudgetBudgets } from '../integrations/actualbudget/api/routes.ts';
+import { getTargetsByIDActualBudgetBudgets } from '../integrations/actualbudget/routes.ts';
 import {
   getSourcesByIDEnableBankingASPSPs,
   postEnableBankingSession,
   postSourcesByIDEnableBankingAuth,
-} from '../integrations/enablebanking/api/routes.ts';
+} from '../integrations/enablebanking/routes.ts';
 import {
   getNotificationSettings,
   putNotificationSettings,

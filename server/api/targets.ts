@@ -13,7 +13,7 @@ import {
   applyActualBudgetTargetUpdate,
   getActualBudgetTargetAccounts,
   getActualBudgetTargetResponse,
-} from '../integrations/actualbudget/api/targets.ts';
+} from '../integrations/actualbudget/targets.ts';
 import { loadState, putState } from '../state.ts';
 
 export async function getTargets(_req: Request, res: Response): Promise<void> {

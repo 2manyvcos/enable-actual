@@ -13,7 +13,7 @@ import {
   applyEnableBankingSourceUpdate,
   getEnableBankingSourceAccounts,
   getEnableBankingSourceResponse,
-} from '../integrations/enablebanking/api/sources.ts';
+} from '../integrations/enablebanking/sources.ts';
 import { loadState, putState } from '../state.ts';
 
 export async function getSources(_req: Request, res: Response): Promise<void> {

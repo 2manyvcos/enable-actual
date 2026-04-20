@@ -1,10 +1,10 @@
 import type { output } from 'zod';
-import type ActualBudgetTargetRequest from '../../../../shared/schema/ActualBudgetTargetRequest.ts';
-import ActualBudgetTargetResponse from '../../../../shared/schema/ActualBudgetTargetResponse.ts';
-import ActualBudgetTargetState from '../../../../shared/schema/ActualBudgetTargetState.ts';
-import type ActualBudgetTargetUpdate from '../../../../shared/schema/ActualBudgetTargetUpdate.ts';
-import type TargetAccount from '../../../../shared/schema/TargetAccount.ts';
-import ABClient from '../ABClient.ts';
+import type ActualBudgetTargetRequest from '../../../shared/schema/ActualBudgetTargetRequest.ts';
+import ActualBudgetTargetResponse from '../../../shared/schema/ActualBudgetTargetResponse.ts';
+import ActualBudgetTargetState from '../../../shared/schema/ActualBudgetTargetState.ts';
+import type ActualBudgetTargetUpdate from '../../../shared/schema/ActualBudgetTargetUpdate.ts';
+import type TargetAccount from '../../../shared/schema/TargetAccount.ts';
+import ABClient from './ABClient.ts';
 
 export function getActualBudgetTargetResponse(
   id: string,

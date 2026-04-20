@@ -1,11 +1,11 @@
 import type { output } from 'zod';
-import type EnableBankingSourceRequest from '../../../../shared/schema/EnableBankingSourceRequest.ts';
-import EnableBankingSourceResponse from '../../../../shared/schema/EnableBankingSourceResponse.ts';
-import EnableBankingSourceState from '../../../../shared/schema/EnableBankingSourceState.ts';
-import type EnableBankingSourceUpdate from '../../../../shared/schema/EnableBankingSourceUpdate.ts';
-import type SourceAccount from '../../../../shared/schema/SourceAccount.ts';
-import { ENABLEBANKING_API } from '../../../config.ts';
-import EBClient from '../EBClient.ts';
+import type EnableBankingSourceRequest from '../../../shared/schema/EnableBankingSourceRequest.ts';
+import EnableBankingSourceResponse from '../../../shared/schema/EnableBankingSourceResponse.ts';
+import EnableBankingSourceState from '../../../shared/schema/EnableBankingSourceState.ts';
+import type EnableBankingSourceUpdate from '../../../shared/schema/EnableBankingSourceUpdate.ts';
+import type SourceAccount from '../../../shared/schema/SourceAccount.ts';
+import { ENABLEBANKING_API } from '../../config.ts';
+import EBClient from './EBClient.ts';
 
 export function getEnableBankingSourceResponse(
   id: string,

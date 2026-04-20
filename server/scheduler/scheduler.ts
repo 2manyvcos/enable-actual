@@ -1,17 +1,17 @@
 import { CronJob } from 'cron';
 import { loadState } from '../state.ts';
 import createImportJob from './createImportJob.ts';
-import createSessionExpiryJob from './createSessionExpiryJob.ts';
+import createSetupAlertJob from './createSetupAlertJob.ts';
 
 const scheduleJobs: { [scheduleID: string]: CronJob | undefined } = {};
 
 export function startScheduler() {
   const { schedules } = loadState();
 
-  console.debug('Starting session expiry job');
+  console.debug('Starting setup alert job');
   CronJob.from({
     cronTime: '0 12 * * *',
-    onTick: createSessionExpiryJob(),
+    onTick: createSetupAlertJob(),
     start: true,
   });
 
