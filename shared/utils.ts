@@ -1,9 +1,9 @@
-export function getDateString(date: Date | string): string {
+export function toDateString(date: Date | string): string {
   return new Date(date).toISOString().split('T', 1)[0];
 }
 
 export function startOfDate(date: Date | string): Date {
-  return new Date(getDateString(date));
+  return new Date(toDateString(date));
 }
 
 export function addToDate(date: Date | string, days: number): Date {
@@ -13,7 +13,7 @@ export function addToDate(date: Date | string, days: number): Date {
 }
 
 export function addToDateString(date: Date | string, days: number): string {
-  const d = new Date(date);
+  const d = startOfDate(date);
   d.setDate(d.getDate() + days);
-  return getDateString(addToDate(date, days));
+  return toDateString(d);
 }

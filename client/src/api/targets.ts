@@ -23,7 +23,7 @@ export async function postTargets({
 
   return toast.promise(promise, {
     loading: 'Creating target…',
-    success: 'Target created successfully',
+    success: 'The target has been successfully created',
     error: (error) =>
       `Error creating target: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
@@ -49,7 +49,7 @@ export async function putTargetsByID({
 
   return toast.promise(promise, {
     loading: 'Saving changes…',
-    success: 'Changes saved successfully',
+    success: 'The changes have been successfully saved',
     error: (error) =>
       `Error saving changes: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
@@ -69,7 +69,7 @@ export async function deleteTargetsByID({
 
   return toast.promise(promise, {
     loading: 'Deleting target…',
-    success: 'Target deleted successfully',
+    success: 'The target has been successfully deleted',
     error: (error) =>
       `Error deleting target: ${(error?.message ?? error) || 'Unexpected error'}`,
   });

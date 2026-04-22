@@ -32,6 +32,22 @@ export type ABAccount = {
   closed?: boolean;
 };
 
+export type ABTransaction = {
+  account: string;
+  date: string;
+  amount?: number;
+  payeeName?: string;
+  importedPayee?: string;
+  notes?: string;
+  importedID?: string;
+};
+
+export type ABImportResult = {
+  added: number;
+  updated: number;
+  errors: unknown[];
+};
+
 export type ABErrorResponsible = 'client' | 'server';
 
 export class ABError extends Error {
@@ -57,4 +73,12 @@ export interface ABFnDownloadBudget {
 
 export interface ABFnGetAccounts {
   (config: ABConfig, budgetConfig: ABBudgetConfig): Promise<ABAccount[]>;
+}
+
+export interface ABFnImportTransactions {
+  (
+    config: ABConfig,
+    budgetConfig: ABBudgetConfig,
+    bundles: { accountUID: string; transactions: ABTransaction[] }[],
+  ): Promise<ABImportResult>;
 }

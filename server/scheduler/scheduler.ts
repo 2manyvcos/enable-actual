@@ -21,9 +21,10 @@ export function startScheduler() {
     console.debug(`Starting import job for ${scheduleID}`);
     scheduleJobs[scheduleID] = CronJob.from({
       cronTime: schedule.schedule,
-      onTick: createImportJob(scheduleID, schedule),
+      onTick: createImportJob(scheduleID),
       start: true,
     });
+    createImportJob(scheduleID)();
   });
 }
 
@@ -42,10 +43,10 @@ export function updateSchedule(scheduleID: string) {
     return;
   }
 
-  console.log(`Restarting import job for ${scheduleID}`);
+  console.debug(`Restarting import job for ${scheduleID}`);
   scheduleJobs[scheduleID] = CronJob.from({
     cronTime: schedule.schedule,
-    onTick: createImportJob(scheduleID, schedule),
+    onTick: createImportJob(scheduleID),
     start: true,
   });
 }

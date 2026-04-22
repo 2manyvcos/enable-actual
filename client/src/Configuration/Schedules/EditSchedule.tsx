@@ -9,7 +9,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { set } from 'immutable';
+import { set, update } from 'immutable';
 import { useState, type ReactNode } from 'react';
 import type { input, output } from 'zod';
 import { putSchedulesByID } from '@/api/schedules';
@@ -19,6 +19,12 @@ import type ScheduleResponse from '@shared/schema/ScheduleResponse';
 import type ScheduleUpdate from '@shared/schema/ScheduleUpdate';
 import DeleteSchedule from './DeleteSchedule';
 import ScheduleAccountMapping from './ScheduleAccountMapping';
+
+type HandleChangeValue<T> =
+  | T
+  | {
+      bivarianceHack(prev: T): T;
+    }['bivarianceHack'];
 
 function Component({
   data: schedule,
@@ -38,9 +44,19 @@ function Component({
 
   const handleChange: <F extends keyof typeof data>(
     field: F,
-    value: (typeof data)[F],
+    value: HandleChangeValue<(typeof data)[F]>,
   ) => void = (field: string, value: unknown): void => {
-    setData((prev) => set(prev, field, value));
+    setData((prev) => {
+      if (typeof value === 'function')
+        return update(
+          prev,
+          field as keyof typeof data,
+          value as (
+            prev: (typeof data)[keyof typeof data],
+          ) => (typeof data)[keyof typeof data],
+        );
+      return set(prev, field, value);
+    });
   };
 
   return (
@@ -151,7 +167,9 @@ function Component({
               onChange={(value) => {
                 handleChange(
                   'accounts',
-                  value as input<typeof ScheduleAccountMappingSchema>[],
+                  value as HandleChangeValue<
+                    input<typeof ScheduleAccountMappingSchema>[]
+                  >,
                 );
               }}
             />

@@ -23,7 +23,7 @@ export async function postSchedules({
 
   return toast.promise(promise, {
     loading: 'Creating schedule…',
-    success: 'Schedule created successfully',
+    success: 'The schedule has been successfully created',
     error: (error) =>
       `Error creating schedule: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
@@ -49,7 +49,7 @@ export async function putSchedulesByID({
 
   return toast.promise(promise, {
     loading: 'Saving changes…',
-    success: 'Changes saved successfully',
+    success: 'The changes have been successfully saved',
     error: (error) =>
       `Error saving changes: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
@@ -69,7 +69,7 @@ export async function deleteSchedulesByID({
 
   return toast.promise(promise, {
     loading: 'Deleting schedule…',
-    success: 'Schedule deleted successfully',
+    success: 'The schedule has been successfully deleted',
     error: (error) =>
       `Error deleting schedule: ${(error?.message ?? error) || 'Unexpected error'}`,
   });

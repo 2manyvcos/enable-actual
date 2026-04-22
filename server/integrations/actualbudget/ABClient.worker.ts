@@ -6,11 +6,14 @@ import api from '@actual-app/api';
 import { ACTUAL_DATA_DIR } from '../../config.ts';
 import {
   ABError,
+  type ABAccount,
   type ABConfig,
   type ABFnAuth,
   type ABFnDownloadBudget,
   type ABFnGetAccounts,
   type ABFnGetBudgets,
+  type ABFnImportTransactions,
+  type ABImportResult,
 } from './ABClient.types.ts';
 
 import '../../applyLogLevel.ts';
@@ -74,12 +77,65 @@ const getAccounts: ABFnGetAccounts = async (
   }
 };
 
+const importTransactions: ABFnImportTransactions = async (
+  config,
+  { budgetID, budgetPassword },
+  bundles,
+) => {
+  try {
+    await init(config);
+
+    await api.downloadBudget(budgetID, { password: budgetPassword });
+
+    const accounts = (await api.getAccounts()) as ABAccount[];
+    const accountUIDs = Object.fromEntries(
+      accounts.filter(({ id }) => id).map(({ id }) => [id!, true]),
+    );
+
+    const result: ABImportResult = { added: 0, updated: 0, errors: [] };
+
+    await api.batchBudgetUpdates(async () => {
+      for (const { accountUID, transactions } of bundles) {
+        if (!Object.hasOwn(accountUIDs, accountUID)) {
+          result.errors.push(
+            `Account "${accountUID}" does not exist - was it deleted?`,
+          );
+          continue;
+        }
+
+        const { added, updated, errors } = await api.importTransactions(
+          accountUID,
+          transactions.map((transaction) => ({
+            account: transaction.account,
+            date: transaction.date,
+            amount: transaction.amount,
+            payee_name: transaction.payeeName,
+            imported_payee: transaction.importedPayee,
+            notes: transaction.notes,
+            imported_id: transaction.importedID,
+          })),
+          { reimportDeleted: false, defaultCleared: true },
+        );
+
+        result.added += added.length;
+        result.updated += updated.length;
+        result.errors.push(...errors);
+      }
+    });
+
+    return result;
+  } finally {
+    await api.shutdown();
+  }
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 const methods: { [method: string]: Function } = {
   auth,
   getBudgets,
   downloadBudget,
   getAccounts,
+  importTransactions,
 };
 
 let queue = Promise.resolve();

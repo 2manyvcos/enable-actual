@@ -10,6 +10,7 @@ import {
   SSL_CERTIFICATE_FILE,
   SSL_PRIVATE_KEY_FILE,
 } from './config.ts';
+import { loadHistory } from './history.ts';
 import resolveClientTemplate from './resolveClientTemplate.ts';
 import { startScheduler } from './scheduler/scheduler.ts';
 import { loadState } from './state.ts';
@@ -20,8 +21,15 @@ import './applyLogLevel.ts';
 try {
   loadState();
 } catch (error) {
+  throw new Error(`Error loading state: ${(error as Error)?.message ?? error}`);
+}
+
+// prevent server startup if history file is invalid
+try {
+  loadHistory();
+} catch (error) {
   throw new Error(
-    `Error loading state: ${(error as Error)?.message ?? error?.toString()}`,
+    `Error loading history: ${(error as Error)?.message ?? error}`,
   );
 }
 

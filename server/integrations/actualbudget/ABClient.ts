@@ -12,6 +12,9 @@ import {
   type ABFnDownloadBudget,
   type ABFnGetAccounts,
   type ABFnGetBudgets,
+  type ABFnImportTransactions,
+  type ABImportResult,
+  type ABTransaction,
 } from './ABClient.types.ts';
 
 const workers: { [serverURL: string]: Worker } = {};
@@ -49,6 +52,18 @@ export default class ABClient {
 
   getAccounts(budgetConfig: ABBudgetConfig): Promise<ABAccount[]> {
     return this.send<ABFnGetAccounts>('getAccounts', this.config, budgetConfig);
+  }
+
+  importTransactions(
+    budgetConfig: ABBudgetConfig,
+    bundles: { accountUID: string; transactions: ABTransaction[] }[],
+  ): Promise<ABImportResult> {
+    return this.send<ABFnImportTransactions>(
+      'importTransactions',
+      this.config,
+      budgetConfig,
+      bundles,
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

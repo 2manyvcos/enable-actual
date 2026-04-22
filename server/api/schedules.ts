@@ -13,41 +13,74 @@ import { loadState, putState } from '../state.ts';
 
 function getScheduleResponse(
   id: string,
-  schedule: output<typeof ScheduleState>,
+  {
+    name,
+    schedule,
+    initialDays,
+    overscanDays,
+    offsetDays,
+    accounts,
+  }: output<typeof ScheduleState>,
 ): output<typeof ScheduleResponse> {
   return ScheduleResponse.decode({
     id,
-    ...schedule!,
-    nextRun: sendAt(schedule.schedule).toISO() ?? undefined,
+    name,
+    schedule,
+    initialDays,
+    overscanDays,
+    offsetDays,
+    accounts,
+    nextRun: sendAt(schedule).toISO() ?? undefined,
   });
 }
 
-function applyScheduleRequest(
-  request: output<typeof ScheduleRequest>,
-): output<typeof ScheduleState> {
-  const { valid, error } = validateCronExpression(request.schedule);
+function applyScheduleRequest({
+  name,
+  schedule,
+  initialDays,
+  overscanDays,
+  offsetDays,
+  accounts,
+}: output<typeof ScheduleRequest>): output<typeof ScheduleState> {
+  const { valid, error } = validateCronExpression(schedule);
   if (!valid) {
     throw new Error(`Invalid CRON expression: ${error}`);
   }
 
   return ScheduleState.decode({
-    ...request!,
-    name: request.name || request.schedule,
+    name: name || schedule,
+    schedule,
+    initialDays,
+    overscanDays,
+    offsetDays,
+    accounts,
   });
 }
 
 function applyScheduleUpdate(
-  _state: output<typeof ScheduleState>,
-  update: output<typeof ScheduleUpdate>,
+  { state }: output<typeof ScheduleState>,
+  {
+    name,
+    schedule,
+    initialDays,
+    overscanDays,
+    offsetDays,
+    accounts,
+  }: output<typeof ScheduleUpdate>,
 ): output<typeof ScheduleState> {
-  const { valid, error } = validateCronExpression(update.schedule);
+  const { valid, error } = validateCronExpression(schedule);
   if (!valid) {
     throw new Error(`Invalid CRON expression: ${error}`);
   }
 
   return ScheduleState.decode({
-    ...update!,
-    name: update.name || update.schedule,
+    name: name || schedule,
+    schedule,
+    initialDays,
+    overscanDays,
+    offsetDays,
+    accounts,
+    state,
   });
 }
 

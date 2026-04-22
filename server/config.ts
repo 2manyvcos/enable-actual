@@ -19,6 +19,10 @@ export const DATA_DIR =
 
 export const STATE_FILE = path.join(DATA_DIR, 'enable-actual.json');
 
+export const HISTORY_FILE = path.join(DATA_DIR, 'enable-actual.history.json');
+
+export const HISTORY_LENGTH = Math.max(1, +(process.env.HISTORY_LENGTH || 10));
+
 export const ENABLEBANKING_API =
   process.env.ENABLEBANKING_API ?? 'https://api.enablebanking.com';
 

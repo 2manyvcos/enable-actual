@@ -18,7 +18,7 @@ export async function postSourcesByIDEnableBankingAuth({
   return toast.promise(promise, {
     loading: 'Requesting authorization…',
     success:
-      'Authorization requested successfully - you should be redirected now',
+      'Authorization has been successfully requested - you should be redirected shortly',
     error: (error) =>
       `Error requesting authorization: ${
         (error?.message ?? error) || 'Unexpected error'

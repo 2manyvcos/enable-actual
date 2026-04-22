@@ -174,7 +174,7 @@ export default class EBClient {
 
     const search = new URLSearchParams();
     if (country) search.set('country', country);
-    const res = await fetch(`${this.api}/aspsps?${search.toString()}`, {
+    const res = await fetch(`${this.api}/aspsps?${search}`, {
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${jwt}`,
@@ -284,7 +284,7 @@ export default class EBClient {
     if (transactionStatus) search.set('transaction_status', transactionStatus);
     if (continuationKey) search.set('continuation_key', continuationKey);
     const res = await fetch(
-      `${this.api}/accounts/${encodeURIComponent(accountUID)}/transactions?${search.toString()}`,
+      `${this.api}/accounts/${encodeURIComponent(accountUID)}/transactions?${search}`,
       {
         headers: {
           Accept: 'application/json',

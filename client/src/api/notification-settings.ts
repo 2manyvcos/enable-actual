@@ -18,7 +18,7 @@ export async function putNotificationSettings({
 
   return toast.promise(promise, {
     loading: 'Saving changes…',
-    success: 'Changes saved successfully',
+    success: 'The changes have been successfully saved',
     error: (error) =>
       `Error saving changes: ${(error?.message ?? error) || 'Unexpected error'}`,
   });

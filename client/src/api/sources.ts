@@ -23,7 +23,7 @@ export async function postSources({
 
   return toast.promise(promise, {
     loading: 'Creating source…',
-    success: 'Source created successfully',
+    success: 'The source has been successfully created',
     error: (error) =>
       `Error creating source: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
@@ -49,7 +49,7 @@ export async function putSourcesByID({
 
   return toast.promise(promise, {
     loading: 'Saving changes…',
-    success: 'Changes saved successfully',
+    success: 'The changes have been successfully saved',
     error: (error) =>
       `Error saving changes: ${(error?.message ?? error) || 'Unexpected error'}`,
   });
@@ -69,7 +69,7 @@ export async function deleteSourcesByID({
 
   return toast.promise(promise, {
     loading: 'Deleting source…',
-    success: 'Source deleted successfully',
+    success: 'The source has been successfully deleted',
     error: (error) =>
       `Error deleting source: ${(error?.message ?? error) || 'Unexpected error'}`,
   });

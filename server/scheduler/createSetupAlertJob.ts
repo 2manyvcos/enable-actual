@@ -10,12 +10,10 @@ export default function createSetupAlertJob(): () => Promise<void> {
     const {
       sources,
       targets,
-      notifications: {
-        alerts: { sessionExpiryDays },
-      },
+      notifications: { alerts },
     } = loadState();
 
-    if (sessionExpiryDays) {
+    if (alerts.sessionExpiryDays) {
       const expiries = await Promise.all([
         ...Object.entries(sources).map(([sourceID, source]) => {
           if (!source) return;
@@ -48,7 +46,7 @@ export default function createSetupAlertJob(): () => Promise<void> {
       ]);
 
       const expiring = expiries.filter(
-        (expiry) => expiry != null && expiry <= sessionExpiryDays,
+        (expiry) => expiry != null && expiry <= alerts.sessionExpiryDays,
       ) as number[];
 
       if (expiring.length) {

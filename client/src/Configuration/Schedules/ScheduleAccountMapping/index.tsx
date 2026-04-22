@@ -53,7 +53,7 @@ function Item({
     field: F,
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
-    onChange((prev) => setIn(prev, [index, field], value));
+    onChange((prev) => setIn(prev ?? [{}], [index, field], value));
   };
 
   const sourceAccountResource = useResource<
