@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { type SyntheticEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import NotificationSettings from './NotificationSettings';
+import QuickActions from './QuickActions';
 import Reports from './Reports';
 import Schedules from './Schedules';
 import Sources from './Sources';
@@ -23,6 +24,8 @@ export default function Configuration() {
 
   return (
     <Container sx={{ paddingTop: 2 }}>
+      <QuickActions />
+
       <Accordion
         expanded={expanded === 'sources'}
         onChange={handleChange('sources')}

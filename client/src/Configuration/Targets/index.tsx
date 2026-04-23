@@ -19,6 +19,11 @@ export default function Targets() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  const preview = searchParams.get('preview');
+  const previewID = preview?.startsWith('target:')
+    ? preview.substring('target:'.length)
+    : undefined;
+
   const edit = searchParams.get('edit');
   const editID = edit?.startsWith('target:')
     ? edit.substring('target:'.length)
@@ -66,7 +71,11 @@ export default function Targets() {
       <Stack spacing={2}>
         <List>
           {resource.data?.map((target) => (
-            <Target key={target.id} data={target} />
+            <Target
+              key={target.id}
+              data={target}
+              preview={previewID === target.id}
+            />
           ))}
         </List>
 

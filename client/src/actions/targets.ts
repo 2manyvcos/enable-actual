@@ -7,6 +7,22 @@ export function gotoTargets({ navigate }: { navigate: NavigateFunction }) {
   });
 }
 
+export function previewTarget({
+  navigate,
+  targetID,
+}: {
+  navigate: NavigateFunction;
+  targetID: string;
+}) {
+  navigate({
+    pathname: '/',
+    hash: 'targets',
+    search: new URLSearchParams({
+      preview: `target:${encodeURIComponent(targetID)}`,
+    }).toString(),
+  });
+}
+
 export function editTarget({
   navigate,
   targetID,

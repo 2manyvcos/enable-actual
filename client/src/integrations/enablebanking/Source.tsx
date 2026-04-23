@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
-import { type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { type output } from 'zod';
 import { editSource } from '@/actions/sources';
@@ -14,13 +14,27 @@ import { addToDate, startOfDate } from '@shared/utils';
 
 export default function Source({
   data,
+  preview,
   editAction,
 }: {
   data: output<typeof EnableBankingSourceResponse>;
+  preview: boolean;
   editAction: ReactNode;
 }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
+
+  const ref = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (preview) {
+      setTimeout(() => ref.current?.scrollIntoView({ behavior: 'instant' }));
+      setTimeout(
+        () => ref.current?.scrollIntoView({ behavior: 'smooth' }),
+        500,
+      );
+    }
+  }, [preview]);
 
   const sessionValidUntil = !data.sessionValidUntil
     ? undefined
@@ -28,7 +42,13 @@ export default function Source({
   const today = startOfDate(new Date());
 
   return (
-    <ListItem secondaryAction={editAction}>
+    <ListItem
+      ref={ref}
+      sx={(theme) =>
+        preview ? { backgroundColor: theme.palette.action.selected } : {}
+      }
+      secondaryAction={editAction}
+    >
       <ListItemText
         primary={data.name ?? data.id}
         secondary={

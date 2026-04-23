@@ -19,6 +19,11 @@ export default function Schedules() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  const preview = searchParams.get('preview');
+  const previewID = preview?.startsWith('schedule:')
+    ? preview.substring('schedule:'.length)
+    : undefined;
+
   const edit = searchParams.get('edit');
   const editID = edit?.startsWith('schedule:')
     ? edit.substring('schedule:'.length)
@@ -66,7 +71,11 @@ export default function Schedules() {
       <Stack spacing={2}>
         <List>
           {resource.data?.map((schedule) => (
-            <Schedule key={schedule.id} data={schedule} />
+            <Schedule
+              key={schedule.id}
+              data={schedule}
+              preview={previewID === schedule.id}
+            />
           ))}
         </List>
 

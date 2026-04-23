@@ -19,6 +19,11 @@ export default function Sources() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  const preview = searchParams.get('preview');
+  const previewID = preview?.startsWith('source:')
+    ? preview.substring('source:'.length)
+    : undefined;
+
   const edit = searchParams.get('edit');
   const editID = edit?.startsWith('source:')
     ? edit.substring('source:'.length)
@@ -66,7 +71,11 @@ export default function Sources() {
       <Stack spacing={2}>
         <List>
           {resource.data?.map((source) => (
-            <Source key={source.id} data={source} />
+            <Source
+              key={source.id}
+              data={source}
+              preview={previewID === source.id}
+            />
           ))}
         </List>
 

@@ -2,6 +2,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HideSourceIcon from '@mui/icons-material/HideSource';
 import ReportIcon from '@mui/icons-material/Report';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import Accordion from '@mui/material/Accordion';
 import AccordionActions from '@mui/material/AccordionActions';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -17,7 +18,7 @@ import Typography from '@mui/material/Typography';
 import { useNavigate, useSearchParams } from 'react-router';
 import { type output } from 'zod';
 import { gotoReports, previewReport } from '@/actions/reports';
-import { editSchedule } from '@/actions/schedules';
+import { previewSchedule } from '@/actions/schedules';
 import type ImportReport from '@shared/schema/ImportReport';
 import { stringifyError } from '@shared/utils';
 
@@ -66,10 +67,11 @@ export default function Report({
         <Button
           sx={{ alignSelf: 'center', marginTop: 2 }}
           onClick={() => {
-            editSchedule({ navigate, scheduleID: data.scheduleID });
+            previewSchedule({ navigate, scheduleID: data.scheduleID });
           }}
+          startIcon={<VisibilityIcon />}
         >
-          Schedule: {data.scheduleName || data.scheduleID}
+          {data.scheduleName || data.scheduleID}
         </Button>
       </AccordionActions>
 

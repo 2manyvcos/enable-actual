@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import type { output } from 'zod';
 import { editSchedule } from '@/actions/schedules';
@@ -13,14 +14,32 @@ import type ScheduleResponse from '@shared/schema/ScheduleResponse';
 
 export default function Schedule({
   data,
+  preview,
 }: {
   data: output<typeof ScheduleResponse>;
+  preview: boolean;
 }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
+  const ref = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (preview) {
+      setTimeout(() => ref.current?.scrollIntoView({ behavior: 'instant' }));
+      setTimeout(
+        () => ref.current?.scrollIntoView({ behavior: 'smooth' }),
+        500,
+      );
+    }
+  }, [preview]);
+
   return (
     <ListItem
+      ref={ref}
+      sx={(theme) =>
+        preview ? { backgroundColor: theme.palette.action.selected } : {}
+      }
       secondaryAction={
         <IconButton
           aria-label="edit"

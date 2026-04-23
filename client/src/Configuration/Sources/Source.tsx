@@ -12,8 +12,10 @@ const components = {
 
 export default function Source({
   data,
+  preview,
 }: {
   data: output<typeof SourceResponse>;
+  preview: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -22,6 +24,7 @@ export default function Source({
   return (
     <Component
       data={data}
+      preview={preview}
       editAction={
         <IconButton
           aria-label="edit"
