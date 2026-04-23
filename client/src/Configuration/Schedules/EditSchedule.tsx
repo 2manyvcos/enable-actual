@@ -28,12 +28,10 @@ type HandleChangeValue<T> =
 
 function Component({
   data: schedule,
-  onSuccess,
   onClose,
   deleteAction,
 }: {
   data: output<typeof ScheduleResponse>;
-  onSuccess: () => void;
   onClose: () => void;
   deleteAction: ReactNode;
 }) {
@@ -80,7 +78,6 @@ function Component({
               },
             });
 
-            onSuccess();
             onClose();
           }}
         >
@@ -203,11 +200,9 @@ function Component({
 
 export default function EditSchedule({
   data,
-  onSuccess,
   onClose,
 }: {
   data: output<typeof ScheduleResponse> | undefined;
-  onSuccess: () => void;
   onClose: () => void;
 }) {
   const [deleteRequested, setDeleteRequested] = useState(false);
@@ -219,7 +214,6 @@ export default function EditSchedule({
 
         <Component
           data={data!}
-          onSuccess={onSuccess}
           onClose={onClose}
           deleteAction={
             <Button
@@ -239,10 +233,7 @@ export default function EditSchedule({
         <DeleteSchedule
           open={deleteRequested}
           data={data}
-          onSuccess={() => {
-            onSuccess();
-            onClose();
-          }}
+          onSuccess={onClose}
           onClose={() => {
             setDeleteRequested(false);
           }}

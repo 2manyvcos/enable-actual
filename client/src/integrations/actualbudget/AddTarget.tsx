@@ -40,13 +40,7 @@ Enable Actual requires password authentication to connect to your Actual Budget 
 You may set \`ACTUAL_USER_CREATION_MODE=login\` to automatically create users after successful OpenID login.
 `;
 
-export default function AddTarget({
-  onSuccess,
-  onReset,
-}: {
-  onSuccess: () => void;
-  onReset: () => void;
-}) {
+export default function AddTarget({ onReset }: { onReset: () => void }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
@@ -81,7 +75,6 @@ export default function AddTarget({
               },
             });
 
-            onSuccess();
             onReset();
 
             editTarget({ navigate, targetID: id });

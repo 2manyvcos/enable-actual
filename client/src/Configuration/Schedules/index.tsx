@@ -80,13 +80,12 @@ export default function Schedules() {
           ))}
         </List>
 
-        <AddSchedule onSuccess={resource.notify} />
+        <AddSchedule />
 
         <EditSchedule
           data={
             !editID ? undefined : resource.data?.find(({ id }) => id === editID)
           }
-          onSuccess={resource.notify}
           onClose={() => {
             gotoSchedules({ navigate });
           }}

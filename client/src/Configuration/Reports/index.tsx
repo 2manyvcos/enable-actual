@@ -72,14 +72,10 @@ export default function Reports() {
         <Button
           onClick={async () => {
             await deleteReports({ dataProvider: resource.dataProvider });
-
-            resource.notify();
           }}
         >
           Clear
         </Button>
-
-        <Button onClick={resource.notify}>Reload</Button>
       </AccordionActions>
 
       <AccordionDetails>

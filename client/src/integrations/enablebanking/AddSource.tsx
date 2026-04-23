@@ -70,13 +70,7 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-export default function AddSource({
-  onSuccess,
-  onReset,
-}: {
-  onSuccess: () => void;
-  onReset: () => void;
-}) {
+export default function AddSource({ onReset }: { onReset: () => void }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
@@ -109,7 +103,6 @@ export default function AddSource({
               },
             });
 
-            onSuccess();
             onReset();
 
             editSource({ navigate, sourceID: id });

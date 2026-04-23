@@ -11,7 +11,7 @@ const components = {
   enablebanking: EnableBankingAddSource,
 };
 
-export default function AddSource({ onSuccess }: { onSuccess: () => void }) {
+export default function AddSource() {
   const [expanded, setExpanded] = useState(false);
   const [type, setType] =
     useState<output<typeof SourceRequest>['type']>('enablebanking');
@@ -36,7 +36,6 @@ export default function AddSource({ onSuccess }: { onSuccess: () => void }) {
       </AccordionSummary>
 
       <Component
-        onSuccess={onSuccess}
         onReset={() => {
           setExpanded(false);
           setType('enablebanking');

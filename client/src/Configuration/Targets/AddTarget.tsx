@@ -11,7 +11,7 @@ const components = {
   actualbudget: ActualBudgetAddTarget,
 };
 
-export default function AddTarget({ onSuccess }: { onSuccess: () => void }) {
+export default function AddTarget() {
   const [expanded, setExpanded] = useState(false);
   const [type, setType] =
     useState<output<typeof TargetRequest>['type']>('actualbudget');
@@ -36,7 +36,6 @@ export default function AddTarget({ onSuccess }: { onSuccess: () => void }) {
       </AccordionSummary>
 
       <Component
-        onSuccess={onSuccess}
         onReset={() => {
           setExpanded(false);
           setType('actualbudget');

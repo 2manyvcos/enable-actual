@@ -80,13 +80,12 @@ export default function Sources() {
           ))}
         </List>
 
-        <AddSource onSuccess={resource.notify} />
+        <AddSource />
 
         <EditSource
           data={
             !editID ? undefined : resource.data?.find(({ id }) => id === editID)
           }
-          onSuccess={resource.notify}
           onClose={() => {
             gotoSources({ navigate });
           }}

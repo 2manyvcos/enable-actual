@@ -80,13 +80,12 @@ export default function Targets() {
           ))}
         </List>
 
-        <AddTarget onSuccess={resource.notify} />
+        <AddTarget />
 
         <EditTarget
           data={
             !editID ? undefined : resource.data?.find(({ id }) => id === editID)
           }
-          onSuccess={resource.notify}
           onClose={() => {
             gotoTargets({ navigate });
           }}

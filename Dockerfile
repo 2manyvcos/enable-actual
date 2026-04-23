@@ -27,6 +27,5 @@ EXPOSE 3000
 
 VOLUME /data
 ENV DATA_DIR=/data
-ENV EB_PRIVATE_KEY_FILE=/data/private.pem
 
 CMD [ "node", "." ]

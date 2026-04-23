@@ -27,12 +27,10 @@ import { stringifyError } from '@shared/utils';
 
 export default function EditTarget({
   data: target,
-  onSuccess,
   onClose,
   deleteAction,
 }: {
   data: output<typeof ActualBudgetTargetResponse>;
-  onSuccess: () => void;
   onClose: () => void;
   deleteAction: ReactNode;
 }) {
@@ -81,7 +79,6 @@ export default function EditTarget({
               },
             });
 
-            onSuccess();
             onClose();
           }}
         >

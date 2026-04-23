@@ -25,12 +25,10 @@ import { stringifyError } from '@shared/utils';
 
 export default function EditSource({
   data: source,
-  onSuccess,
   onClose,
   deleteAction,
 }: {
   data: output<typeof EnableBankingSourceResponse>;
-  onSuccess: () => void;
   onClose: () => void;
   deleteAction: ReactNode;
 }) {
@@ -107,7 +105,6 @@ export default function EditSource({
               },
             });
 
-            onSuccess();
             onClose();
 
             if (source.sessionID) return;

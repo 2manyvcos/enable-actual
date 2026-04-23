@@ -24,13 +24,7 @@ type HandleChangeValue<T> =
       bivarianceHack(prev: T): T;
     }['bivarianceHack'];
 
-function Component({
-  onSuccess,
-  onReset,
-}: {
-  onSuccess: () => void;
-  onReset: () => void;
-}) {
+function Component({ onReset }: { onReset: () => void }) {
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
   const [data, setData] = useState<Partial<input<typeof ScheduleRequest>>>({
@@ -76,7 +70,6 @@ function Component({
               },
             });
 
-            onSuccess();
             onReset();
           }}
         >
@@ -184,7 +177,7 @@ function Component({
   );
 }
 
-export default function AddSchedule({ onSuccess }: { onSuccess: () => void }) {
+export default function AddSchedule() {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -205,7 +198,6 @@ export default function AddSchedule({ onSuccess }: { onSuccess: () => void }) {
       </AccordionSummary>
 
       <Component
-        onSuccess={onSuccess}
         onReset={() => {
           setExpanded(false);
         }}

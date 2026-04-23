@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import type { output } from 'zod';
 import type ImportReport from '../../shared/schema/ImportReport.ts';
 import { loadHistory, putHistory } from '../history.ts';
+import { publishEvent } from './events.ts';
 
 export async function getReports(_req: Request, res: Response): Promise<void> {
   const { entries } = loadHistory();
@@ -16,6 +17,8 @@ export async function deleteReports(
   res: Response,
 ): Promise<void> {
   putHistory({ entries: [] });
+
+  publishEvent();
 
   res.sendStatus(200);
 }

@@ -14,11 +14,9 @@ const components = {
 
 export default function EditTarget({
   data,
-  onSuccess,
   onClose,
 }: {
   data: output<typeof TargetResponse> | undefined;
-  onSuccess: () => void;
   onClose: () => void;
 }) {
   const Component = data ? components[data.type] : undefined;
@@ -33,7 +31,6 @@ export default function EditTarget({
         {!Component ? null : (
           <Component
             data={data!}
-            onSuccess={onSuccess}
             onClose={onClose}
             deleteAction={
               <Button
@@ -54,10 +51,7 @@ export default function EditTarget({
         <DeleteTarget
           open={deleteRequested}
           data={data}
-          onSuccess={() => {
-            onSuccess();
-            onClose();
-          }}
+          onSuccess={onClose}
           onClose={() => {
             setDeleteRequested(false);
           }}
