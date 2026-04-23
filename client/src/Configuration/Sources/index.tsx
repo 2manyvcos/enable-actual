@@ -35,6 +35,7 @@ export default function Sources() {
   >({
     name: 'v1/sources',
     query: undefined,
+    events: true,
   });
 
   if (resource.isLoading && resource.isInitial) {

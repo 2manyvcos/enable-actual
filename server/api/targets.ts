@@ -16,6 +16,7 @@ import {
 } from '../integrations/actualbudget/targets.ts';
 import { loadState, putState } from '../state.ts';
 import APIError from './APIError.ts';
+import { publishEvent } from './events.ts';
 
 export async function getTargets(_req: Request, res: Response): Promise<void> {
   const { targets } = loadState();
@@ -52,6 +53,8 @@ export async function postTargets(req: Request, res: Response): Promise<void> {
   }
 
   putState((prev) => setIn(prev, ['targets', targetID], target));
+
+  publishEvent();
 
   res.send({ id: targetID } satisfies output<typeof IDResponse>);
 }
@@ -112,6 +115,8 @@ export async function putTargetsByID(
 
   putState((prev) => setIn(prev, ['targets', targetID], nextTarget));
 
+  publishEvent();
+
   res.sendStatus(200);
 }
 
@@ -125,6 +130,8 @@ export function deleteTargetsByID(req: Request, res: Response): void {
   }
 
   putState((prev) => removeIn(prev, ['targets', targetID]));
+
+  publishEvent();
 
   res.sendStatus(200);
 }

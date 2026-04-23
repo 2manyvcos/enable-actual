@@ -20,6 +20,7 @@ export default function QuickActions() {
   >({
     name: 'v1/quick-actions',
     query: undefined,
+    events: true,
   });
 
   if (resource.isLoading && resource.isInitial) {

@@ -31,6 +31,7 @@
     "@base-ui/react": "^1.4.1",
     "@civet/common": "^2.3.2",
     "@civet/core": "^6.2.7",
+    "@civet/events": "^4.1.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.10",
@@ -73,6 +74,6 @@
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.0",
-    "vite": "^8.0.9"
+    "vite": "^8.0.10"
   }
 }

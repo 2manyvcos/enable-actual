@@ -35,6 +35,7 @@ export default function NotificationSettings() {
   >({
     name: 'v1/notification-settings',
     query: undefined,
+    events: true,
   });
 
   const [state, setState] =

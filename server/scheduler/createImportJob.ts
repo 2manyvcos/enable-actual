@@ -8,6 +8,7 @@ import ScheduleImportState from '../../shared/schema/ScheduleImportState.ts';
 import type Transaction from '../../shared/schema/Transaction.ts';
 import type TransactionBundle from '../../shared/schema/TransactionBundle.ts';
 import { stringifyError } from '../../shared/utils.ts';
+import { publishEvent } from '../api/events.ts';
 import { HISTORY_LENGTH, PUBLIC_URL } from '../config.ts';
 import { putHistory } from '../history.ts';
 import { importActualBudgetTransactions } from '../integrations/actualbudget/transactions.ts';
@@ -203,6 +204,8 @@ export default function createImportJob(
         [report, ...prevEntries].slice(0, HISTORY_LENGTH),
       ),
     );
+
+    publishEvent();
 
     if (
       (report.importedTransactions || report.updatedTransactions) &&

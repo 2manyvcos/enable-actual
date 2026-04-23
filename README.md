@@ -1,7 +1,6 @@
 # TODO: v2
 
 - add payee mapping? (maybe there is an official source?)
-- events?
 - implement data migration
 - handle pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
 - update readme

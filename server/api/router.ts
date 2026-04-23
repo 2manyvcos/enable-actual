@@ -10,6 +10,7 @@ import {
   postSourcesByIDEnableBankingAuth,
 } from '../integrations/enablebanking/routes.ts';
 import APIError from './APIError.ts';
+import { getEvents } from './events.ts';
 import {
   getNotificationSettings,
   putNotificationSettings,
@@ -49,6 +50,8 @@ router.use(express.json());
 router.get('/v1/health', (_req, res) => {
   res.sendStatus(200);
 });
+
+router.get('/v1/events', getEvents);
 
 router.get('/v1/sources', getSources);
 router.post('/v1/sources', postSources);

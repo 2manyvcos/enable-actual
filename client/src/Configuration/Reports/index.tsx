@@ -20,6 +20,7 @@ export default function Reports() {
   >({
     name: 'v1/reports',
     query: undefined,
+    events: true,
   });
 
   const [data, error] = useMemo<

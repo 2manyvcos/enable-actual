@@ -52,6 +52,7 @@ export default function EditSource({
   >({
     name: `v1/sources/${encodeURIComponent(source.id)}/enablebanking/aspsps`,
     query: undefined,
+    events: true,
   });
 
   const countries = useMemo(

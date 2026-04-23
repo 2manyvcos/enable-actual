@@ -57,6 +57,7 @@ export default function EditTarget({
   >({
     name: `v1/targets/${encodeURIComponent(target.id)}/actualbudget/budgets`,
     query: undefined,
+    events: true,
   });
 
   return (

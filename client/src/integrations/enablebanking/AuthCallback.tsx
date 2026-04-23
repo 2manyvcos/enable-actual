@@ -30,6 +30,7 @@ export default function AuthCallback() {
         code: code!,
       } satisfies input<typeof EnableBankingSessionRequest>),
     },
+    events: false,
     disabled: !state || !code,
   });
 

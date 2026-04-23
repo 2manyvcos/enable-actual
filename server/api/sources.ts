@@ -16,6 +16,7 @@ import {
 } from '../integrations/enablebanking/sources.ts';
 import { loadState, putState } from '../state.ts';
 import APIError from './APIError.ts';
+import { publishEvent } from './events.ts';
 
 export async function getSources(_req: Request, res: Response): Promise<void> {
   const { sources } = loadState();
@@ -52,6 +53,8 @@ export async function postSources(req: Request, res: Response): Promise<void> {
   }
 
   putState((prev) => setIn(prev, ['sources', sourceID], source));
+
+  publishEvent();
 
   res.send({ id: sourceID } satisfies output<typeof IDResponse>);
 }
@@ -112,6 +115,8 @@ export async function putSourcesByID(
 
   putState((prev) => setIn(prev, ['sources', sourceID], nextSource));
 
+  publishEvent();
+
   res.sendStatus(200);
 }
 
@@ -125,6 +130,8 @@ export function deleteSourcesByID(req: Request, res: Response): void {
   }
 
   putState((prev) => removeIn(prev, ['sources', sourceID]));
+
+  publishEvent();
 
   res.sendStatus(200);
 }

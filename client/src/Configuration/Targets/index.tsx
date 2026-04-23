@@ -35,6 +35,7 @@ export default function Targets() {
   >({
     name: 'v1/targets',
     query: undefined,
+    events: true,
   });
 
   if (resource.isLoading && resource.isInitial) {

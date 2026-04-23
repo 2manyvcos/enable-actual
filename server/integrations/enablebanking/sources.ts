@@ -92,6 +92,7 @@ export async function applyEnableBankingSourceUpdate(
     psuType: prevPsuType,
     sessionID: prevSessionID,
     sessionValidUntil: prevSessionValidUntil,
+    availableAccounts,
   }: output<typeof EnableBankingSourceState>,
   {
     name,
@@ -127,6 +128,7 @@ export async function applyEnableBankingSourceUpdate(
       tokenValidityDays,
       sessionID,
       sessionValidUntil,
+      availableAccounts,
     });
   } catch (error) {
     throw new APIError(error, 500, 'Schema violation');

@@ -35,6 +35,7 @@ export default function Schedules() {
   >({
     name: 'v1/schedules',
     query: undefined,
+    events: true,
   });
 
   if (resource.isLoading && resource.isInitial) {

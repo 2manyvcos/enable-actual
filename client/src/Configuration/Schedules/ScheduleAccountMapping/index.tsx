@@ -63,6 +63,7 @@ function Item({
   >({
     name: `v1/sources/${encodeURIComponent(data.sourceID!)}/accounts`,
     query: undefined,
+    events: true,
     disabled: !data.sourceID,
   });
 
@@ -72,6 +73,7 @@ function Item({
   >({
     name: `v1/targets/${encodeURIComponent(data.targetID!)}/accounts`,
     query: undefined,
+    events: true,
     disabled: !data.targetID,
   });
 
@@ -252,6 +254,7 @@ export default function ScheduleAccountMapping({
   >({
     name: 'v1/sources',
     query: undefined,
+    events: true,
   });
 
   const targetResource = useResource<
@@ -260,6 +263,7 @@ export default function ScheduleAccountMapping({
   >({
     name: 'v1/targets',
     query: undefined,
+    events: true,
   });
 
   if (

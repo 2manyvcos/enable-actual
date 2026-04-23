@@ -9,6 +9,7 @@ import EnableBankingSessionRequest from '../../../shared/schema/EnableBankingSes
 import type IDResponse from '../../../shared/schema/IDResponse.ts';
 import type SourceState from '../../../shared/schema/SourceState.ts';
 import APIError from '../../api/APIError.ts';
+import { publishEvent } from '../../api/events.ts';
 import { ENABLEBANKING_API, PUBLIC_URL } from '../../config.ts';
 import { loadState, putState } from '../../state.ts';
 import EBClient, { EBError } from './EBClient.ts';
@@ -199,6 +200,8 @@ export async function postEnableBankingSession(
         },
       ),
     );
+
+    publishEvent();
 
     res.send({ id: sourceID } satisfies output<typeof IDResponse>);
   } catch (error) {

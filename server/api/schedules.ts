@@ -12,6 +12,7 @@ import ScheduleUpdate from '../../shared/schema/ScheduleUpdate.ts';
 import { runSchedule, updateSchedule } from '../scheduler/scheduler.ts';
 import { loadState, putState } from '../state.ts';
 import APIError from './APIError.ts';
+import { publishEvent } from './events.ts';
 
 function getScheduleResponse(
   id: string,
@@ -136,6 +137,7 @@ export async function postSchedules(
 
   putState((prev) => setIn(prev, ['schedules', scheduleID], schedule));
 
+  publishEvent();
   updateSchedule(scheduleID);
 
   res.send({ id: scheduleID } satisfies output<typeof IDResponse>);
@@ -191,6 +193,7 @@ export async function putSchedulesByID(
 
   putState((prev) => setIn(prev, ['schedules', scheduleID], nextSchedule));
 
+  publishEvent();
   updateSchedule(scheduleID);
 
   res.sendStatus(200);
@@ -207,6 +210,7 @@ export function deleteSchedulesByID(req: Request, res: Response): void {
 
   putState((prev) => removeIn(prev, ['schedules', scheduleID]));
 
+  publishEvent();
   updateSchedule(scheduleID);
 
   res.sendStatus(200);
@@ -237,6 +241,7 @@ export function deleteSchedulesByIDState(req: Request, res: Response): void {
 
   putState((prev) => removeIn(prev, ['schedules', scheduleID, 'state']));
 
+  // publishEvent(); // this change is not transparent to the client, so an event is not necessary
   updateSchedule(scheduleID);
 
   res.sendStatus(200);

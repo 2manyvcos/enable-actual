@@ -3,6 +3,7 @@ import { type output } from 'zod';
 import NotificationSettings from '../../shared/schema/NotificationSettings.ts';
 import { loadState, putState } from '../state.ts';
 import APIError from './APIError.ts';
+import { publishEvent } from './events.ts';
 
 export function getNotificationSettings(_req: Request, res: Response): void {
   res.send(
@@ -19,6 +20,8 @@ export function putNotificationSettings(req: Request, res: Response): void {
   }
 
   putState({ notifications });
+
+  publishEvent();
 
   res.sendStatus(200);
 }
