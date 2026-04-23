@@ -34,7 +34,12 @@ export default function createImportJob(
       return;
     }
 
-    const report = ImportReport.decode({ id: uuid(), time: new Date() });
+    const report = ImportReport.decode({
+      id: uuid(),
+      time: new Date(),
+      scheduleID,
+      scheduleName: schedule.name,
+    });
 
     const bundles: {
       [sourceID: string]:
@@ -210,7 +215,7 @@ export default function createImportJob(
             : `${report.updatedTransactions.toLocaleString()} transactions have been successfully updated.`
           : `${report.importedTransactions.toLocaleString()} new transactions have been successfully imported.`,
         action: new URL(
-          `?${new URLSearchParams({ preview: report.id })}#history`,
+          `?${new URLSearchParams({ preview: `report:${encodeURIComponent(report.id)}` })}#reports`,
           PUBLIC_URL,
         ).href,
       });
@@ -223,7 +228,7 @@ export default function createImportJob(
       notify({
         message: 'Issues occurred while importing transactions.',
         action: new URL(
-          `?${new URLSearchParams({ preview: report.id })}#history`,
+          `?${new URLSearchParams({ preview: `report:${encodeURIComponent(report.id)}` })}#reports`,
           PUBLIC_URL,
         ).href,
       });

@@ -1,6 +1,5 @@
 # TODO: v2
 
-- add import history UI
 - add payee mapping? (maybe there is an official source?)
 - add quick fixes UI (expiring / missing sessions, unavailable account IDs / budget IDs, sync errors)
 - events?
@@ -11,8 +10,6 @@
 
 ---
 
-- better credential handling (don't send private keys to client, don't send private key directly from client for aspsp call) -> split source setup process? (first create account with app ID and private key, then setup existing account; this would also allow editing existing accounts)
-- use enablebanking /sessions/session_id for session information
 - MIGRATION from v1!!!
   - data/state.json -> data/enable-actual.json + schema changes
   - data/actual -> data/actual/server-id

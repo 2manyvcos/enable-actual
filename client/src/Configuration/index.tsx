@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { type SyntheticEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import NotificationSettings from './NotificationSettings';
+import Reports from './Reports';
 import Schedules from './Schedules';
 import Sources from './Sources';
 import Targets from './Targets';
@@ -81,6 +82,22 @@ export default function Configuration() {
         </AccordionSummary>
 
         <NotificationSettings />
+      </Accordion>
+
+      <Accordion
+        expanded={expanded === 'reports'}
+        onChange={handleChange('reports')}
+        slotProps={{ transition: { unmountOnExit: true } }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="reports-content"
+          id="reports-headers"
+        >
+          <Typography component="span">Import History</Typography>
+        </AccordionSummary>
+
+        <Reports />
       </Accordion>
     </Container>
   );

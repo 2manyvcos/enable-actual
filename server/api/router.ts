@@ -14,6 +14,7 @@ import {
   getNotificationSettings,
   putNotificationSettings,
 } from './notification-settings.ts';
+import { deleteReports, getReports } from './reports.ts';
 import {
   deleteSchedulesByID,
   deleteSchedulesByIDState,
@@ -84,6 +85,9 @@ router.post(
   postSchedulesByIDExecutions,
 );
 router.delete('/v1/schedules/:scheduleID/state', deleteSchedulesByIDState);
+
+router.get('/v1/reports', getReports);
+router.delete('/v1/reports', deleteReports);
 
 router.get('/v1/notification-settings', getNotificationSettings);
 router.put('/v1/notification-settings', putNotificationSettings);
