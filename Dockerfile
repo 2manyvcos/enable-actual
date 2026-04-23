@@ -1,9 +1,10 @@
 FROM node:lts AS base
 
 WORKDIR /app
+RUN mkdir /data
 
 RUN adduser app
-RUN chown app:app /app
+RUN chown app:app /app /data
 USER app
 
 FROM base AS builder
@@ -12,7 +13,7 @@ COPY --chown=app:app package.json package-lock.json ./
 RUN npm install
 
 COPY --chown=app:app ./ ./
-RUN npm run client:build
+RUN npm run client:build:force
 
 FROM base
 

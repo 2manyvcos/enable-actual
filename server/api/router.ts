@@ -105,7 +105,7 @@ router.all('{*splat}', (_req, res) => {
 });
 
 router.use(((error, _req, res, _next) => {
-  const code = (error as APIError)?.code ?? 500;
+  const code = error instanceof APIError ? error.code : 500;
   console.debug(`API error (${STATUS_CODES[code]}):`, error);
   res.status(code).send(stringifyError(error));
 }) satisfies ErrorRequestHandler);

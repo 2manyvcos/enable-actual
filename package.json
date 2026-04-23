@@ -22,6 +22,7 @@
     "dev": "tsc && touch .env .env.server && node --env-file=.env --env-file=.env.server .",
     "client:dev": "vite",
     "client:build": "tsc -b && vite build",
+    "client:build:force": "vite build",
     "client:preview": "vite preview",
     "lint": "eslint",
     "prettify": "prettier . --write"
