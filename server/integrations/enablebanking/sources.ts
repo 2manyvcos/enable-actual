@@ -3,8 +3,9 @@ import type EnableBankingSourceRequest from '../../../shared/schema/EnableBankin
 import EnableBankingSourceResponse from '../../../shared/schema/EnableBankingSourceResponse.ts';
 import EnableBankingSourceState from '../../../shared/schema/EnableBankingSourceState.ts';
 import type EnableBankingSourceUpdate from '../../../shared/schema/EnableBankingSourceUpdate.ts';
+import type QuickAction from '../../../shared/schema/QuickAction.ts';
 import type SourceAccount from '../../../shared/schema/SourceAccount.ts';
-import { startOfDate } from '../../../shared/utils.ts';
+import { addToDate, startOfDate } from '../../../shared/utils.ts';
 import APIError from '../../api/APIError.ts';
 import { ENABLEBANKING_API } from '../../config.ts';
 import EBClient, { type EBError } from './EBClient.ts';
@@ -141,6 +142,53 @@ export async function getEnableBankingSourceAccounts(
   }
 
   return availableAccounts;
+}
+
+export function getEnableBankingSourceQuickActions(
+  id: string,
+  state: output<typeof EnableBankingSourceState>,
+): output<typeof QuickAction>[] {
+  const data = getEnableBankingSourceResponse(id, state);
+
+  if (data.setupRequired) {
+    return [
+      {
+        description: `Source "${data.name || id}" requires additional setup!`,
+        action: 'Details',
+        resource: 'sources',
+        id,
+      },
+    ];
+  }
+
+  if (!data.sessionID) {
+    return [
+      {
+        description: `Source "${data.name || id}" needs to be authorized!`,
+        action: 'Details',
+        resource: 'sources',
+        id,
+      },
+    ];
+  }
+
+  const sessionValidUntil = !data.sessionValidUntil
+    ? undefined
+    : startOfDate(data.sessionValidUntil);
+  const today = startOfDate(new Date());
+
+  if (!sessionValidUntil || sessionValidUntil <= addToDate(today, 7)) {
+    return [
+      {
+        description: `Source "${data.name || id}" needs to be reauthorized!`,
+        action: 'Details',
+        resource: 'sources',
+        id,
+      },
+    ];
+  }
+
+  return [];
 }
 
 export function getEnableBankingSourceSessionExpiryDays(

@@ -1,7 +1,6 @@
 # TODO: v2
 
 - add payee mapping? (maybe there is an official source?)
-- add quick fixes UI (expiring / missing sessions, unavailable account IDs / budget IDs, sync errors)
 - events?
 - implement data migration
 - add setup guides (quick action if no source / target / sync schedule is configured yet; note / link after successful auth with follow-up steps)

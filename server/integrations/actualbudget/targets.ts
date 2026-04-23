@@ -3,6 +3,7 @@ import type ActualBudgetTargetRequest from '../../../shared/schema/ActualBudgetT
 import ActualBudgetTargetResponse from '../../../shared/schema/ActualBudgetTargetResponse.ts';
 import ActualBudgetTargetState from '../../../shared/schema/ActualBudgetTargetState.ts';
 import type ActualBudgetTargetUpdate from '../../../shared/schema/ActualBudgetTargetUpdate.ts';
+import type QuickAction from '../../../shared/schema/QuickAction.ts';
 import type TargetAccount from '../../../shared/schema/TargetAccount.ts';
 import APIError from '../../api/APIError.ts';
 import ABClient from './ABClient.ts';
@@ -150,4 +151,24 @@ export async function getActualBudgetTargetAccounts(
       (error as ABError)?.responsible === 'client' ? 400 : 500,
     );
   }
+}
+
+export function getActualBudgetTargetQuickActions(
+  id: string,
+  state: output<typeof ActualBudgetTargetState>,
+): output<typeof QuickAction>[] {
+  const data = getActualBudgetTargetResponse(id, state);
+
+  if (data.setupRequired) {
+    return [
+      {
+        description: `Target "${data.name || id}" requires additional setup!`,
+        action: 'Details',
+        resource: 'targets',
+        id,
+      },
+    ];
+  }
+
+  return [];
 }

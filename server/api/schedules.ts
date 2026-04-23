@@ -4,6 +4,7 @@ import { removeIn, setIn } from 'immutable';
 import { v7 as uuid } from 'uuid';
 import type { output } from 'zod';
 import IDResponse from '../../shared/schema/IDResponse.ts';
+import type QuickAction from '../../shared/schema/QuickAction.ts';
 import ScheduleRequest from '../../shared/schema/ScheduleRequest.ts';
 import ScheduleResponse from '../../shared/schema/ScheduleResponse.ts';
 import ScheduleState from '../../shared/schema/ScheduleState.ts';
@@ -91,6 +92,13 @@ function applyScheduleUpdate(
   } catch (error) {
     throw new APIError(error, 500, 'Schema violation');
   }
+}
+
+export function getScheduleQuickActions(
+  _id: string,
+  _state: output<typeof ScheduleState>,
+): output<typeof QuickAction>[] {
+  return [];
 }
 
 export async function getSchedules(

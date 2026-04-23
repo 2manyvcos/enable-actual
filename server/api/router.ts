@@ -14,6 +14,7 @@ import {
   getNotificationSettings,
   putNotificationSettings,
 } from './notification-settings.ts';
+import { getQuickActions } from './quick-actions.ts';
 import { deleteReports, getReports } from './reports.ts';
 import {
   deleteSchedulesByID,
@@ -91,6 +92,8 @@ router.delete('/v1/reports', deleteReports);
 
 router.get('/v1/notification-settings', getNotificationSettings);
 router.put('/v1/notification-settings', putNotificationSettings);
+
+router.get('/v1/quick-actions', getQuickActions);
 
 router.post('/v1/enablebanking/session', postEnableBankingSession);
 

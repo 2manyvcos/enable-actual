@@ -34,13 +34,17 @@ export default function Reports() {
 
   if (resource.isLoading && resource.isInitial) {
     return (
-      <AccordionDetails>
-        <Stack spacing={2}>
-          <Skeleton variant="rounded" height={88} />
+      <>
+        <AccordionActions>
+          <Skeleton variant="text" width={64} height={36.5} />
+        </AccordionActions>
 
-          <Skeleton variant="rounded" height={88} />
-        </Stack>
-      </AccordionDetails>
+        <AccordionDetails>
+          <Stack>
+            <Skeleton variant="rounded" height={50} />
+          </Stack>
+        </AccordionDetails>
+      </>
     );
   }
 
