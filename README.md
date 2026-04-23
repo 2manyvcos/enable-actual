@@ -3,7 +3,6 @@
 - add payee mapping? (maybe there is an official source?)
 - events?
 - implement data migration
-- add setup guides (quick action if no source / target / sync schedule is configured yet; note / link after successful auth with follow-up steps)
 - handle pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)
 - update readme
 
