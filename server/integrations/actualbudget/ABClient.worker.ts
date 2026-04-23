@@ -3,6 +3,7 @@ import { mkdirSync } from 'fs';
 import path from 'path';
 import { parentPort } from 'worker_threads';
 import api from '@actual-app/api';
+import { stringifyError } from '../../../shared/utils.ts';
 import { ACTUAL_DATA_DIR } from '../../config.ts';
 import {
   ABError,
@@ -28,7 +29,14 @@ async function init({ serverURL, password }: ABConfig): Promise<void> {
 
   mkdirSync(dataDir, { recursive: true });
 
-  await api.init({ dataDir, serverURL, password });
+  try {
+    await api.init({ dataDir, serverURL, password });
+  } catch (error) {
+    throw new ABError(
+      `Authentication failed: ${stringifyError(error)}`,
+      'client',
+    );
+  }
 }
 
 const auth: ABFnAuth = async (config) => {
@@ -56,7 +64,14 @@ const downloadBudget: ABFnDownloadBudget = async (
   try {
     await init(config);
 
-    await api.downloadBudget(budgetID, { password: budgetPassword });
+    try {
+      await api.downloadBudget(budgetID, { password: budgetPassword });
+    } catch (error) {
+      throw new ABError(
+        `Downloading budget file failed: ${stringifyError(error)}`,
+        'client',
+      );
+    }
   } finally {
     await api.shutdown();
   }
@@ -97,9 +112,7 @@ const importTransactions: ABFnImportTransactions = async (
     await api.batchBudgetUpdates(async () => {
       for (const { accountUID, transactions } of bundles) {
         if (!Object.hasOwn(accountUIDs, accountUID)) {
-          result.errors.push(
-            `Account "${accountUID}" does not exist - was it deleted?`,
-          );
+          result.errors.push(`Account "${accountUID}" not found`);
           continue;
         }
 
@@ -150,9 +163,7 @@ parentPort!.addListener(
       } catch (error) {
         parentPort!.postMessage({
           id,
-          error:
-            ((error as Error)?.message ?? error?.toString()) ||
-            'Unexpected error',
+          error: stringifyError(error),
           responsible: error instanceof ABError ? error.responsible : 'server',
         });
       }

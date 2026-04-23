@@ -1,5 +1,6 @@
 import type { FetchProviderType } from '@civet/common';
 import { useResource } from '@civet/core';
+import AccordionDetails from '@mui/material/AccordionDetails';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
@@ -9,6 +10,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { type output } from 'zod';
 import { gotoSources } from '@/actions/sources';
 import type SourceResponse from '@shared/schema/SourceResponse';
+import { stringifyError } from '@shared/utils';
 import AddSource from './AddSource';
 import EditSource from './EditSource';
 import Source from './Source';
@@ -32,48 +34,54 @@ export default function Sources() {
 
   if (resource.isLoading && resource.isInitial) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rounded" height={88} />
+      <AccordionDetails>
+        <Stack spacing={2}>
+          <Skeleton variant="rounded" height={88} />
 
-        <Skeleton variant="rounded" height={48} />
-      </Stack>
+          <Skeleton variant="rounded" height={48} />
+        </Stack>
+      </AccordionDetails>
     );
   }
 
   if (resource.error) {
     return (
-      <Alert
-        severity="error"
-        action={
-          <Button color="inherit" size="small" onClick={resource.notify}>
-            Retry
-          </Button>
-        }
-      >
-        Error: {`${resource.error.message ?? resource.error}`}
-      </Alert>
+      <AccordionDetails>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={resource.notify}>
+              Retry
+            </Button>
+          }
+        >
+          Error: {stringifyError(resource.error)}
+        </Alert>
+      </AccordionDetails>
     );
   }
 
   return (
-    <Stack spacing={2}>
-      <List>
-        {resource.data?.map((source) => (
-          <Source key={source.id} data={source} />
-        ))}
-      </List>
+    <AccordionDetails>
+      <Stack spacing={2}>
+        <List>
+          {resource.data?.map((source) => (
+            <Source key={source.id} data={source} />
+          ))}
+        </List>
 
-      <AddSource onSuccess={resource.notify} />
+        <AddSource onSuccess={resource.notify} />
 
-      <EditSource
-        data={
-          !editID ? undefined : resource.data?.find(({ id }) => id === editID)
-        }
-        onSuccess={resource.notify}
-        onClose={() => {
-          gotoSources({ navigate });
-        }}
-      />
-    </Stack>
+        <EditSource
+          data={
+            !editID ? undefined : resource.data?.find(({ id }) => id === editID)
+          }
+          onSuccess={resource.notify}
+          onClose={() => {
+            gotoSources({ navigate });
+          }}
+        />
+      </Stack>
+    </AccordionDetails>
   );
 }

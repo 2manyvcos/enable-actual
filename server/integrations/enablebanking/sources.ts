@@ -5,8 +5,9 @@ import EnableBankingSourceState from '../../../shared/schema/EnableBankingSource
 import type EnableBankingSourceUpdate from '../../../shared/schema/EnableBankingSourceUpdate.ts';
 import type SourceAccount from '../../../shared/schema/SourceAccount.ts';
 import { startOfDate } from '../../../shared/utils.ts';
+import APIError from '../../api/APIError.ts';
 import { ENABLEBANKING_API } from '../../config.ts';
-import EBClient from './EBClient.ts';
+import EBClient, { type EBError } from './EBClient.ts';
 
 export function getEnableBankingSourceResponse(
   id: string,
@@ -24,20 +25,24 @@ export function getEnableBankingSourceResponse(
   const setupRequired =
     !bankCountry || !bankName || !psuType || !tokenValidityDays;
 
-  return EnableBankingSourceResponse.decode({
-    id,
-    type: 'enablebanking',
-    name,
-    available: !setupRequired && !!sessionID,
-    appID,
-    bankCountry,
-    bankName,
-    psuType,
-    tokenValidityDays,
-    sessionID,
-    sessionValidUntil,
-    setupRequired,
-  });
+  try {
+    return EnableBankingSourceResponse.decode({
+      id,
+      type: 'enablebanking',
+      name,
+      available: !setupRequired && !!sessionID,
+      appID,
+      bankCountry,
+      bankName,
+      psuType,
+      tokenValidityDays,
+      sessionID,
+      sessionValidUntil,
+      setupRequired,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 export async function applyEnableBankingSourceRequest({
@@ -47,22 +52,34 @@ export async function applyEnableBankingSourceRequest({
 }: output<typeof EnableBankingSourceRequest>): Promise<
   output<typeof EnableBankingSourceState>
 > {
-  const client = new EBClient({
-    api: ENABLEBANKING_API,
-    appID,
-    privateKey,
-  });
+  try {
+    const client = new EBClient({
+      api: ENABLEBANKING_API,
+      appID,
+      privateKey,
+    });
 
-  const { active } = await client.getApplication();
+    const { active } = await client.getApplication();
 
-  if (!active) throw new Error('Application is inactive');
+    if (!active)
+      throw new APIError('Enable Banking application is inactive', 400);
+  } catch (error) {
+    throw new APIError(
+      error,
+      (error as EBError)?.responsible === 'client' ? 400 : 500,
+    );
+  }
 
-  return EnableBankingSourceState.decode({
-    type: 'enablebanking',
-    name,
-    appID,
-    privateKey,
-  });
+  try {
+    return EnableBankingSourceState.decode({
+      type: 'enablebanking',
+      name,
+      appID,
+      privateKey,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 export async function applyEnableBankingSourceUpdate(
@@ -97,18 +114,22 @@ export async function applyEnableBankingSourceUpdate(
     sessionValidUntil = prevSessionValidUntil;
   }
 
-  return EnableBankingSourceState.decode({
-    type: 'enablebanking',
-    name: name || `${bankName} (${bankCountry})`,
-    appID,
-    privateKey,
-    bankCountry,
-    bankName,
-    psuType,
-    tokenValidityDays,
-    sessionID,
-    sessionValidUntil,
-  });
+  try {
+    return EnableBankingSourceState.decode({
+      type: 'enablebanking',
+      name: name || `${bankName} (${bankCountry})`,
+      appID,
+      privateKey,
+      bankCountry,
+      bankName,
+      psuType,
+      tokenValidityDays,
+      sessionID,
+      sessionValidUntil,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 export async function getEnableBankingSourceAccounts(
@@ -116,7 +137,7 @@ export async function getEnableBankingSourceAccounts(
   { sessionID, availableAccounts }: output<typeof EnableBankingSourceState>,
 ): Promise<output<typeof SourceAccount>[]> {
   if (!sessionID || !availableAccounts) {
-    throw new Error('Setup required');
+    throw new APIError('Setup required', 400);
   }
 
   return availableAccounts;

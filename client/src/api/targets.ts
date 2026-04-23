@@ -4,6 +4,7 @@ import type { input, output } from 'zod';
 import type IDResponse from '@shared/schema/IDResponse';
 import type TargetRequest from '@shared/schema/TargetRequest';
 import type TargetUpdate from '@shared/schema/TargetUpdate';
+import { stringifyError } from '@shared/utils';
 
 export async function postTargets({
   dataProvider,
@@ -24,8 +25,7 @@ export async function postTargets({
   return toast.promise(promise, {
     loading: 'Creating target…',
     success: 'The target has been successfully created',
-    error: (error) =>
-      `Error creating target: ${(error?.message ?? error) || 'Unexpected error'}`,
+    error: (error) => `Error creating target: ${stringifyError(error)}`,
   });
 }
 
@@ -50,8 +50,7 @@ export async function putTargetsByID({
   return toast.promise(promise, {
     loading: 'Saving changes…',
     success: 'The changes have been successfully saved',
-    error: (error) =>
-      `Error saving changes: ${(error?.message ?? error) || 'Unexpected error'}`,
+    error: (error) => `Error saving changes: ${stringifyError(error)}`,
   });
 }
 
@@ -70,7 +69,6 @@ export async function deleteTargetsByID({
   return toast.promise(promise, {
     loading: 'Deleting target…',
     success: 'The target has been successfully deleted',
-    error: (error) =>
-      `Error deleting target: ${(error?.message ?? error) || 'Unexpected error'}`,
+    error: (error) => `Error deleting target: ${stringifyError(error)}`,
   });
 }

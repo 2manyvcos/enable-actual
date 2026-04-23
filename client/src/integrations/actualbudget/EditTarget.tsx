@@ -23,6 +23,7 @@ import { putTargetsByID } from '@/api/targets';
 import type ActualBudgetBudget from '@shared/schema/ActualBudgetBudget';
 import type ActualBudgetTargetResponse from '@shared/schema/ActualBudgetTargetResponse';
 import type ActualBudgetTargetUpdate from '@shared/schema/ActualBudgetTargetUpdate';
+import { stringifyError } from '@shared/utils';
 
 export default function EditTarget({
   data: target,
@@ -200,8 +201,7 @@ export default function EditTarget({
                       </Button>
                     }
                   >
-                    Error:{' '}
-                    {`${budgetResource.error.message ?? budgetResource.error}`}
+                    Error: {stringifyError(budgetResource.error)}
                   </Alert>
                 )}
 

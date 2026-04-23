@@ -8,6 +8,7 @@ import type EnableBankingAuthRequest from '../../../shared/schema/EnableBankingA
 import EnableBankingSessionRequest from '../../../shared/schema/EnableBankingSessionRequest.ts';
 import type IDResponse from '../../../shared/schema/IDResponse.ts';
 import type SourceState from '../../../shared/schema/SourceState.ts';
+import APIError from '../../api/APIError.ts';
 import { ENABLEBANKING_API, PUBLIC_URL } from '../../config.ts';
 import { loadState, putState } from '../../state.ts';
 import EBClient, { EBError } from './EBClient.ts';
@@ -24,15 +25,13 @@ export async function getSourcesByIDEnableBankingASPSPs(
   const { sources } = loadState();
 
   if (!Object.hasOwn(sources, sourceID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
   const source = sources[sourceID];
 
   if (source?.type !== 'enablebanking') {
-    res.sendStatus(400);
-    return;
+    throw new APIError('Type mismatch', 400);
   }
 
   try {
@@ -58,10 +57,10 @@ export async function getSourcesByIDEnableBankingASPSPs(
       ) satisfies output<typeof EnableBankingASPSP>[],
     );
   } catch (error) {
-    if (error instanceof EBError && error.responsible === 'client') {
-      res.sendStatus(400);
-    }
-    throw error;
+    throw new APIError(
+      error,
+      (error as EBError)?.responsible === 'client' ? 400 : 500,
+    );
   }
 }
 
@@ -74,21 +73,22 @@ export async function postSourcesByIDEnableBankingAuth(
   const { sources } = loadState();
 
   if (!Object.hasOwn(sources, sourceID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
   const source = sources[sourceID];
 
+  if (source?.type !== 'enablebanking') {
+    throw new APIError('Type mismatch', 400);
+  }
+
   if (
-    source?.type !== 'enablebanking' ||
     !source.tokenValidityDays ||
     !source.bankCountry ||
     !source.bankName ||
     !source.psuType
   ) {
-    res.sendStatus(400);
-    return;
+    throw new APIError('Setup required', 400);
   }
 
   try {
@@ -113,10 +113,10 @@ export async function postSourcesByIDEnableBankingAuth(
 
     res.send({ url } satisfies output<typeof EnableBankingAuthRequest>);
   } catch (error) {
-    if (error instanceof EBError && error.responsible === 'client') {
-      res.sendStatus(400);
-    }
-    throw error;
+    throw new APIError(
+      error,
+      (error as EBError)?.responsible === 'client' ? 400 : 500,
+    );
   }
 }
 
@@ -128,9 +128,7 @@ export async function postEnableBankingSession(
   try {
     request = EnableBankingSessionRequest.parse(req.body);
   } catch (error) {
-    console.debug('Schema violation:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Schema violation');
   }
 
   let sourceID: string;
@@ -140,30 +138,24 @@ export async function postEnableBankingSession(
     });
 
     if (typeof token === 'string' || !token.sub) {
-      console.debug('Error parsing state: Invalid JWT payload');
-      res.sendStatus(500);
-      return;
+      throw new APIError('Invalid JWT payload', 500);
     }
 
     sourceID = token.sub;
   } catch (error) {
-    console.debug('Verifying state failed:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Invalid state');
   }
 
   const { sources } = loadState();
 
   if (!Object.hasOwn(sources, sourceID)) {
-    res.sendStatus(400);
-    return;
+    throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
   const source = sources[sourceID];
 
   if (source?.type !== 'enablebanking') {
-    res.sendStatus(400);
-    return;
+    throw new APIError('Type mismatch', 400);
   }
 
   try {
@@ -182,8 +174,12 @@ export async function postEnableBankingSession(
         prev,
         ['sources', sourceID],
         (prev: output<typeof SourceState>): output<typeof SourceState> => {
-          if (!prev || prev.type !== 'enablebanking') {
-            throw new Error('source gone');
+          if (!prev) {
+            throw new APIError(`Source "${sourceID}" not found`, 404);
+          }
+
+          if (prev.type !== 'enablebanking') {
+            throw new APIError('Type mismatch', 400);
           }
 
           return {
@@ -206,9 +202,9 @@ export async function postEnableBankingSession(
 
     res.send({ id: sourceID } satisfies output<typeof IDResponse>);
   } catch (error) {
-    if (error instanceof EBError && error.responsible === 'client') {
-      res.sendStatus(400);
-    }
-    throw error;
+    throw new APIError(
+      error,
+      (error as EBError)?.responsible === 'client' ? 400 : 500,
+    );
   }
 }

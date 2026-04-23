@@ -1,11 +1,9 @@
 # TODO: v2
 
-- add meaningful errors (including strict HTTP codes)
-- add "reset schedule state" button
-- trigger import from UI
 - add import history UI
 - add payee mapping? (maybe there is an official source?)
 - add quick fixes UI (expiring / missing sessions, unavailable account IDs / budget IDs, sync errors)
+- events?
 - implement data migration
 - add setup guides (quick action if no source / target / sync schedule is configured yet; note / link after successful auth with follow-up steps)
 - handle pending transactions (keep individual IDs in state file and poll regularly, use actual time plans?)

@@ -4,7 +4,9 @@ import ActualBudgetTargetResponse from '../../../shared/schema/ActualBudgetTarge
 import ActualBudgetTargetState from '../../../shared/schema/ActualBudgetTargetState.ts';
 import type ActualBudgetTargetUpdate from '../../../shared/schema/ActualBudgetTargetUpdate.ts';
 import type TargetAccount from '../../../shared/schema/TargetAccount.ts';
+import APIError from '../../api/APIError.ts';
 import ABClient from './ABClient.ts';
+import type { ABError } from './ABClient.types.ts';
 
 export function getActualBudgetTargetResponse(
   id: string,
@@ -18,17 +20,21 @@ export function getActualBudgetTargetResponse(
 ): output<typeof ActualBudgetTargetResponse> {
   const setupRequired = !budgetID;
 
-  return ActualBudgetTargetResponse.decode({
-    id,
-    type: 'actualbudget',
-    name,
-    available: !setupRequired,
-    url,
-    hasPassword: !!password,
-    budgetID,
-    hasBudgetPassword: !!budgetPassword,
-    setupRequired,
-  });
+  try {
+    return ActualBudgetTargetResponse.decode({
+      id,
+      type: 'actualbudget',
+      name,
+      available: !setupRequired,
+      url,
+      hasPassword: !!password,
+      budgetID,
+      hasBudgetPassword: !!budgetPassword,
+      setupRequired,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 export async function applyActualBudgetTargetRequest({
@@ -38,16 +44,27 @@ export async function applyActualBudgetTargetRequest({
 }: output<typeof ActualBudgetTargetRequest>): Promise<
   output<typeof ActualBudgetTargetState>
 > {
-  const client = new ABClient({ url, password });
+  try {
+    const client = new ABClient({ url, password });
 
-  await client.auth();
+    await client.auth();
+  } catch (error) {
+    throw new APIError(
+      error,
+      (error as ABError)?.responsible === 'client' ? 400 : 500,
+    );
+  }
 
-  return ActualBudgetTargetState.decode({
-    type: 'actualbudget',
-    name,
-    url,
-    password,
-  });
+  try {
+    return ActualBudgetTargetState.decode({
+      type: 'actualbudget',
+      name,
+      url,
+      password,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 export async function applyActualBudgetTargetUpdate(
@@ -71,26 +88,37 @@ export async function applyActualBudgetTargetUpdate(
       ? nextBudgetPassword || undefined
       : prevBudgetPassword;
 
-  const client = new ABClient({ url, password });
+  try {
+    const client = new ABClient({ url, password });
 
-  if (!name) {
-    const budgets = await client.getBudgets();
-    const budget = budgets.find(
-      ({ state, groupId: id }) => state === 'remote' && id === budgetID,
+    if (!name) {
+      const budgets = await client.getBudgets();
+      const budget = budgets.find(
+        ({ state, groupId: id }) => state === 'remote' && id === budgetID,
+      );
+      name = budget?.name;
+    }
+
+    await client.downloadBudget({ budgetID, budgetPassword });
+  } catch (error) {
+    throw new APIError(
+      error,
+      (error as ABError)?.responsible === 'client' ? 400 : 500,
     );
-    name = budget?.name;
   }
 
-  await client.downloadBudget({ budgetID, budgetPassword });
-
-  return ActualBudgetTargetState.decode({
-    type: 'actualbudget',
-    name,
-    url,
-    password,
-    budgetID,
-    budgetPassword,
-  });
+  try {
+    return ActualBudgetTargetState.decode({
+      type: 'actualbudget',
+      name,
+      url,
+      password,
+      budgetID,
+      budgetPassword,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 export async function getActualBudgetTargetAccounts(
@@ -102,17 +130,24 @@ export async function getActualBudgetTargetAccounts(
     budgetPassword,
   }: output<typeof ActualBudgetTargetState>,
 ): Promise<output<typeof TargetAccount>[]> {
-  if (!budgetID) throw new Error('Setup required');
+  if (!budgetID) throw new APIError('Setup required', 400);
 
-  const client = new ABClient({ url, password });
+  try {
+    const client = new ABClient({ url, password });
 
-  const accounts = await client.getAccounts({ budgetID, budgetPassword });
+    const accounts = await client.getAccounts({ budgetID, budgetPassword });
 
-  return accounts
-    .filter(({ id }) => id)
-    .map(({ id, name: accountName, offbudget }) => {
-      let name = accountName;
-      if (offbudget) name += ` (Off budget)`;
-      return { id: id!, name };
-    });
+    return accounts
+      .filter(({ id }) => id)
+      .map(({ id, name: accountName, offbudget }) => {
+        let name = accountName;
+        if (offbudget) name += ` (Off budget)`;
+        return { id: id!, name };
+      });
+  } catch (error) {
+    throw new APIError(
+      error,
+      (error as ABError)?.responsible === 'client' ? 400 : 500,
+    );
+  }
 }

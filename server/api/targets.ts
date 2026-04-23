@@ -15,27 +15,21 @@ import {
   getActualBudgetTargetResponse,
 } from '../integrations/actualbudget/targets.ts';
 import { loadState, putState } from '../state.ts';
+import APIError from './APIError.ts';
 
 export async function getTargets(_req: Request, res: Response): Promise<void> {
   const { targets } = loadState();
 
-  let response: output<typeof TargetResponse>[];
-  try {
-    response = await Promise.all(
-      Object.entries(targets)
-        .filter(([, value]) => value)
-        .map(async ([targetID, target]) => {
-          switch (target!.type) {
-            case 'actualbudget':
-              return await getActualBudgetTargetResponse(targetID, target!);
-          }
-        }),
-    );
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(500);
-    return;
-  }
+  const response: output<typeof TargetResponse>[] = await Promise.all(
+    Object.entries(targets)
+      .filter(([, value]) => value)
+      .map(async ([targetID, target]) => {
+        switch (target!.type) {
+          case 'actualbudget':
+            return await getActualBudgetTargetResponse(targetID, target!);
+        }
+      }),
+  );
 
   res.send(response);
 }
@@ -45,24 +39,16 @@ export async function postTargets(req: Request, res: Response): Promise<void> {
   try {
     request = TargetRequest.parse(req.body);
   } catch (error) {
-    console.debug('Schema violation:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Schema violation');
   }
 
   const targetID = uuid();
 
   let target: output<typeof TargetState>;
-  try {
-    switch (request.type) {
-      case 'actualbudget':
-        target = await applyActualBudgetTargetRequest(request);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
+  switch (request.type) {
+    case 'actualbudget':
+      target = await applyActualBudgetTargetRequest(request);
+      break;
   }
 
   putState((prev) => setIn(prev, ['targets', targetID], target));
@@ -79,23 +65,16 @@ export async function getTargetsByID(
   const { targets } = loadState();
 
   if (!Object.hasOwn(targets, targetID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
   const target = targets[targetID]!;
 
   let response: output<typeof TargetResponse>;
-  try {
-    switch (target.type) {
-      case 'actualbudget':
-        response = await getActualBudgetTargetResponse(targetID, target);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
+  switch (target.type) {
+    case 'actualbudget':
+      response = await getActualBudgetTargetResponse(targetID, target);
+      break;
   }
 
   res.send(response);
@@ -110,8 +89,7 @@ export async function putTargetsByID(
   const { targets } = loadState();
 
   if (!Object.hasOwn(targets, targetID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
   const target = targets[targetID]!;
@@ -119,24 +97,17 @@ export async function putTargetsByID(
   let update: output<typeof TargetUpdate>;
   try {
     update = TargetUpdate.parse(req.body);
-    if (target.type !== update.type) throw new Error('type mismatch');
   } catch (error) {
-    console.debug('Schema violation:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Schema violation');
   }
 
+  if (target.type !== update.type) throw new APIError('Type mismatch', 400);
+
   let nextTarget: output<typeof TargetState>;
-  try {
-    switch (update.type) {
-      case 'actualbudget':
-        nextTarget = await applyActualBudgetTargetUpdate(target, update);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
+  switch (update.type) {
+    case 'actualbudget':
+      nextTarget = await applyActualBudgetTargetUpdate(target, update);
+      break;
   }
 
   putState((prev) => setIn(prev, ['targets', targetID], nextTarget));
@@ -150,8 +121,7 @@ export function deleteTargetsByID(req: Request, res: Response): void {
   const { targets } = loadState();
 
   if (!Object.hasOwn(targets, targetID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
   putState((prev) => removeIn(prev, ['targets', targetID]));
@@ -168,23 +138,16 @@ export async function getTargetsByIDAccounts(
   const { targets } = loadState();
 
   if (!Object.hasOwn(targets, targetID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
   const target = targets[targetID]!;
 
   let response: output<typeof TargetAccount>[];
-  try {
-    switch (target.type) {
-      case 'actualbudget':
-        response = await getActualBudgetTargetAccounts(targetID, target!);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(500);
-    return;
+  switch (target.type) {
+    case 'actualbudget':
+      response = await getActualBudgetTargetAccounts(targetID, target!);
+      break;
   }
 
   res.send(response);

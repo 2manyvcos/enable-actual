@@ -1,6 +1,5 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -35,9 +34,7 @@ export default function Configuration() {
           <Typography component="span">Sources</Typography>
         </AccordionSummary>
 
-        <AccordionDetails>
-          <Sources />
-        </AccordionDetails>
+        <Sources />
       </Accordion>
 
       <Accordion
@@ -52,9 +49,7 @@ export default function Configuration() {
           <Typography component="span">Targets</Typography>
         </AccordionSummary>
 
-        <AccordionDetails>
-          <Targets />
-        </AccordionDetails>
+        <Targets />
       </Accordion>
 
       <Accordion
@@ -69,9 +64,7 @@ export default function Configuration() {
           <Typography component="span">Schedules</Typography>
         </AccordionSummary>
 
-        <AccordionDetails>
-          <Schedules />
-        </AccordionDetails>
+        <Schedules />
       </Accordion>
 
       <Accordion
@@ -87,9 +80,7 @@ export default function Configuration() {
           <Typography component="span">Notification Settings</Typography>
         </AccordionSummary>
 
-        <AccordionDetails>
-          <NotificationSettings />
-        </AccordionDetails>
+        <NotificationSettings />
       </Accordion>
     </Container>
   );

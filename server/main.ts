@@ -3,6 +3,7 @@ import http from 'http';
 import https from 'https';
 import path from 'node:path';
 import express from 'express';
+import { stringifyError } from '../shared/utils.ts';
 import apiRouter from './api/router.ts';
 import {
   LISTEN_ADDRESS,
@@ -21,16 +22,14 @@ import './applyLogLevel.ts';
 try {
   loadState();
 } catch (error) {
-  throw new Error(`Error loading state: ${(error as Error)?.message ?? error}`);
+  throw new Error(`Error loading state: ${stringifyError(error)}`);
 }
 
 // prevent server startup if history file is invalid
 try {
   loadHistory();
 } catch (error) {
-  throw new Error(
-    `Error loading history: ${(error as Error)?.message ?? error}`,
-  );
+  throw new Error(`Error loading history: ${stringifyError(error)}`);
 }
 
 startScheduler();

@@ -27,6 +27,7 @@ import type SourceAccount from '@shared/schema/SourceAccount';
 import type SourceResponse from '@shared/schema/SourceResponse';
 import type TargetAccount from '@shared/schema/TargetAccount';
 import type TargetResponse from '@shared/schema/TargetResponse';
+import { stringifyError } from '@shared/utils';
 
 function Item({
   data: items,
@@ -128,8 +129,7 @@ function Item({
                     </Button>
                   }
                 >
-                  Error:{' '}
-                  {`${sourceAccountResource.error.message ?? sourceAccountResource.error}`}
+                  Error: {stringifyError(sourceAccountResource.error)}
                 </Alert>
               )}
 
@@ -199,8 +199,7 @@ function Item({
                     </Button>
                   }
                 >
-                  Error:{' '}
-                  {`${targetAccountResource.error.message ?? targetAccountResource.error}`}
+                  Error: {stringifyError(targetAccountResource.error)}
                 </Alert>
               )}
 
@@ -288,7 +287,7 @@ export default function ScheduleAccountMapping({
           </Button>
         }
       >
-        Error: {`${sourceResource.error.message ?? sourceResource.error}`}
+        Error: {stringifyError(sourceResource.error)}
       </Alert>
     );
   }
@@ -303,7 +302,7 @@ export default function ScheduleAccountMapping({
           </Button>
         }
       >
-        Error: {`${targetResource.error.message ?? targetResource.error}`}
+        Error: {stringifyError(targetResource.error)}
       </Alert>
     );
   }

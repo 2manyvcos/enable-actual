@@ -4,6 +4,7 @@ import type { input, output } from 'zod';
 import type IDResponse from '@shared/schema/IDResponse';
 import type SourceRequest from '@shared/schema/SourceRequest';
 import type SourceUpdate from '@shared/schema/SourceUpdate';
+import { stringifyError } from '@shared/utils';
 
 export async function postSources({
   dataProvider,
@@ -24,8 +25,7 @@ export async function postSources({
   return toast.promise(promise, {
     loading: 'Creating source…',
     success: 'The source has been successfully created',
-    error: (error) =>
-      `Error creating source: ${(error?.message ?? error) || 'Unexpected error'}`,
+    error: (error) => `Error creating source: ${stringifyError(error)}`,
   });
 }
 
@@ -50,8 +50,7 @@ export async function putSourcesByID({
   return toast.promise(promise, {
     loading: 'Saving changes…',
     success: 'The changes have been successfully saved',
-    error: (error) =>
-      `Error saving changes: ${(error?.message ?? error) || 'Unexpected error'}`,
+    error: (error) => `Error saving changes: ${stringifyError(error)}`,
   });
 }
 
@@ -70,7 +69,6 @@ export async function deleteSourcesByID({
   return toast.promise(promise, {
     loading: 'Deleting source…',
     success: 'The source has been successfully deleted',
-    error: (error) =>
-      `Error deleting source: ${(error?.message ?? error) || 'Unexpected error'}`,
+    error: (error) => `Error deleting source: ${stringifyError(error)}`,
   });
 }

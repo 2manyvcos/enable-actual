@@ -1,4 +1,4 @@
-import { array, number, strictObject, string } from 'zod';
+import { array, literal, number, strictObject, string } from 'zod';
 import ScheduleAccountMapping from './ScheduleAccountMapping.ts';
 
 export default strictObject({
@@ -8,4 +8,5 @@ export default strictObject({
   overscanDays: number().int().nonnegative().default(0),
   offsetDays: number().int().nonnegative().default(0),
   accounts: array(ScheduleAccountMapping).min(1),
+  state: literal(null).optional(),
 });

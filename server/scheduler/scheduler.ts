@@ -24,7 +24,6 @@ export function startScheduler() {
       onTick: createImportJob(scheduleID),
       start: true,
     });
-    createImportJob(scheduleID)();
   });
 }
 
@@ -49,4 +48,9 @@ export function updateSchedule(scheduleID: string) {
     onTick: createImportJob(scheduleID),
     start: true,
   });
+}
+
+export async function runSchedule(scheduleID: string) {
+  await new Promise((resolve) => setTimeout(resolve));
+  createImportJob(scheduleID)();
 }

@@ -5,7 +5,11 @@ import type ScheduleImportState from '../../../shared/schema/ScheduleImportState
 import type ScheduleState from '../../../shared/schema/ScheduleState.ts';
 import type Transaction from '../../../shared/schema/Transaction.ts';
 import type TransactionBundle from '../../../shared/schema/TransactionBundle.ts';
-import { addToDateString, startOfDate } from '../../../shared/utils.ts';
+import {
+  addToDateString,
+  startOfDate,
+  stringifyError,
+} from '../../../shared/utils.ts';
 import { ENABLEBANKING_API } from '../../config.ts';
 import type { EBTransaction } from './EBClient.ts';
 import EBClient from './EBClient.ts';
@@ -116,9 +120,9 @@ export async function resolveEnableBankingTransactions({
             }
           } catch (error) {
             report.errors.push(
-              `Error fetching transactions for source "${sourceID}", account "${sourceAccountID}": ${
-                ((error as Error)?.message ?? error) || 'Unexpected error'
-              }`,
+              `Error fetching transactions for source "${sourceID}", account "${sourceAccountID}": ${stringifyError(
+                error,
+              )}`,
             );
             return undefined;
           }

@@ -8,8 +8,9 @@ import ScheduleRequest from '../../shared/schema/ScheduleRequest.ts';
 import ScheduleResponse from '../../shared/schema/ScheduleResponse.ts';
 import ScheduleState from '../../shared/schema/ScheduleState.ts';
 import ScheduleUpdate from '../../shared/schema/ScheduleUpdate.ts';
-import { updateSchedule } from '../scheduler/scheduler.ts';
+import { runSchedule, updateSchedule } from '../scheduler/scheduler.ts';
 import { loadState, putState } from '../state.ts';
+import APIError from './APIError.ts';
 
 function getScheduleResponse(
   id: string,
@@ -22,16 +23,20 @@ function getScheduleResponse(
     accounts,
   }: output<typeof ScheduleState>,
 ): output<typeof ScheduleResponse> {
-  return ScheduleResponse.decode({
-    id,
-    name,
-    schedule,
-    initialDays,
-    overscanDays,
-    offsetDays,
-    accounts,
-    nextRun: sendAt(schedule).toISO() ?? undefined,
-  });
+  try {
+    return ScheduleResponse.decode({
+      id,
+      name,
+      schedule,
+      initialDays,
+      overscanDays,
+      offsetDays,
+      accounts,
+      nextRun: sendAt(schedule).toISO() ?? undefined,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 function applyScheduleRequest({
@@ -43,18 +48,20 @@ function applyScheduleRequest({
   accounts,
 }: output<typeof ScheduleRequest>): output<typeof ScheduleState> {
   const { valid, error } = validateCronExpression(schedule);
-  if (!valid) {
-    throw new Error(`Invalid CRON expression: ${error}`);
-  }
+  if (!valid) throw new APIError(error, 400, 'Invalid CRON expression');
 
-  return ScheduleState.decode({
-    name: name || schedule,
-    schedule,
-    initialDays,
-    overscanDays,
-    offsetDays,
-    accounts,
-  });
+  try {
+    return ScheduleState.decode({
+      name: name || schedule,
+      schedule,
+      initialDays,
+      overscanDays,
+      offsetDays,
+      accounts,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 function applyScheduleUpdate(
@@ -69,19 +76,21 @@ function applyScheduleUpdate(
   }: output<typeof ScheduleUpdate>,
 ): output<typeof ScheduleState> {
   const { valid, error } = validateCronExpression(schedule);
-  if (!valid) {
-    throw new Error(`Invalid CRON expression: ${error}`);
-  }
+  if (!valid) throw new APIError(error, 400, 'Invalid CRON expression');
 
-  return ScheduleState.decode({
-    name: name || schedule,
-    schedule,
-    initialDays,
-    overscanDays,
-    offsetDays,
-    accounts,
-    state,
-  });
+  try {
+    return ScheduleState.decode({
+      name: name || schedule,
+      schedule,
+      initialDays,
+      overscanDays,
+      offsetDays,
+      accounts,
+      state,
+    });
+  } catch (error) {
+    throw new APIError(error, 500, 'Schema violation');
+  }
 }
 
 export async function getSchedules(
@@ -90,20 +99,13 @@ export async function getSchedules(
 ): Promise<void> {
   const { schedules } = loadState();
 
-  let response: output<typeof ScheduleResponse>[];
-  try {
-    response = await Promise.all(
-      Object.entries(schedules)
-        .filter(([, value]) => value)
-        .map(async ([scheduleID, schedule]) =>
-          getScheduleResponse(scheduleID, schedule!),
-        ),
-    );
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(500);
-    return;
-  }
+  const response: output<typeof ScheduleResponse>[] = await Promise.all(
+    Object.entries(schedules)
+      .filter(([, value]) => value)
+      .map(async ([scheduleID, schedule]) =>
+        getScheduleResponse(scheduleID, schedule!),
+      ),
+  );
 
   res.send(response);
 }
@@ -116,21 +118,13 @@ export async function postSchedules(
   try {
     request = ScheduleRequest.parse(req.body);
   } catch (error) {
-    console.debug('Schema violation:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Schema violation');
   }
 
   const scheduleID = uuid();
 
-  let schedule: output<typeof ScheduleState>;
-  try {
-    schedule = await applyScheduleRequest(request);
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
-  }
+  const schedule: output<typeof ScheduleState> =
+    await applyScheduleRequest(request);
 
   putState((prev) => setIn(prev, ['schedules', scheduleID], schedule));
 
@@ -148,20 +142,15 @@ export async function getSchedulesByID(
   const { schedules } = loadState();
 
   if (!Object.hasOwn(schedules, scheduleID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Schedule "${scheduleID}" not found`, 404);
   }
 
   const schedule = schedules[scheduleID]!;
 
-  let response: output<typeof ScheduleResponse>;
-  try {
-    response = await getScheduleResponse(scheduleID, schedule);
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
-  }
+  const response: output<typeof ScheduleResponse> = await getScheduleResponse(
+    scheduleID,
+    schedule,
+  );
 
   res.send(response);
 }
@@ -175,8 +164,7 @@ export async function putSchedulesByID(
   const { schedules } = loadState();
 
   if (!Object.hasOwn(schedules, scheduleID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Schedule "${scheduleID}" not found`, 404);
   }
 
   const schedule = schedules[scheduleID]!;
@@ -185,19 +173,13 @@ export async function putSchedulesByID(
   try {
     update = ScheduleUpdate.parse(req.body);
   } catch (error) {
-    console.debug('Schema violation:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Schema violation');
   }
 
-  let nextSchedule: output<typeof ScheduleState>;
-  try {
-    nextSchedule = await applyScheduleUpdate(schedule, update);
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
-  }
+  const nextSchedule: output<typeof ScheduleState> = await applyScheduleUpdate(
+    schedule,
+    update,
+  );
 
   putState((prev) => setIn(prev, ['schedules', scheduleID], nextSchedule));
 
@@ -212,11 +194,40 @@ export function deleteSchedulesByID(req: Request, res: Response): void {
   const { schedules } = loadState();
 
   if (!Object.hasOwn(schedules, scheduleID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Schedule "${scheduleID}" not found`, 404);
   }
 
   putState((prev) => removeIn(prev, ['schedules', scheduleID]));
+
+  updateSchedule(scheduleID);
+
+  res.sendStatus(200);
+}
+
+export function postSchedulesByIDExecutions(req: Request, res: Response): void {
+  const scheduleID = req.params.scheduleID.toString();
+
+  const { schedules } = loadState();
+
+  if (!Object.hasOwn(schedules, scheduleID)) {
+    throw new APIError(`Schedule "${scheduleID}" not found`, 404);
+  }
+
+  runSchedule(scheduleID);
+
+  res.sendStatus(202);
+}
+
+export function deleteSchedulesByIDState(req: Request, res: Response): void {
+  const scheduleID = req.params.scheduleID.toString();
+
+  const { schedules } = loadState();
+
+  if (!Object.hasOwn(schedules, scheduleID)) {
+    throw new APIError(`Schedule "${scheduleID}" not found`, 404);
+  }
+
+  putState((prev) => removeIn(prev, ['schedules', scheduleID, 'state']));
 
   updateSchedule(scheduleID);
 

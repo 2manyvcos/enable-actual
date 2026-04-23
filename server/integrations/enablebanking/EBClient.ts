@@ -2,6 +2,7 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
+import { stringifyError } from '../../../shared/utils.ts';
 
 export type EBApplicationResponse = {
   active: boolean;
@@ -143,7 +144,7 @@ export default class EBClient {
         'client',
         0,
         'invalid-jwt',
-        (error as Error)?.message || error?.toString(),
+        stringifyError(error, '') || undefined,
       );
     }
   }

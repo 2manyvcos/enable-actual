@@ -9,6 +9,7 @@ import { useSearchParams, Link as RouterLink } from 'react-router';
 import type { input, output } from 'zod';
 import type EnableBankingSessionRequest from '@shared/schema/EnableBankingSessionRequest';
 import type IDResponse from '@shared/schema/IDResponse';
+import { stringifyError } from '@shared/utils';
 
 const headers = { 'Content-Type': 'application/json' };
 
@@ -75,7 +76,7 @@ export default function AuthCallback() {
             </Button>
           }
         >
-          Error: {`${resource.error.message ?? resource.error}`}
+          Error: {stringifyError(resource.error)}
         </Alert>
       </Container>
     );

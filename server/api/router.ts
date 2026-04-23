@@ -1,5 +1,7 @@
+import { STATUS_CODES } from 'http';
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
+import { stringifyError } from '../../shared/utils.ts';
 import { PUBLIC_URL } from '../config.ts';
 import { getTargetsByIDActualBudgetBudgets } from '../integrations/actualbudget/routes.ts';
 import {
@@ -7,15 +9,18 @@ import {
   postEnableBankingSession,
   postSourcesByIDEnableBankingAuth,
 } from '../integrations/enablebanking/routes.ts';
+import APIError from './APIError.ts';
 import {
   getNotificationSettings,
   putNotificationSettings,
 } from './notification-settings.ts';
 import {
   deleteSchedulesByID,
+  deleteSchedulesByIDState,
   getSchedules,
   getSchedulesByID,
   postSchedules,
+  postSchedulesByIDExecutions,
   putSchedulesByID,
 } from './schedules.ts';
 import {
@@ -40,7 +45,7 @@ router.use(cors({ origin: new URL(PUBLIC_URL).origin }));
 router.use(express.json());
 
 router.get('/v1/health', (_req, res) => {
-  res.send('OK');
+  res.sendStatus(200);
 });
 
 router.get('/v1/sources', getSources);
@@ -74,6 +79,11 @@ router.post('/v1/schedules', postSchedules);
 router.get('/v1/schedules/:scheduleID', getSchedulesByID);
 router.put('/v1/schedules/:scheduleID', putSchedulesByID);
 router.delete('/v1/schedules/:scheduleID', deleteSchedulesByID);
+router.post(
+  '/v1/schedules/:scheduleID/executions',
+  postSchedulesByIDExecutions,
+);
+router.delete('/v1/schedules/:scheduleID/state', deleteSchedulesByIDState);
 
 router.get('/v1/notification-settings', getNotificationSettings);
 router.put('/v1/notification-settings', putNotificationSettings);
@@ -85,8 +95,9 @@ router.all('{*splat}', (_req, res) => {
 });
 
 router.use(((error, _req, res, _next) => {
-  console.debug('Server error:', error);
-  res.sendStatus(500);
+  const code = (error as APIError)?.code ?? 500;
+  console.debug(`API error (${STATUS_CODES[code]}):`, error);
+  res.status(code).send(stringifyError(error));
 }) satisfies ErrorRequestHandler);
 
 export default router;

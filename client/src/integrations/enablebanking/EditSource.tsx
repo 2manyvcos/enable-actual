@@ -21,6 +21,7 @@ import NumberField from '@/components/NumberField';
 import type EnableBankingASPSP from '@shared/schema/EnableBankingASPSP';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import type EnableBankingSourceUpdate from '@shared/schema/EnableBankingSourceUpdate';
+import { stringifyError } from '@shared/utils';
 
 export default function EditSource({
   data: source,
@@ -156,8 +157,7 @@ export default function EditSource({
                       </Button>
                     }
                   >
-                    Error:{' '}
-                    {`${aspspResource.error.message ?? aspspResource.error}`}
+                    Error: {stringifyError(aspspResource.error)}
                   </Alert>
                 )}
 

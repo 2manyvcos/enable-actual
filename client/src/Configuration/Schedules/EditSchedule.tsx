@@ -12,7 +12,7 @@ import TextField from '@mui/material/TextField';
 import { set, update } from 'immutable';
 import { useState, type ReactNode } from 'react';
 import type { input, output } from 'zod';
-import { putSchedulesByID } from '@/api/schedules';
+import { deleteSchedulesByIDState, putSchedulesByID } from '@/api/schedules';
 import NumberField from '@/components/NumberField';
 import ScheduleAccountMappingSchema from '@shared/schema/ScheduleAccountMapping';
 import type ScheduleResponse from '@shared/schema/ScheduleResponse';
@@ -179,6 +179,17 @@ function Component({
 
       <DialogActions>
         {deleteAction}
+
+        <Button
+          onClick={() => {
+            deleteSchedulesByIDState({
+              dataProvider: dataProvider!,
+              scheduleID: schedule.id,
+            });
+          }}
+        >
+          Reset state
+        </Button>
 
         <Button onClick={onClose}>Cancel</Button>
 

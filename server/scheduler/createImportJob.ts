@@ -7,6 +7,7 @@ import type ScheduleImportAccountState from '../../shared/schema/ScheduleImportA
 import ScheduleImportState from '../../shared/schema/ScheduleImportState.ts';
 import type Transaction from '../../shared/schema/Transaction.ts';
 import type TransactionBundle from '../../shared/schema/TransactionBundle.ts';
+import { stringifyError } from '../../shared/utils.ts';
 import { HISTORY_LENGTH, PUBLIC_URL } from '../config.ts';
 import { putHistory } from '../history.ts';
 import { importActualBudgetTransactions } from '../integrations/actualbudget/transactions.ts';
@@ -29,7 +30,7 @@ export default function createImportJob(
 
     const schedule = schedules[scheduleID];
     if (!schedule) {
-      console.debug(`Schedule "${scheduleID}" does not exist - skipping`);
+      console.debug(`Schedule "${scheduleID}" not found`);
       return;
     }
 
@@ -58,9 +59,7 @@ export default function createImportJob(
         Object.groupBy(schedule.accounts, ({ sourceID }) => sourceID),
       ).map(async ([sourceID, accounts]): Promise<void> => {
         if (!Object.hasOwn(sources, sourceID)) {
-          report.errors.push(
-            `Source "${sourceID}" does not exist - was it deleted?`,
-          );
+          report.errors.push(`Source "${sourceID}" not found`);
           return;
         }
 
@@ -87,9 +86,9 @@ export default function createImportJob(
           }
         } catch (error) {
           report.errors.push(
-            `Error fetching transactions for source "${sourceID}": ${
-              ((error as Error)?.message ?? error) || 'Unexpected error'
-            }`,
+            `Error fetching transactions for source "${sourceID}": ${stringifyError(
+              error,
+            )}`,
           );
           return;
         }
@@ -112,9 +111,7 @@ export default function createImportJob(
         Object.groupBy(schedule.accounts, ({ targetID }) => targetID),
       ).map(async ([targetID, accounts]): Promise<void> => {
         if (!Object.hasOwn(targets, targetID)) {
-          report.errors.push(
-            `Target "${targetID}" does not exist - was it deleted?`,
-          );
+          report.errors.push(`Target "${targetID}" not found`);
           return;
         }
 
@@ -161,9 +158,9 @@ export default function createImportJob(
           }
         } catch (error) {
           report.errors.push(
-            `Error importing transactions into target "${targetID}": ${
-              ((error as Error)?.message ?? error) || 'Unexpected error'
-            }`,
+            `Error importing transactions into target "${targetID}": ${stringifyError(
+              error,
+            )}`,
           );
           return;
         }

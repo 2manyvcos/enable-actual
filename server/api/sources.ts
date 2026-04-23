@@ -15,27 +15,21 @@ import {
   getEnableBankingSourceResponse,
 } from '../integrations/enablebanking/sources.ts';
 import { loadState, putState } from '../state.ts';
+import APIError from './APIError.ts';
 
 export async function getSources(_req: Request, res: Response): Promise<void> {
   const { sources } = loadState();
 
-  let response: output<typeof SourceResponse>[];
-  try {
-    response = await Promise.all(
-      Object.entries(sources)
-        .filter(([, value]) => value)
-        .map(async ([sourceID, source]) => {
-          switch (source!.type) {
-            case 'enablebanking':
-              return await getEnableBankingSourceResponse(sourceID, source!);
-          }
-        }),
-    );
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(500);
-    return;
-  }
+  const response: output<typeof SourceResponse>[] = await Promise.all(
+    Object.entries(sources)
+      .filter(([, value]) => value)
+      .map(async ([sourceID, source]) => {
+        switch (source!.type) {
+          case 'enablebanking':
+            return await getEnableBankingSourceResponse(sourceID, source!);
+        }
+      }),
+  );
 
   res.send(response);
 }
@@ -45,24 +39,16 @@ export async function postSources(req: Request, res: Response): Promise<void> {
   try {
     request = SourceRequest.parse(req.body);
   } catch (error) {
-    console.debug('Schema violation:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Schema violation');
   }
 
   const sourceID = uuid();
 
   let source: output<typeof SourceState>;
-  try {
-    switch (request.type) {
-      case 'enablebanking':
-        source = await applyEnableBankingSourceRequest(request);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
+  switch (request.type) {
+    case 'enablebanking':
+      source = await applyEnableBankingSourceRequest(request);
+      break;
   }
 
   putState((prev) => setIn(prev, ['sources', sourceID], source));
@@ -79,23 +65,16 @@ export async function getSourcesByID(
   const { sources } = loadState();
 
   if (!Object.hasOwn(sources, sourceID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
   const source = sources[sourceID]!;
 
   let response: output<typeof SourceResponse>;
-  try {
-    switch (source.type) {
-      case 'enablebanking':
-        response = await getEnableBankingSourceResponse(sourceID, source);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
+  switch (source.type) {
+    case 'enablebanking':
+      response = await getEnableBankingSourceResponse(sourceID, source);
+      break;
   }
 
   res.send(response);
@@ -110,8 +89,7 @@ export async function putSourcesByID(
   const { sources } = loadState();
 
   if (!Object.hasOwn(sources, sourceID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
   const source = sources[sourceID]!;
@@ -119,24 +97,17 @@ export async function putSourcesByID(
   let update: output<typeof SourceUpdate>;
   try {
     update = SourceUpdate.parse(req.body);
-    if (source.type !== update.type) throw new Error('type mismatch');
   } catch (error) {
-    console.debug('Schema violation:', error);
-    res.sendStatus(400);
-    return;
+    throw new APIError(error, 400, 'Schema violation');
   }
 
+  if (source.type !== update.type) throw new APIError('Type mismatch', 400);
+
   let nextSource: output<typeof SourceState>;
-  try {
-    switch (update.type) {
-      case 'enablebanking':
-        nextSource = await applyEnableBankingSourceUpdate(source, update);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(400);
-    return;
+  switch (update.type) {
+    case 'enablebanking':
+      nextSource = await applyEnableBankingSourceUpdate(source, update);
+      break;
   }
 
   putState((prev) => setIn(prev, ['sources', sourceID], nextSource));
@@ -150,8 +121,7 @@ export function deleteSourcesByID(req: Request, res: Response): void {
   const { sources } = loadState();
 
   if (!Object.hasOwn(sources, sourceID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
   putState((prev) => removeIn(prev, ['sources', sourceID]));
@@ -168,23 +138,16 @@ export async function getSourcesByIDAccounts(
   const { sources } = loadState();
 
   if (!Object.hasOwn(sources, sourceID)) {
-    res.sendStatus(404);
-    return;
+    throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
   const source = sources[sourceID]!;
 
   let response: output<typeof SourceAccount>[];
-  try {
-    switch (source.type) {
-      case 'enablebanking':
-        response = await getEnableBankingSourceAccounts(sourceID, source!);
-        break;
-    }
-  } catch (error) {
-    console.debug('Implementation rejection:', error);
-    res.sendStatus(500);
-    return;
+  switch (source.type) {
+    case 'enablebanking':
+      response = await getEnableBankingSourceAccounts(sourceID, source!);
+      break;
   }
 
   res.send(response);

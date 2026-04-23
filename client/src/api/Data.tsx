@@ -9,6 +9,15 @@ const apiURL = new URL(
 
 const dataProvider = new FetchProvider({
   baseURL: apiURL,
+  handleError: async (_requestURL, _request, response) => {
+    let message;
+    try {
+      message = await response.text();
+    } catch {
+      // ignore
+    }
+    throw new Error(message || response.statusText);
+  },
 });
 
 export default function Data({ children }: { children: ReactNode }) {

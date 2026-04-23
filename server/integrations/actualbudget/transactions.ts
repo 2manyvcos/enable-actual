@@ -4,7 +4,7 @@ import type ImportReport from '../../../shared/schema/ImportReport';
 import type ResolvedTransaction from '../../../shared/schema/ResolvedTransaction';
 import type ScheduleState from '../../../shared/schema/ScheduleState';
 import type TransactionImportBundle from '../../../shared/schema/TransactionImportBundle';
-import { toDateString } from '../../../shared/utils.ts';
+import { stringifyError, toDateString } from '../../../shared/utils.ts';
 import ABClient from './ABClient.ts';
 import type { ABTransaction } from './ABClient.types';
 
@@ -53,9 +53,9 @@ export async function importActualBudgetTransactions({
   report.errors.push(
     ...errors.map(
       (error) =>
-        `Error importing transactions into target "${targetID}": ${
-          ((error as Error)?.message ?? error) || 'Unexpected error'
-        }`,
+        `Error importing transactions into target "${targetID}": ${stringifyError(
+          error,
+        )}`,
     ),
   );
 

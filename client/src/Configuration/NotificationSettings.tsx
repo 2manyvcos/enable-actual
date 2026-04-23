@@ -5,6 +5,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
@@ -25,6 +26,7 @@ import type { input, output } from 'zod';
 import { putNotificationSettings } from '@/api/notification-settings';
 import NumberField from '@/components/NumberField';
 import NotificationSettingsSchema from '@shared/schema/NotificationSettings';
+import { stringifyError } from '@shared/utils';
 
 export default function NotificationSettings() {
   const resource = useResource<
@@ -60,253 +62,279 @@ export default function NotificationSettings() {
 
   if (resource.isLoading && resource.isInitial) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rounded" height={48} />
+      <AccordionDetails>
+        <Stack spacing={2}>
+          <Skeleton variant="rounded" height={48} />
 
-        <Skeleton variant="rounded" height={315} />
+          <Skeleton variant="rounded" height={315} />
 
-        <Skeleton variant="rounded" height={36} />
-      </Stack>
+          <Skeleton variant="rounded" height={36} />
+        </Stack>
+      </AccordionDetails>
     );
   }
 
   if (resource.error) {
     return (
-      <Alert
-        severity="error"
-        action={
-          <Button color="inherit" size="small" onClick={resource.notify}>
-            Retry
-          </Button>
-        }
-      >
-        Error: {`${resource.error.message ?? resource.error}`}
-      </Alert>
+      <AccordionDetails>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={resource.notify}>
+              Retry
+            </Button>
+          }
+        >
+          Error: {stringifyError(resource.error)}
+        </Alert>
+      </AccordionDetails>
     );
   }
 
   return (
-    <form
-      onSubmit={async (event) => {
-        event.preventDefault();
+    <>
+      <AccordionDetails>
+        <form
+          id="edit-notification-settings"
+          onSubmit={async (event) => {
+            event.preventDefault();
 
-        if (!state) return;
+            if (!state) return;
 
-        await putNotificationSettings({
-          dataProvider: resource.dataProvider,
-          data: state,
-        });
+            await putNotificationSettings({
+              dataProvider: resource.dataProvider,
+              data: state,
+            });
 
-        const { revision } = await resource.notify();
+            const { revision } = await resource.notify();
 
-        setResetStateAfterRevision(revision);
-      }}
-    >
-      <Stack
-        component="fieldset"
-        spacing={2}
-        sx={{ margin: 0, padding: 0, border: 'none' }}
-        disabled={resource.isLoading}
-      >
-        <Accordion variant="outlined">
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="ntfy-content"
-            id="ntfy-header"
+            setResetStateAfterRevision(revision);
+          }}
+        >
+          <Stack
+            component="fieldset"
+            spacing={2}
+            sx={{ margin: 0, padding: 0, border: 'none' }}
+            disabled={resource.isLoading}
           >
-            <Typography component="span">ntfy.sh</Typography>
-          </AccordionSummary>
+            <Accordion variant="outlined">
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="ntfy-content"
+                id="ntfy-header"
+              >
+                <Typography component="span">ntfy.sh</Typography>
+              </AccordionSummary>
 
-          <AccordionDetails>
-            <Stack spacing={2}>
-              <FormControlLabel
-                label="Enable ntfy.sh Notifications"
-                name="ntfy-enabled"
-                control={
-                  <Switch
-                    id="ntfy-enabled"
-                    checked={data?.ntfy?.enabled ?? false}
-                    onChange={(_event, checked) => {
-                      handleChange(['ntfy', 'enabled'], checked);
+              <AccordionDetails>
+                <Stack spacing={2}>
+                  <FormControlLabel
+                    label="Enable ntfy.sh Notifications"
+                    name="ntfy-enabled"
+                    control={
+                      <Switch
+                        id="ntfy-enabled"
+                        checked={data?.ntfy?.enabled ?? false}
+                        onChange={(_event, checked) => {
+                          handleChange(['ntfy', 'enabled'], checked);
+                        }}
+                      />
+                    }
+                  />
+
+                  <Divider />
+
+                  <TextField
+                    id="ntfy-url"
+                    label="URL"
+                    name="ntfy-url"
+                    value={data?.ntfy?.url ?? ''}
+                    onChange={(event) => {
+                      handleChange(
+                        ['ntfy', 'url'],
+                        event.target.value || undefined,
+                      );
+                    }}
+                    required={data?.ntfy?.enabled}
+                  />
+
+                  <TextField
+                    id="ntfy-username"
+                    label="Username"
+                    name="ntfy-username"
+                    autoComplete="username"
+                    value={data?.ntfy?.username ?? ''}
+                    onChange={(event) => {
+                      handleChange(
+                        ['ntfy', 'username'],
+                        event.target.value || undefined,
+                      );
                     }}
                   />
-                }
-              />
 
-              <Divider />
+                  <TextField
+                    id="ntfy-password"
+                    label="Password"
+                    name="ntfy-password"
+                    type={ntfyPasswordVisible ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    value={data?.ntfy?.password ?? ''}
+                    onChange={(event) => {
+                      handleChange(
+                        ['ntfy', 'password'],
+                        event.target.value || undefined,
+                      );
+                    }}
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label={
+                                ntfyPasswordVisible
+                                  ? 'hide the password'
+                                  : 'display the password'
+                              }
+                              onClick={() => {
+                                setNtfyPasswordVisible((prev) => !prev);
+                              }}
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                              }}
+                              onMouseUp={(event) => {
+                                event.preventDefault();
+                              }}
+                              edge="end"
+                            >
+                              {ntfyPasswordVisible ? (
+                                <VisibilityOffIcon />
+                              ) : (
+                                <VisibilityIcon />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
 
-              <TextField
-                id="ntfy-url"
-                label="URL"
-                name="ntfy-url"
-                value={data?.ntfy?.url ?? ''}
-                onChange={(event) => {
-                  handleChange(
-                    ['ntfy', 'url'],
-                    event.target.value || undefined,
-                  );
-                }}
-                required={data?.ntfy?.enabled}
-              />
+            <Accordion variant="outlined" defaultExpanded>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="alerts-content"
+                id="alerts-header"
+              >
+                <Typography component="span">Alerts</Typography>
+              </AccordionSummary>
 
-              <TextField
-                id="ntfy-username"
-                label="Username"
-                name="ntfy-username"
-                autoComplete="username"
-                value={data?.ntfy?.username ?? ''}
-                onChange={(event) => {
-                  handleChange(
-                    ['ntfy', 'username'],
-                    event.target.value || undefined,
-                  );
-                }}
-              />
-
-              <TextField
-                id="ntfy-password"
-                label="Password"
-                name="ntfy-password"
-                type={ntfyPasswordVisible ? 'text' : 'password'}
-                autoComplete="current-password"
-                value={data?.ntfy?.password ?? ''}
-                onChange={(event) => {
-                  handleChange(
-                    ['ntfy', 'password'],
-                    event.target.value || undefined,
-                  );
-                }}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label={
-                            ntfyPasswordVisible
-                              ? 'hide the password'
-                              : 'display the password'
-                          }
-                          onClick={() => {
-                            setNtfyPasswordVisible((prev) => !prev);
+              <AccordionDetails>
+                <Stack spacing={2}>
+                  <FormGroup>
+                    <FormControlLabel
+                      label="Enable session expiry warnings"
+                      name="alerts-session-expiry"
+                      control={
+                        <Switch
+                          id="alerts-session-expiry"
+                          checked={(data?.alerts?.sessionExpiryDays ?? 0) > 0}
+                          onChange={(_event, checked) => {
+                            handleChange(
+                              ['alerts', 'sessionExpiryDays'],
+                              checked ? 7 : 0,
+                            );
                           }}
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                          }}
-                          onMouseUp={(event) => {
-                            event.preventDefault();
-                          }}
-                          edge="end"
-                        >
-                          {ntfyPasswordVisible ? (
-                            <VisibilityOffIcon />
-                          ) : (
-                            <VisibilityIcon />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-            </Stack>
-          </AccordionDetails>
-        </Accordion>
+                        />
+                      }
+                    />
 
-        <Accordion variant="outlined" defaultExpanded>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="alerts-content"
-            id="alerts-header"
-          >
-            <Typography component="span">Alerts</Typography>
-          </AccordionSummary>
+                    <FormControlLabel
+                      label="Enable alerts on successful imports"
+                      name="alerts-successful-imports"
+                      control={
+                        <Switch
+                          id="alerts-successful-imports"
+                          checked={data?.alerts?.successfulImports ?? false}
+                          onChange={(_event, checked) => {
+                            handleChange(
+                              ['alerts', 'successfulImports'],
+                              checked,
+                            );
+                          }}
+                        />
+                      }
+                    />
 
-          <AccordionDetails>
-            <Stack spacing={2}>
-              <FormGroup>
-                <FormControlLabel
-                  label="Enable session expiry warnings"
-                  name="alerts-session-expiry"
-                  control={
-                    <Switch
-                      id="alerts-session-expiry"
-                      checked={(data?.alerts?.sessionExpiryDays ?? 0) > 0}
-                      onChange={(_event, checked) => {
+                    <FormControlLabel
+                      label="Enable alerts on unsuccessful imports"
+                      name="alerts-unsuccessful-imports"
+                      control={
+                        <Switch
+                          id="alerts-unsuccessful-imports"
+                          checked={data?.alerts?.unsuccessfulImports ?? false}
+                          onChange={(_event, checked) => {
+                            handleChange(
+                              ['alerts', 'unsuccessfulImports'],
+                              checked,
+                            );
+                          }}
+                        />
+                      }
+                    />
+                  </FormGroup>
+
+                  <Divider
+                    sx={{
+                      '&:last-child': { display: 'none' },
+                    }}
+                  />
+
+                  {!data?.alerts?.sessionExpiryDays ? null : (
+                    <NumberField
+                      id="alerts-session-expiry-days"
+                      label="Days before session expiry"
+                      helperText="Select how many days before the session expires you would like to be notified"
+                      name="alerts-session-expiry-days"
+                      min={1}
+                      step={1}
+                      value={data.alerts.sessionExpiryDays}
+                      onValueChange={(value) => {
                         handleChange(
                           ['alerts', 'sessionExpiryDays'],
-                          checked ? 7 : 0,
+                          value ?? 1,
                         );
                       }}
                     />
-                  }
-                />
+                  )}
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          </Stack>
+        </form>
+      </AccordionDetails>
 
-                <FormControlLabel
-                  label="Enable alerts on successful imports"
-                  name="alerts-successful-imports"
-                  control={
-                    <Switch
-                      id="alerts-successful-imports"
-                      checked={data?.alerts?.successfulImports ?? false}
-                      onChange={(_event, checked) => {
-                        handleChange(['alerts', 'successfulImports'], checked);
-                      }}
-                    />
-                  }
-                />
-
-                <FormControlLabel
-                  label="Enable alerts on unsuccessful imports"
-                  name="alerts-unsuccessful-imports"
-                  control={
-                    <Switch
-                      id="alerts-unsuccessful-imports"
-                      checked={data?.alerts?.unsuccessfulImports ?? false}
-                      onChange={(_event, checked) => {
-                        handleChange(
-                          ['alerts', 'unsuccessfulImports'],
-                          checked,
-                        );
-                      }}
-                    />
-                  }
-                />
-              </FormGroup>
-
-              <Divider
-                sx={{
-                  '&:last-child': { display: 'none' },
-                }}
-              />
-
-              {!data?.alerts?.sessionExpiryDays ? null : (
-                <NumberField
-                  id="alerts-session-expiry-days"
-                  label="Days before session expiry"
-                  helperText="Select how many days before the session expires you would like to be notified"
-                  name="alerts-session-expiry-days"
-                  min={1}
-                  step={1}
-                  value={data.alerts.sessionExpiryDays}
-                  onValueChange={(value) => {
-                    handleChange(['alerts', 'sessionExpiryDays'], value ?? 1);
-                  }}
-                />
-              )}
-            </Stack>
-          </AccordionDetails>
-        </Accordion>
+      <AccordionActions>
+        <Button
+          onClick={() => {
+            setState(undefined);
+          }}
+          disabled={!state}
+        >
+          Cancel
+        </Button>
 
         <Button
           type="submit"
-          sx={{ alignSelf: 'flex-end' }}
+          form="edit-notification-settings"
           startIcon={<SaveIcon />}
           loading={resource.isLoading}
           disabled={!state}
         >
           Save
         </Button>
-      </Stack>
-    </form>
+      </AccordionActions>
+    </>
   );
 }
