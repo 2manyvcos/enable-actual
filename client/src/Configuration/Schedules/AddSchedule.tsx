@@ -28,6 +28,7 @@ function Component({ onReset }: { onReset: () => void }) {
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
   const [data, setData] = useState<Partial<input<typeof ScheduleRequest>>>({
+    schedule: '0 0 * * *',
     initialDays: 0,
     overscanDays: 7,
     offsetDays: 0,
