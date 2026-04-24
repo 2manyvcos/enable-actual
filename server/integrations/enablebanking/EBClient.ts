@@ -91,12 +91,18 @@ export class EBError extends Error {
 }
 
 async function throwStatus(res: Response, message: string) {
+  let error: string | undefined;
+  try {
+    error = await res.text();
+  } catch {
+    error = undefined;
+  }
   throw new EBError(
     message,
     res.status < 500 ? 'client' : 'server',
     res.status,
     res.statusText,
-    await res.text(),
+    error,
   );
 }
 

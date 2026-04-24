@@ -6,6 +6,10 @@ export const LISTEN_ADDRESS = process.env.LISTEN_ADDRESS ?? '0.0.0.0';
 
 export const PORT = process.env.PORT ?? '3000';
 
+export const SSL_ENABLED = ['true', 'yes', 'on', '1'].includes(
+  process.env.SSL_ENABLED?.toLowerCase() || 'true',
+);
+
 export const SSL_PRIVATE_KEY_FILE = process.env.SSL_PRIVATE_KEY_FILE;
 
 export const SSL_CERTIFICATE_FILE = process.env.SSL_CERTIFICATE_FILE;

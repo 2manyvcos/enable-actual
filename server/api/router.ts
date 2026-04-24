@@ -11,6 +11,7 @@ import {
 } from '../integrations/enablebanking/routes.ts';
 import APIError from './APIError.ts';
 import { getEvents } from './events.ts';
+import { postNotificationSettingsNtfyTests } from './notification-settings-ntfy.ts';
 import {
   getNotificationSettings,
   putNotificationSettings,
@@ -95,6 +96,10 @@ router.delete('/v1/reports', deleteReports);
 
 router.get('/v1/notification-settings', getNotificationSettings);
 router.put('/v1/notification-settings', putNotificationSettings);
+router.post(
+  '/v1/notification-settings/ntfy/tests',
+  postNotificationSettingsNtfyTests,
+);
 
 router.get('/v1/quick-actions', getQuickActions);
 

@@ -23,7 +23,10 @@ import Typography from '@mui/material/Typography';
 import { setIn } from 'immutable';
 import { useState } from 'react';
 import type { input, output } from 'zod';
-import { putNotificationSettings } from '@/api/notification-settings';
+import {
+  postNotificationSettingsNtfyTests,
+  putNotificationSettings,
+} from '@/api/notification-settings';
 import NumberField from '@/components/NumberField';
 import NotificationSettingsSchema from '@shared/schema/NotificationSettings';
 import { stringifyError } from '@shared/utils';
@@ -220,6 +223,24 @@ export default function NotificationSettings() {
                   />
                 </Stack>
               </AccordionDetails>
+
+              <AccordionActions>
+                <Button
+                  onClick={() => {
+                    postNotificationSettingsNtfyTests({
+                      dataProvider: resource.dataProvider,
+                      data: {
+                        url: data?.ntfy?.url ?? '',
+                        username: data?.ntfy?.username,
+                        password: data?.ntfy?.password,
+                      },
+                    });
+                  }}
+                  disabled={!data?.ntfy?.url}
+                >
+                  Test
+                </Button>
+              </AccordionActions>
             </Accordion>
 
             <Accordion variant="outlined" defaultExpanded>

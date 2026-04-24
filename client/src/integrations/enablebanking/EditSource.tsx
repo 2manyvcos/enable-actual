@@ -132,6 +132,14 @@ export default function EditSource({
               }}
             />
 
+            <TextField
+              id="app-id"
+              label="Application ID"
+              name="app-id"
+              value={source.appID ?? ''}
+              disabled
+            />
+
             {aspspResource.isLoading && aspspResource.isInitial ? (
               <>
                 <Skeleton variant="rounded" height={56} />

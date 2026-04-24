@@ -58,18 +58,19 @@ Then open the web UI and complete setup.
 
 ## Configuration
 
-| Variable               | Description                                         | Default                         |
-| ---------------------- | --------------------------------------------------- | ------------------------------- |
-| `APP_NAME`             | Application name                                    | `Enable Actual`                 |
-| `LISTEN_ADDRESS`       | IP address to bind to                               | `0.0.0.0`                       |
-| `PORT`                 | HTTP port                                           | `3000`                          |
-| `SSL_PRIVATE_KEY_FILE` | Path to SSL private key (enables HTTPS)             | —                               |
-| `SSL_CERTIFICATE_FILE` | Path to SSL certificate (enables HTTPS)             | —                               |
-| `PUBLIC_URL`           | Public URL (must match Enable Banking redirect URL) | `http://localhost:{PORT}`       |
-| `DATA_DIR`             | Data directory                                      | `./data`                        |
-| `HISTORY_LENGTH`       | Number of stored history entries                    | `10`                            |
-| `ENABLEBANKING_API`    | Enable Banking API                                  | `https://api.enablebanking.com` |
-| `LOG_LEVEL`            | Log level (`none`, `info`, `debug`)                 | `info`                          |
+| Variable               | Description                                                                     | Default                         |
+| ---------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
+| `APP_NAME`             | Application name                                                                | `Enable Actual`                 |
+| `LISTEN_ADDRESS`       | IP address to bind to                                                           | `0.0.0.0`                       |
+| `PORT`                 | HTTP port                                                                       | `3000`                          |
+| `SSL_ENABLED`          | Whether to use SSL (a self signed certificate is generated if none is provided) | `true`                          |
+| `SSL_PRIVATE_KEY_FILE` | Path to custom SSL private key                                                  | —                               |
+| `SSL_CERTIFICATE_FILE` | Path to custom SSL certificate                                                  | —                               |
+| `PUBLIC_URL`           | Public URL (must match Enable Banking redirect URL)                             | `http://localhost:{PORT}`       |
+| `DATA_DIR`             | Data directory                                                                  | `./data`                        |
+| `HISTORY_LENGTH`       | Number of stored history entries                                                | `10`                            |
+| `ENABLEBANKING_API`    | Enable Banking API                                                              | `https://api.enablebanking.com` |
+| `LOG_LEVEL`            | Log level (`none`, `info`, `debug`)                                             | `info`                          |
 
 ---
 

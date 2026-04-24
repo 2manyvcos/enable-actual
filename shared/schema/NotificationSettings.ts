@@ -1,11 +1,10 @@
-import { boolean, number, object, strictObject, string } from 'zod';
+import { boolean, number, object, strictObject } from 'zod';
+import NtfyCredentials from './NtfyCredentials.ts';
 
 export default strictObject({
   ntfy: object({
     enabled: boolean().default(false),
-    url: string().optional(),
-    username: string().optional(),
-    password: string().optional(),
+    ...NtfyCredentials.partial().shape,
   }).prefault({}),
 
   alerts: strictObject({

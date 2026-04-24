@@ -3,12 +3,15 @@ import http from 'http';
 import https from 'https';
 import path from 'node:path';
 import express from 'express';
+import { generate as generateCert } from 'selfsigned';
 import { stringifyError } from '../shared/utils.ts';
 import apiRouter from './api/router.ts';
 import {
   LISTEN_ADDRESS,
   PORT,
+  PUBLIC_URL,
   SSL_CERTIFICATE_FILE,
+  SSL_ENABLED,
   SSL_PRIVATE_KEY_FILE,
 } from './config.ts';
 import { loadHistory } from './history.ts';
@@ -57,9 +60,24 @@ app.get('{*splat}', (_req, res) => {
 
 let server;
 let proto;
-if (SSL_PRIVATE_KEY_FILE && SSL_CERTIFICATE_FILE) {
-  const key = fs.readFileSync(SSL_PRIVATE_KEY_FILE);
-  const cert = fs.readFileSync(SSL_CERTIFICATE_FILE);
+if (SSL_ENABLED) {
+  let key: Buffer | string;
+  let cert: Buffer | string;
+  if (!SSL_PRIVATE_KEY_FILE && !SSL_CERTIFICATE_FILE) {
+    const { hostname } = new URL(PUBLIC_URL);
+    console.debug(`Generating self signed certificate for ${hostname}`);
+    ({ private: key, cert } = await generateCert([
+      { name: 'commonName', value: hostname },
+    ]));
+  } else {
+    console.debug('Using provided certificate');
+    if (!SSL_PRIVATE_KEY_FILE || !SSL_CERTIFICATE_FILE)
+      throw new Error(
+        'When using a custom SSL certificate, both SSL_PRIVATE_KEY_FILE and SSL_CERTIFICATE_FILE must be specified',
+      );
+    key = fs.readFileSync(SSL_PRIVATE_KEY_FILE);
+    cert = fs.readFileSync(SSL_CERTIFICATE_FILE);
+  }
   server = https.createServer({ key, cert }, app);
   proto = 'https';
 } else {
