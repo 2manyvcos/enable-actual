@@ -38,12 +38,15 @@ docker run \
   -it \
   -p 3000:3000 \
   -v ./data/sync:/data \
-  -e PUBLIC_URL=https://sync.example.com \
+  -e SSL_ENABLED=true \
+  -e PUBLIC_URL=https://localhost:3000 \
   2manyvcos/enable-actual
 ```
 
-Replace `https://sync.example.com` with your own URL.  
-Then open the web UI and complete setup.
+Then open https://localhost:3000 in your browser and complete the setup.
+
+> ⚠️ Your browser will tell you that the website uses an insecure self signed certificate, which is expected.
+> However, you should provide your own trusted certificate for production use.
 
 ---
 
@@ -63,7 +66,7 @@ Then open the web UI and complete setup.
 | `APP_NAME`             | Application name                                                                | `Enable Actual`                 |
 | `LISTEN_ADDRESS`       | IP address to bind to                                                           | `0.0.0.0`                       |
 | `PORT`                 | HTTP port                                                                       | `3000`                          |
-| `SSL_ENABLED`          | Whether to use SSL (a self signed certificate is generated if none is provided) | `true`                          |
+| `SSL_ENABLED`          | Whether to use SSL (a self signed certificate is generated if none is provided) | `false`                         |
 | `SSL_PRIVATE_KEY_FILE` | Path to custom SSL private key                                                  | —                               |
 | `SSL_CERTIFICATE_FILE` | Path to custom SSL certificate                                                  | —                               |
 | `PUBLIC_URL`           | Public URL (must match Enable Banking redirect URL)                             | `http://localhost:{PORT}`       |
