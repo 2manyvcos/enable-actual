@@ -19,7 +19,7 @@ Enable Actual connects this data to [Actual Budget](https://actualbudget.com) an
 
 > ⚠️ **Security note:** Enable Actual only has **read-only access** to your bank data. It cannot move or modify funds.
 
-![Demo Screenshot](./assets/demo.png)
+![Demo Screenshot](https://raw.githubusercontent.com/2manyvcos/enable-actual/refs/heads/main/assets/demo.png)
 
 ---
 
