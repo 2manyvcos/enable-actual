@@ -17,7 +17,9 @@
 [Enable Banking](https://enablebanking.com) provides free (for personal use) access to bank transactions via official PSD2 APIs.  
 Enable Actual connects this data to [Actual Budget](https://actualbudget.com) and keeps your transactions in sync automatically.
 
-> ⚠️ **Security note:** Enable Actual has **read-only access** to your bank data. It cannot move or modify funds.
+> ⚠️ **Security note:** Enable Actual only has **read-only access** to your bank data. It cannot move or modify funds.
+
+![Demo Screenshot](./assets/demo.png)
 
 ---
 
@@ -39,11 +41,11 @@ docker run \
   -p 3000:3000 \
   -v ./data/sync:/data \
   -e SSL_ENABLED=true \
-  -e PUBLIC_URL=https://localhost:3000 \
+  -e PUBLIC_URL=https://$(hostname):3000 \
   2manyvcos/enable-actual
 ```
 
-Then open https://localhost:3000 in your browser and complete the setup.
+Then open https://YOUR-HOSTNAME:3000 in your browser and complete the setup.
 
 > ⚠️ Your browser will tell you that the website uses an insecure self signed certificate, which is expected.
 > However, you should provide your own trusted certificate for production use.

@@ -31,6 +31,7 @@ steps:
     params:
       DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
       TAG: { var: PACKAGE_VERSION }
+    command: sh
     input: |
       set -e
       apk update && apk add jq
