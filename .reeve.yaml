@@ -25,3 +25,15 @@ steps:
       NAME: docker.io/2manyvcos/enable-actual
       TAG: { var: PACKAGE_VERSION }
       PLATFORM: amd64
+
+  - name: Tag image with Actual version
+    task: '@docker/cli'
+    params:
+      DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
+      TAG: { var: PACKAGE_VERSION }
+    input: |
+      set -e
+      apk update && apk add jq
+      ACTUAL_VERSION=`docker run --rm docker.io/2manyvcos/enable-actual:${TAG} npm list '@actual-app/api' --depth=0 --json | jq -er '.dependencies["@actual-app/api"].version'`
+      docker image tag docker.io/2manyvcos/enable-actual:${TAG} docker.io/2manyvcos/enable-actual:${TAG}-actual${ACTUAL_VERSION}
+      docker push docker.io/2manyvcos/enable-actual:${TAG}-actual${ACTUAL_VERSION}

@@ -25,10 +25,10 @@
     "noUncheckedSideEffectImports": true,
 
     /* Path aliases */
-    "baseUrl": "client",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./client/src/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
-  "include": ["client/src"]
+  "include": ["./client/src", "./shared"]
 }

@@ -1,19 +1,32 @@
-FROM node:lts
+FROM node:lts AS base
 
 WORKDIR /app
+RUN mkdir /data
 
 RUN adduser app
-RUN chown app:app /app
+RUN chown app:app /app /data
 USER app
 
-COPY --chown=app:app package.json package-lock.json .
+FROM base AS builder
+
+COPY --chown=app:app package.json package-lock.json ./
 RUN npm install
-COPY --chown=app:app src src
+
+COPY --chown=app:app ./ ./
+RUN npm run client:build:force
+
+FROM base
+
+COPY --from=builder --chown=app:app /app/client/dist/ ./client/dist/
+COPY --from=builder --chown=app:app /app/node_modules/ ./node_modules/
+COPY --from=builder --chown=app:app /app/shared/ ./shared/
+COPY --from=builder --chown=app:app /app/server/ ./server/
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/package-lock.json ./
 
 EXPOSE 3000
 
 VOLUME /data
 ENV DATA_DIR=/data
-ENV EB_PRIVATE_KEY_FILE=/data/private.pem
 
 CMD [ "node", "." ]

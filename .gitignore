@@ -13,7 +13,9 @@ npm-debug.log*
 .vscode/launch.json
 __debug_*
 
-# Runtime data
-.env
-data
-private.pem
+# Application data
+/client/dist
+/.env
+/.env.server
+/data
+*.pem
