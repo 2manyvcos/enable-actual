@@ -23,10 +23,13 @@ export type EBStartAuthorizationResponse = {
   url: string;
 };
 
+export type EBAccountIdentification = {
+  iban?: string;
+  other?: { identification: string; scheme_name: string; issuer?: string };
+};
+
 export type EBAccount = {
-  account_id?: {
-    iban?: string;
-  };
+  account_id?: EBAccountIdentification;
   name?: string;
   details?: string;
   uid?: string;
@@ -49,7 +52,9 @@ export type EBTransaction = {
     amount: string;
   };
   creditor?: { name?: string };
+  creditor_account?: EBAccountIdentification;
   debtor?: { name?: string };
+  debtor_account?: EBAccountIdentification;
   credit_debit_indicator: EBCreditDebitIndicator;
   status: EBTransactionStatus;
   booking_date?: string;

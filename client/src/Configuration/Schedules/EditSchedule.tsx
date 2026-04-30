@@ -7,7 +7,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import { set, update } from 'immutable';
 import { useState, type ReactNode } from 'react';
@@ -74,6 +76,7 @@ function Component({
                 initialDays: data.initialDays!,
                 overscanDays: data.overscanDays!,
                 offsetDays: data.offsetDays!,
+                appendPayeeID: data.appendPayeeID!,
                 accounts: data.accounts!,
               },
             });
@@ -157,6 +160,20 @@ function Component({
               onValueChange={(value) => {
                 handleChange('offsetDays', value ?? undefined);
               }}
+            />
+
+            <FormControlLabel
+              label="Add account identification (e.g. IBAN) to payees"
+              name="append-payee-id"
+              control={
+                <Switch
+                  id="append-payee-id"
+                  checked={data.appendPayeeID ?? false}
+                  onChange={(_event, checked) => {
+                    handleChange('appendPayeeID', checked);
+                  }}
+                />
+              }
             />
 
             <ScheduleAccountMapping
