@@ -31,9 +31,9 @@ function convertTransaction(
   if (transaction.credit_debit_indicator === 'DBIT') amount *= -1;
 
   const payee =
-    transaction.credit_debit_indicator === 'DBIT'
+    (transaction.credit_debit_indicator === 'DBIT'
       ? transaction.creditor?.name
-      : transaction.debtor?.name;
+      : transaction.debtor?.name) ?? undefined;
 
   const notes =
     [transaction.remittance_information, transaction.note]
@@ -42,7 +42,7 @@ function convertTransaction(
       .join(' | ') || undefined;
 
   const result: Partial<output<typeof Transaction>> = {
-    id: transaction.entry_reference,
+    id: transaction.entry_reference ?? undefined,
     date: rawDate ? new Date(rawDate) : undefined,
     amount,
     currency: transaction.transaction_amount.currency,
