@@ -222,6 +222,15 @@ export default function EditTarget({
                       handleChange('budgetPassword', null);
                     }}
                   >
+                    {!data.budgetID ||
+                    budgetResource.data?.some(
+                      ({ id }) => id === data.budgetID,
+                    ) ? null : (
+                      <MenuItem value={data.budgetID} disabled>
+                        <i>Not found: {data.budgetID}</i>
+                      </MenuItem>
+                    )}
+
                     {budgetResource.data?.map(({ id, name }) => (
                       <MenuItem key={id} value={id}>
                         {name}

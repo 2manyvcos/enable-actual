@@ -67,11 +67,10 @@ export async function getTargetsByID(
 
   const { targets } = loadState();
 
-  if (!Object.hasOwn(targets, targetID)) {
+  const target = targets[targetID];
+  if (!Object.hasOwn(targets, targetID) || !target) {
     throw new APIError(`Target "${targetID}" not found`, 404);
   }
-
-  const target = targets[targetID]!;
 
   let response: output<typeof TargetResponse>;
   switch (target.type) {
@@ -91,11 +90,10 @@ export async function putTargetsByID(
 
   const { targets } = loadState();
 
-  if (!Object.hasOwn(targets, targetID)) {
+  const target = targets[targetID];
+  if (!Object.hasOwn(targets, targetID) || !target) {
     throw new APIError(`Target "${targetID}" not found`, 404);
   }
-
-  const target = targets[targetID]!;
 
   let update: output<typeof TargetUpdate>;
   try {
@@ -144,11 +142,10 @@ export async function getTargetsByIDAccounts(
 
   const { targets } = loadState();
 
-  if (!Object.hasOwn(targets, targetID)) {
+  const target = targets[targetID];
+  if (!Object.hasOwn(targets, targetID) || !target) {
     throw new APIError(`Target "${targetID}" not found`, 404);
   }
-
-  const target = targets[targetID]!;
 
   let response: output<typeof TargetAccount>[];
   switch (target.type) {

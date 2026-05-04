@@ -37,6 +37,7 @@ export type EBAccount = {
   name?: string | null;
   details?: string | null;
   uid?: string | null;
+  identification_hash: string;
 };
 
 export type EBAuthorizeSessionResponse = {

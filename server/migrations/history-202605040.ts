@@ -2,8 +2,9 @@
 
 /**
  * A bug caused accounts to sometimes have `id` and / or `payee` to be set to null which isn't allowed by the schema.
+ * This migration function removes those invalid null values.
  */
-export default function history20260504(history: any): unknown {
+export default function history202605040(history: any): unknown {
   if (Array.isArray(history?.entries)) {
     history.entries = history.entries.map((entry: any) => {
       if (Array.isArray(entry?.rejectedTransactions)) {

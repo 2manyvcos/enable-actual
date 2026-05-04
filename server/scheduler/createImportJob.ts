@@ -64,12 +64,12 @@ export default function createImportJob(
       Object.entries(
         Object.groupBy(schedule.accounts, ({ sourceID }) => sourceID),
       ).map(async ([sourceID, accounts]): Promise<void> => {
-        if (!Object.hasOwn(sources, sourceID)) {
+        const source = sources[sourceID];
+        if (!Object.hasOwn(sources, sourceID) || !source) {
           report.errors.push(`Source "${sourceID}" not found`);
           return;
         }
 
-        const source = sources[sourceID]!;
         const sourceAccountIDs = Object.keys(
           Object.groupBy(accounts!, ({ sourceAccountID }) => sourceAccountID),
         );
@@ -116,12 +116,12 @@ export default function createImportJob(
       Object.entries(
         Object.groupBy(schedule.accounts, ({ targetID }) => targetID),
       ).map(async ([targetID, accounts]): Promise<void> => {
-        if (!Object.hasOwn(targets, targetID)) {
+        const target = targets[targetID];
+        if (!Object.hasOwn(targets, targetID) || !target) {
           report.errors.push(`Target "${targetID}" not found`);
           return;
         }
 
-        const target = targets[targetID]!;
         const targetAccounts = Object.entries(
           Object.groupBy(accounts!, ({ targetAccountID }) => targetAccountID),
         )

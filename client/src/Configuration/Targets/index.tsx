@@ -6,16 +6,22 @@ import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { type output } from 'zod';
 import { gotoTargets } from '@/actions/targets';
+import type Issue from '@shared/schema/Issue';
 import type TargetResponse from '@shared/schema/TargetResponse';
 import { stringifyError } from '@shared/utils';
 import AddTarget from './AddTarget';
 import EditTarget from './EditTarget';
 import Target from './Target';
 
-export default function Targets() {
+export default function Targets({
+  issues,
+}: {
+  issues?: output<typeof Issue>[];
+}) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -28,6 +34,11 @@ export default function Targets() {
   const editID = edit?.startsWith('target:')
     ? edit.substring('target:'.length)
     : undefined;
+
+  const issuesByID = useMemo(
+    () => Object.groupBy(issues?.filter(({ id }) => id) ?? [], ({ id }) => id!),
+    [issues],
+  );
 
   const resource = useResource<
     FetchProviderType,
@@ -76,6 +87,7 @@ export default function Targets() {
               key={target.id}
               data={target}
               preview={previewID === target.id}
+              issues={issuesByID[target.id]}
             />
           ))}
         </List>

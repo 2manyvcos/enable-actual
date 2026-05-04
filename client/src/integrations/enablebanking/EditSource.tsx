@@ -187,6 +187,13 @@ export default function EditSource({
                       );
                     }}
                   >
+                    {!data.bankCountry ||
+                    countries.includes(data.bankCountry) ? null : (
+                      <MenuItem value={data.bankCountry} disabled>
+                        <i>Not found: {data.bankCountry}</i>
+                      </MenuItem>
+                    )}
+
                     {countries.map((country) => (
                       <MenuItem key={country} value={country}>
                         {country}
@@ -224,6 +231,20 @@ export default function EditSource({
                       );
                     }}
                   >
+                    {!data.bankCountry ||
+                    !data.bankName ||
+                    aspsps.some(
+                      ({ country, name }) =>
+                        country === data.bankCountry && name === data.bankName,
+                    ) ? null : (
+                      <MenuItem
+                        value={`${data.bankCountry}-${data.bankName}`}
+                        disabled
+                      >
+                        <i>Not found: {data.bankName}</i>
+                      </MenuItem>
+                    )}
+
                     {aspsps.map(({ name, country }) => (
                       <MenuItem
                         key={`${country}-${name}`}
@@ -247,6 +268,12 @@ export default function EditSource({
                       handleChange('psuType', event.target.value || undefined);
                     }}
                   >
+                    {!data.psuType || psuTypes.includes(data.psuType) ? null : (
+                      <MenuItem value={data.psuType} disabled>
+                        <i>Not found: {data.psuType}</i>
+                      </MenuItem>
+                    )}
+
                     {psuTypes.map((psuType) => (
                       <MenuItem key={psuType} value={psuType}>
                         {psuType}

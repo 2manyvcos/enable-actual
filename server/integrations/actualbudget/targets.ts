@@ -3,7 +3,8 @@ import type ActualBudgetTargetRequest from '../../../shared/schema/ActualBudgetT
 import ActualBudgetTargetResponse from '../../../shared/schema/ActualBudgetTargetResponse.ts';
 import ActualBudgetTargetState from '../../../shared/schema/ActualBudgetTargetState.ts';
 import type ActualBudgetTargetUpdate from '../../../shared/schema/ActualBudgetTargetUpdate.ts';
-import type QuickAction from '../../../shared/schema/QuickAction.ts';
+import type Issue from '../../../shared/schema/Issue.ts';
+import type State from '../../../shared/schema/State.ts';
 import type TargetAccount from '../../../shared/schema/TargetAccount.ts';
 import APIError from '../../api/APIError.ts';
 import ABClient from './ABClient.ts';
@@ -153,17 +154,19 @@ export async function getActualBudgetTargetAccounts(
   }
 }
 
-export function getActualBudgetTargetQuickActions(
+export function getActualBudgetTargetIssues(
   id: string,
-  state: output<typeof ActualBudgetTargetState>,
-): output<typeof QuickAction>[] {
-  const data = getActualBudgetTargetResponse(id, state);
+  target: output<typeof ActualBudgetTargetState>,
+  _state: output<typeof State>,
+): output<typeof Issue>[] {
+  const data = getActualBudgetTargetResponse(id, target);
 
   if (data.setupRequired) {
     return [
       {
         description: `Target "${data.name || id}" requires additional setup!`,
-        action: 'Details',
+        action: 'setup',
+        actionLabel: 'Details',
         resource: 'targets',
         id,
       },

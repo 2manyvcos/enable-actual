@@ -14,13 +14,12 @@ export async function postTargetsByIDActualBudgetConnection(
 
   const { targets } = loadState();
 
-  if (!Object.hasOwn(targets, targetID)) {
+  const target = targets[targetID];
+  if (!Object.hasOwn(targets, targetID) || !target) {
     throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
-  const target = targets[targetID];
-
-  if (target?.type !== 'actualbudget') {
+  if (target.type !== 'actualbudget') {
     throw new APIError('Type mismatch', 400);
   }
 
@@ -48,13 +47,12 @@ export async function getTargetsByIDActualBudgetBudgets(
 
   const { targets } = loadState();
 
-  if (!Object.hasOwn(targets, targetID)) {
+  const target = targets[targetID];
+  if (!Object.hasOwn(targets, targetID) || !target) {
     throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
-  const target = targets[targetID];
-
-  if (target?.type !== 'actualbudget') {
+  if (target.type !== 'actualbudget') {
     throw new APIError('Type mismatch', 400);
   }
 

@@ -10,16 +10,19 @@ import { type output } from 'zod';
 import { editSource } from '@/actions/sources';
 import { postSourcesByIDEnableBankingAuth } from '@/api/sources-enablebanking';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
-import { addToDate, startOfDate } from '@shared/utils';
+import type Issue from '@shared/schema/Issue';
+import { startOfDate } from '@shared/utils';
 
 export default function Source({
   data,
   preview,
   editAction,
+  issues,
 }: {
   data: output<typeof EnableBankingSourceResponse>;
   preview: boolean;
   editAction: ReactNode;
+  issues?: output<typeof Issue>[];
 }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
@@ -35,6 +38,11 @@ export default function Source({
       );
     }
   }, [preview]);
+
+  const setupIssue = issues?.find((issue) => issue.action === 'setup');
+  const authorizationIssue = issues?.find(
+    (issue) => issue.action === 'authorization',
+  );
 
   const sessionValidUntil = !data.sessionValidUntil
     ? undefined
@@ -58,7 +66,7 @@ export default function Source({
               <Typography variant="inherit" component="span" color="warning">
                 No active session
               </Typography>
-            ) : !sessionValidUntil ? (
+            ) : sessionValidUntil == null ? (
               <Typography variant="inherit" component="span" color="warning">
                 Session expiry details unavailable
               </Typography>
@@ -84,11 +92,7 @@ export default function Source({
               <Typography
                 variant="inherit"
                 component="span"
-                color={
-                  sessionValidUntil <= addToDate(today, 7)
-                    ? 'warning'
-                    : 'success'
-                }
+                color={authorizationIssue ? 'warning' : 'success'}
               >
                 Session expires{' '}
                 {(() => {
@@ -109,7 +113,7 @@ export default function Source({
         }
       />
 
-      {data.setupRequired ? (
+      {setupIssue ? (
         <Button
           color="warning"
           sx={{ marginInline: 2 }}
@@ -121,13 +125,7 @@ export default function Source({
         </Button>
       ) : (
         <Button
-          color={
-            !data.sessionID ||
-            !sessionValidUntil ||
-            sessionValidUntil <= addToDate(today, 7)
-              ? 'warning'
-              : undefined
-          }
+          color={authorizationIssue ? 'warning' : undefined}
           sx={{ marginInline: 2 }}
           onClick={async () => {
             const { url } = await postSourcesByIDEnableBankingAuth({

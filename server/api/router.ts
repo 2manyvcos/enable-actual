@@ -14,12 +14,12 @@ import {
 } from '../integrations/enablebanking/routes.ts';
 import APIError from './APIError.ts';
 import { getEvents } from './events.ts';
+import { getIssues } from './issues.ts';
 import { postNotificationSettingsNtfyTests } from './notification-settings-ntfy.ts';
 import {
   getNotificationSettings,
   putNotificationSettings,
 } from './notification-settings.ts';
-import { getQuickActions } from './quick-actions.ts';
 import { deleteReports, getReports } from './reports.ts';
 import {
   deleteSchedulesByID,
@@ -108,7 +108,7 @@ router.post(
   postNotificationSettingsNtfyTests,
 );
 
-router.get('/v1/quick-actions', getQuickActions);
+router.get('/v1/issues', getIssues);
 
 router.post('/v1/enablebanking/session', postEnableBankingSession);
 
