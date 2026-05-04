@@ -13,7 +13,7 @@ COPY --chown=app:app package.json package-lock.json ./
 RUN npm install
 
 COPY --chown=app:app ./ ./
-RUN npm run client:build:force
+RUN npm run client:build
 
 FROM base
 
