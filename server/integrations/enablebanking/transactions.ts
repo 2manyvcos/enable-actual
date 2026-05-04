@@ -3,7 +3,7 @@ import type EnableBankingSourceState from '../../../shared/schema/EnableBankingS
 import type ImportReport from '../../../shared/schema/ImportReport.ts';
 import type ScheduleImportState from '../../../shared/schema/ScheduleImportState.ts';
 import type ScheduleState from '../../../shared/schema/ScheduleState.ts';
-import type Transaction from '../../../shared/schema/Transaction.ts';
+import Transaction from '../../../shared/schema/Transaction.ts';
 import type TransactionBundle from '../../../shared/schema/TransactionBundle.ts';
 import {
   addToDateString,
@@ -36,10 +36,10 @@ function convertTransaction(
   let payeeID: EBAccountIdentification | undefined;
   if (transaction.credit_debit_indicator === 'DBIT') {
     payee = transaction.creditor?.name ?? undefined;
-    payeeID = transaction.creditor_account;
+    payeeID = transaction.creditor_account ?? undefined;
   } else {
     payee = transaction.debtor?.name ?? undefined;
-    payeeID = transaction.debtor_account;
+    payeeID = transaction.debtor_account ?? undefined;
   }
   if (appendPayeeID && payee && payeeID) {
     if (payeeID.iban) {
@@ -77,7 +77,7 @@ function convertTransaction(
     return undefined;
   }
 
-  return result as output<typeof Transaction>;
+  return Transaction.parse(result);
 }
 
 export async function resolveEnableBankingTransactions({

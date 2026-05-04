@@ -84,10 +84,10 @@ export default function Report({
           ))}
 
           {data.rejectedTransactions.map(
-            ({ sourceID, sourceAccountID, details }, index) => (
+            ({ sourceID, sourceAccountID, reason, details }, index) => (
               <Alert key={index} severity="error">
                 A transaction from source "{sourceID}", account "
-                {sourceAccountID}" could not be imported:
+                {sourceAccountID}" could not be imported ({reason}):
                 <pre>{JSON.stringify(details)}</pre>
               </Alert>
             ),
