@@ -35,13 +35,13 @@ function convertTransaction(
   let payee: string | undefined;
   let payeeID: EBAccountIdentification | undefined;
   if (transaction.credit_debit_indicator === 'DBIT') {
-    payee = transaction.creditor?.name;
+    payee = transaction.creditor?.name ?? undefined;
     payeeID = transaction.creditor_account;
   } else {
-    payee = transaction.debtor?.name;
+    payee = transaction.debtor?.name ?? undefined;
     payeeID = transaction.debtor_account;
   }
-  if (appendPayeeID && payeeID) {
+  if (appendPayeeID && payee && payeeID) {
     if (payeeID.iban) {
       payee += ` (${maskAccountIdentification(payeeID.iban, 'IBAN')})`;
     } else if (payeeID.other) {
@@ -56,7 +56,7 @@ function convertTransaction(
       .join(' | ') || undefined;
 
   const result: Partial<output<typeof Transaction>> = {
-    id: transaction.entry_reference,
+    id: transaction.entry_reference ?? undefined,
     date: rawDate ? new Date(rawDate) : undefined,
     amount,
     currency: transaction.transaction_amount.currency,
