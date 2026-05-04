@@ -120,7 +120,12 @@ export default function EditSource({
           <Stack
             component="fieldset"
             spacing={2}
-            sx={{ margin: 0, padding: 0, border: 'none' }}
+            sx={{
+              margin: 0,
+              marginTop: 1,
+              padding: 0,
+              border: 'none',
+            }}
           >
             <TextField
               id="name"

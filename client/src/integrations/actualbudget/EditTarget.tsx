@@ -85,7 +85,13 @@ export default function EditTarget({
           <Stack
             component="fieldset"
             spacing={2}
-            sx={{ margin: 0, padding: 0, border: 'none', minWidth: '500px' }}
+            sx={{
+              margin: 0,
+              marginTop: 1,
+              padding: 0,
+              border: 'none',
+              minWidth: '500px',
+            }}
           >
             <TextField
               id="name"
