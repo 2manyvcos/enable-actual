@@ -22,6 +22,7 @@ function getScheduleResponse(
     initialDays,
     overscanDays,
     offsetDays,
+    appendPayeeID,
     accounts,
   }: output<typeof ScheduleState>,
 ): output<typeof ScheduleResponse> {
@@ -33,6 +34,7 @@ function getScheduleResponse(
       initialDays,
       overscanDays,
       offsetDays,
+      appendPayeeID,
       accounts,
       nextRun: sendAt(schedule).toISO() ?? undefined,
     });
@@ -47,6 +49,7 @@ function applyScheduleRequest({
   initialDays,
   overscanDays,
   offsetDays,
+  appendPayeeID,
   accounts,
 }: output<typeof ScheduleRequest>): output<typeof ScheduleState> {
   const { valid, error } = validateCronExpression(schedule);
@@ -59,6 +62,7 @@ function applyScheduleRequest({
       initialDays,
       overscanDays,
       offsetDays,
+      appendPayeeID,
       accounts,
     });
   } catch (error) {
@@ -74,6 +78,7 @@ function applyScheduleUpdate(
     initialDays,
     overscanDays,
     offsetDays,
+    appendPayeeID,
     accounts,
   }: output<typeof ScheduleUpdate>,
 ): output<typeof ScheduleState> {
@@ -87,6 +92,7 @@ function applyScheduleUpdate(
       initialDays,
       overscanDays,
       offsetDays,
+      appendPayeeID,
       accounts,
       state,
     });

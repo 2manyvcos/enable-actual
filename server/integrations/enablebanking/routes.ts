@@ -13,6 +13,7 @@ import { publishEvent } from '../../api/events.ts';
 import { ENABLEBANKING_API, PUBLIC_URL } from '../../config.ts';
 import { loadState, putState } from '../../state.ts';
 import EBClient, { EBError } from './EBClient.ts';
+import maskAccountIdentification from './maskAccountIdentification.ts';
 
 const stateSecret = uuid();
 
@@ -192,8 +193,14 @@ export async function postEnableBankingSession(
               .map(({ uid, name: accountName, details, account_id }) => {
                 let name = accountName ?? '';
                 if (details) name += ` | ${details}`;
-                if (account_id?.iban) name += ` (IBAN ${account_id.iban})`;
-                else name += ` (UID ${uid})`;
+                if (account_id?.iban)
+                  name += ` (IBAN ${maskAccountIdentification(account_id.iban, 'IBAN')})`;
+                else if (account_id?.other) {
+                  let accountID = `${account_id.other.scheme_name} ${maskAccountIdentification(account_id.other.identification, account_id.other.scheme_name)}`;
+                  if (account_id.other.issuer)
+                    accountID += ` | ${account_id.other.issuer}`;
+                  name += ` (${accountID})`;
+                } else name += ` (UID ${uid})`;
                 return { id: uid!, name };
               }),
           };

@@ -23,13 +23,20 @@ export type EBStartAuthorizationResponse = {
   url: string;
 };
 
+export type EBAccountIdentification = {
+  iban?: string | null;
+  other?: {
+    identification: string;
+    scheme_name: string;
+    issuer?: string | null;
+  } | null;
+};
+
 export type EBAccount = {
-  account_id?: {
-    iban?: string;
-  };
-  name?: string;
-  details?: string;
-  uid?: string;
+  account_id?: EBAccountIdentification | null;
+  name?: string | null;
+  details?: string | null;
+  uid?: string | null;
 };
 
 export type EBAuthorizeSessionResponse = {
@@ -43,20 +50,22 @@ export type EBCreditDebitIndicator = 'CRDT' | 'DBIT';
 export type EBTransactionStatus = 'BOOK';
 
 export type EBTransaction = {
-  entry_reference?: string;
+  entry_reference?: string | null;
   transaction_amount: {
     currency: string;
     amount: string;
   };
-  creditor?: { name?: string };
-  debtor?: { name?: string };
+  creditor?: { name?: string | null } | null;
+  creditor_account?: EBAccountIdentification | null;
+  debtor?: { name?: string | null } | null;
+  debtor_account?: EBAccountIdentification | null;
   credit_debit_indicator: EBCreditDebitIndicator;
   status: EBTransactionStatus;
-  booking_date?: string;
-  value_date?: string;
-  transaction_date?: string;
-  remittance_information?: string[];
-  note?: string;
+  booking_date?: string | null;
+  value_date?: string | null;
+  transaction_date?: string | null;
+  remittance_information?: string[] | null;
+  note?: string | null;
 };
 
 export type EBTransactionsResponse = {

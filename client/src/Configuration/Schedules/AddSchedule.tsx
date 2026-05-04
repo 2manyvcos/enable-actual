@@ -6,7 +6,9 @@ import AccordionActions from '@mui/material/AccordionActions';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Button from '@mui/material/Button';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { set, update } from 'immutable';
@@ -32,6 +34,7 @@ function Component({ onReset }: { onReset: () => void }) {
     initialDays: 0,
     overscanDays: 7,
     offsetDays: 0,
+    appendPayeeID: false,
   });
 
   const handleChange: <F extends keyof typeof data>(
@@ -67,6 +70,7 @@ function Component({ onReset }: { onReset: () => void }) {
                 initialDays: data.initialDays!,
                 overscanDays: data.overscanDays!,
                 offsetDays: data.offsetDays!,
+                appendPayeeID: data.appendPayeeID!,
                 accounts: data.accounts!,
               },
             });
@@ -150,6 +154,20 @@ function Component({ onReset }: { onReset: () => void }) {
               onValueChange={(value) => {
                 handleChange('offsetDays', value ?? undefined);
               }}
+            />
+
+            <FormControlLabel
+              label="Add account identification (e.g. IBAN) to payees"
+              name="append-payee-id"
+              control={
+                <Switch
+                  id="append-payee-id"
+                  checked={data.appendPayeeID ?? false}
+                  onChange={(_event, checked) => {
+                    handleChange('appendPayeeID', checked);
+                  }}
+                />
+              }
             />
 
             <ScheduleAccountMapping
