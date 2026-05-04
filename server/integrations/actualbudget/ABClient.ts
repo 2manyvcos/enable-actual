@@ -17,13 +17,35 @@ import {
   type ABTransaction,
 } from './ABClient.types.ts';
 
+let closed = false;
 const workers: { [serverURL: string]: Worker } = {};
+
+export async function closeABWorker(serverURL: string): Promise<void> {
+  if (Object.hasOwn(workers, serverURL)) {
+    const worker = workers[serverURL];
+    delete workers[serverURL];
+    const promise = new Promise((resolve) => {
+      worker.once('exit', resolve);
+    });
+    worker.postMessage({ method: 'close' });
+    await promise;
+  }
+}
+
+export async function shutdownABWorkers(): Promise<void> {
+  if (closed) return;
+  closed = true;
+
+  await Promise.all(Object.keys(workers).map(closeABWorker));
+}
 
 export default class ABClient {
   private connection: Worker;
   private config: ABConfig;
 
   constructor({ url, password }: { url: string; password: string }) {
+    if (closed) throw new ABError('Server is shutting down', 'server');
+
     if (!Object.hasOwn(workers, url)) {
       workers[url] = new Worker(
         path.join(import.meta.dirname, './ABClient.worker.ts'),

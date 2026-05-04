@@ -1,3 +1,5 @@
+import type { FetchProviderType } from '@civet/common';
+import { useConfigContext } from '@civet/core';
 import Button from '@mui/material/Button';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -5,6 +7,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { type output } from 'zod';
 import { editTarget } from '@/actions/targets';
+import { postTargetsByIDActualBudgetConnection } from '@/api/targets-actualbudget';
 import type ActualBudgetTargetResponse from '@shared/schema/ActualBudgetTargetResponse';
 
 export default function Target({
@@ -17,6 +20,7 @@ export default function Target({
   editAction: ReactNode;
 }) {
   const navigate = useNavigate();
+  const { dataProvider } = useConfigContext<FetchProviderType>();
 
   const ref = useRef<HTMLLIElement>(null);
 
@@ -40,7 +44,7 @@ export default function Target({
     >
       <ListItemText primary={data.name ?? data.id} secondary="Actual Budget" />
 
-      {!data.setupRequired ? null : (
+      {data.setupRequired ? (
         <Button
           color="warning"
           sx={{ marginInline: 2 }}
@@ -49,6 +53,18 @@ export default function Target({
           }}
         >
           Setup
+        </Button>
+      ) : (
+        <Button
+          sx={{ marginInline: 2 }}
+          onClick={() => {
+            postTargetsByIDActualBudgetConnection({
+              dataProvider: dataProvider!,
+              targetID: data.id,
+            });
+          }}
+        >
+          Reconnect
         </Button>
       )}
     </ListItem>
