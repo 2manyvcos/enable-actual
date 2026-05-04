@@ -105,6 +105,13 @@ function Item({
                 handleChange('sourceAccountID', undefined);
               }}
             >
+              {!data.sourceID ||
+              sources.some(({ id }) => id === data.sourceID) ? null : (
+                <MenuItem value={data.sourceID} disabled>
+                  <i>Not found: {data.sourceID}</i>
+                </MenuItem>
+              )}
+
               {sources.map(({ id, name, available }) => (
                 <MenuItem key={id} value={id} disabled={!available}>
                   {name || id}
@@ -150,6 +157,15 @@ function Item({
                     );
                   }}
                 >
+                  {!data.sourceAccountID ||
+                  sourceAccountResource.data?.some(
+                    ({ id }) => id === data.sourceAccountID,
+                  ) ? null : (
+                    <MenuItem value={data.sourceAccountID} disabled>
+                      <i>Not found: {data.sourceAccountID}</i>
+                    </MenuItem>
+                  )}
+
                   {sourceAccountResource.data?.map(({ id, name }) => (
                     <MenuItem key={id} value={id}>
                       {name}
@@ -175,6 +191,13 @@ function Item({
                 handleChange('targetAccountID', undefined);
               }}
             >
+              {!data.targetID ||
+              targets.some(({ id }) => id === data.targetID) ? null : (
+                <MenuItem value={data.targetID} disabled>
+                  <i>Not found: {data.targetID}</i>
+                </MenuItem>
+              )}
+
               {targets.map(({ id, name, available }) => (
                 <MenuItem key={id} value={id} disabled={!available}>
                   {name || id}
@@ -220,6 +243,15 @@ function Item({
                     );
                   }}
                 >
+                  {!data.targetAccountID ||
+                  targetAccountResource.data?.some(
+                    ({ id }) => id === data.targetAccountID,
+                  ) ? null : (
+                    <MenuItem value={data.targetAccountID} disabled>
+                      <i>Not found: {data.targetAccountID}</i>
+                    </MenuItem>
+                  )}
+
                   {targetAccountResource.data?.map(({ id, name }) => (
                     <MenuItem key={id} value={id}>
                       {name}

@@ -9,15 +9,18 @@ import { type output } from 'zod';
 import { editTarget } from '@/actions/targets';
 import { postTargetsByIDActualBudgetConnection } from '@/api/targets-actualbudget';
 import type ActualBudgetTargetResponse from '@shared/schema/ActualBudgetTargetResponse';
+import type Issue from '@shared/schema/Issue';
 
 export default function Target({
   data,
   preview,
   editAction,
+  issues,
 }: {
   data: output<typeof ActualBudgetTargetResponse>;
   preview: boolean;
   editAction: ReactNode;
+  issues?: output<typeof Issue>[];
 }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
@@ -34,6 +37,8 @@ export default function Target({
     }
   }, [preview]);
 
+  const setupIssue = issues?.find((issue) => issue.action === 'setup');
+
   return (
     <ListItem
       ref={ref}
@@ -44,7 +49,7 @@ export default function Target({
     >
       <ListItemText primary={data.name ?? data.id} secondary="Actual Budget" />
 
-      {data.setupRequired ? (
+      {setupIssue ? (
         <Button
           color="warning"
           sx={{ marginInline: 2 }}

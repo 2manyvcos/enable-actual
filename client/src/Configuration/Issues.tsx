@@ -1,5 +1,3 @@
-import type { FetchProviderType } from '@civet/common';
-import { useResource } from '@civet/core';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
@@ -8,45 +6,46 @@ import type { output } from 'zod';
 import { gotoSchedules, previewSchedule } from '@/actions/schedules';
 import { gotoSources, previewSource } from '@/actions/sources';
 import { gotoTargets, previewTarget } from '@/actions/targets';
-import type QuickAction from '@shared/schema/QuickAction';
+import type Issue from '@shared/schema/Issue';
 import { stringifyError } from '@shared/utils';
 
-export default function QuickActions() {
+export default function Issues({
+  isLoading,
+  error,
+  notify,
+  data,
+}: {
+  isLoading: boolean;
+  error?: unknown;
+  notify: () => void;
+  data: output<typeof Issue>[] | undefined;
+}) {
   const navigate = useNavigate();
 
-  const resource = useResource<
-    FetchProviderType,
-    output<typeof QuickAction>[] | undefined
-  >({
-    name: 'v1/quick-actions',
-    query: undefined,
-    events: true,
-  });
-
-  if (resource.isLoading && resource.isInitial) {
+  if (isLoading) {
     return null;
   }
 
-  if (resource.error) {
+  if (error) {
     return (
       <Alert
         severity="error"
         action={
-          <Button color="inherit" size="small" onClick={resource.notify}>
+          <Button color="inherit" size="small" onClick={notify}>
             Retry
           </Button>
         }
       >
-        Error: {stringifyError(resource.error)}
+        Error: {stringifyError(error)}
       </Alert>
     );
   }
 
   return (
     <Stack spacing={2}>
-      {resource.data
+      {data
         ?.slice(0, 1)
-        .map(({ description, action, resource, id }, index) => (
+        .map(({ description, actionLabel, resource, id }, index) => (
           <Alert
             key={index}
             severity="warning"
@@ -73,7 +72,7 @@ export default function QuickActions() {
                   }
                 }}
               >
-                {action}
+                {actionLabel}
               </Button>
             }
           >

@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { updateIn } from 'immutable';
+import { List, Map, set, update, updateIn } from 'immutable';
 import jwt from 'jsonwebtoken';
 import { v7 as uuid } from 'uuid';
 import { type output } from 'zod';
@@ -7,6 +7,7 @@ import type EnableBankingASPSP from '../../../shared/schema/EnableBankingASPSP.t
 import type EnableBankingAuthRequest from '../../../shared/schema/EnableBankingAuthRequest.ts';
 import EnableBankingSessionRequest from '../../../shared/schema/EnableBankingSessionRequest.ts';
 import type IDResponse from '../../../shared/schema/IDResponse.ts';
+import type ScheduleState from '../../../shared/schema/ScheduleState.ts';
 import type SourceState from '../../../shared/schema/SourceState.ts';
 import APIError from '../../api/APIError.ts';
 import { publishEvent } from '../../api/events.ts';
@@ -26,13 +27,12 @@ export async function getSourcesByIDEnableBankingASPSPs(
 
   const { sources } = loadState();
 
-  if (!Object.hasOwn(sources, sourceID)) {
+  const source = sources[sourceID];
+  if (!Object.hasOwn(sources, sourceID) || !source) {
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
-  const source = sources[sourceID];
-
-  if (source?.type !== 'enablebanking') {
+  if (source.type !== 'enablebanking') {
     throw new APIError('Type mismatch', 400);
   }
 
@@ -74,13 +74,12 @@ export async function postSourcesByIDEnableBankingAuth(
 
   const { sources } = loadState();
 
-  if (!Object.hasOwn(sources, sourceID)) {
+  const source = sources[sourceID];
+  if (!Object.hasOwn(sources, sourceID) || !source) {
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
-  const source = sources[sourceID];
-
-  if (source?.type !== 'enablebanking') {
+  if (source.type !== 'enablebanking') {
     throw new APIError('Type mismatch', 400);
   }
 
@@ -150,13 +149,12 @@ export async function postEnableBankingSession(
 
   const { sources } = loadState();
 
-  if (!Object.hasOwn(sources, sourceID)) {
+  const source = sources[sourceID];
+  if (!Object.hasOwn(sources, sourceID) || !source) {
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
-  const source = sources[sourceID];
-
-  if (source?.type !== 'enablebanking') {
+  if (source.type !== 'enablebanking') {
     throw new APIError('Type mismatch', 400);
   }
 
@@ -171,9 +169,42 @@ export async function postEnableBankingSession(
       code: request.code,
     });
 
-    putState((prev) =>
-      updateIn(
-        prev,
+    const availableAccounts = accounts
+      .filter(({ uid }) => uid)
+      .map(
+        ({
+          uid,
+          name: accountName,
+          details,
+          account_id,
+          identification_hash,
+        }) => {
+          let name = accountName ?? '';
+          if (details) name += ` | ${details}`;
+          if (account_id?.iban)
+            name += ` (IBAN ${maskAccountIdentification(account_id.iban, 'IBAN')})`;
+          else if (account_id?.other) {
+            let accountID = `${account_id.other.scheme_name} ${maskAccountIdentification(account_id.other.identification, account_id.other.scheme_name)}`;
+            if (account_id.other.issuer)
+              accountID += ` | ${account_id.other.issuer}`;
+            name += ` (${accountID})`;
+          } else name += ` (UID ${uid})`;
+          return { id: uid!, name, hash: identification_hash };
+        },
+      );
+
+    const prevAccountMap = Object.fromEntries(
+      source.availableAccounts?.map(({ id, hash }) => [id, hash]) ?? [],
+    );
+    const nextAccountMap = Object.fromEntries(
+      availableAccounts.map(({ id, hash }) => [hash, id]),
+    );
+
+    putState((prev) => {
+      let updated = prev;
+
+      updated = updateIn(
+        updated,
         ['sources', sourceID],
         (prev: output<typeof SourceState>): output<typeof SourceState> => {
           if (!prev) {
@@ -188,25 +219,55 @@ export async function postEnableBankingSession(
             ...prev,
             sessionID,
             sessionValidUntil: new Date(validUntil),
-            availableAccounts: accounts
-              .filter(({ uid }) => uid)
-              .map(({ uid, name: accountName, details, account_id }) => {
-                let name = accountName ?? '';
-                if (details) name += ` | ${details}`;
-                if (account_id?.iban)
-                  name += ` (IBAN ${maskAccountIdentification(account_id.iban, 'IBAN')})`;
-                else if (account_id?.other) {
-                  let accountID = `${account_id.other.scheme_name} ${maskAccountIdentification(account_id.other.identification, account_id.other.scheme_name)}`;
-                  if (account_id.other.issuer)
-                    accountID += ` | ${account_id.other.issuer}`;
-                  name += ` (${accountID})`;
-                } else name += ` (UID ${uid})`;
-                return { id: uid!, name };
-              }),
+            availableAccounts,
           };
         },
-      ),
-    );
+      );
+
+      updated = update(
+        updated,
+        'schedules',
+        (prev) =>
+          Map(prev)
+            .map(
+              (
+                schedule: output<typeof ScheduleState> | undefined,
+              ): output<typeof ScheduleState> | undefined => {
+                if (!schedule) return schedule;
+
+                return update(
+                  schedule,
+                  'accounts',
+                  (prev) =>
+                    List(prev)
+                      .map((account) => {
+                        if (account.sourceID === sourceID) {
+                          const hash = prevAccountMap[account.sourceAccountID];
+                          const nextID = nextAccountMap[hash];
+                          if (
+                            Object.hasOwn(
+                              prevAccountMap,
+                              account.sourceAccountID,
+                            ) &&
+                            hash &&
+                            Object.hasOwn(nextAccountMap, hash) &&
+                            nextID
+                          ) {
+                            return set(account, 'sourceAccountID', nextID);
+                          }
+                        }
+
+                        return account;
+                      })
+                      .toJS() as typeof schedule.accounts,
+                );
+              },
+            )
+            .toJS() as typeof updated.schedules,
+      );
+
+      return updated;
+    });
 
     publishEvent();
 

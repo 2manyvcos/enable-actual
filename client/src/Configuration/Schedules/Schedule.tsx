@@ -10,14 +10,17 @@ import { useNavigate } from 'react-router';
 import type { output } from 'zod';
 import { editSchedule } from '@/actions/schedules';
 import { postSchedulesByIDExecutions } from '@/api/schedules';
+import type Issue from '@shared/schema/Issue';
 import type ScheduleResponse from '@shared/schema/ScheduleResponse';
 
 export default function Schedule({
   data,
   preview,
+  issues,
 }: {
   data: output<typeof ScheduleResponse>;
   preview: boolean;
+  issues?: output<typeof Issue>[];
 }) {
   const navigate = useNavigate();
   const { dataProvider } = useConfigContext<FetchProviderType>();
@@ -33,6 +36,8 @@ export default function Schedule({
       );
     }
   }, [preview]);
+
+  const setupIssue = issues?.find((issue) => issue.action === 'setup');
 
   return (
     <ListItem
@@ -60,17 +65,29 @@ export default function Schedule({
         }
       />
 
-      <Button
-        sx={{ marginInline: 2 }}
-        onClick={() => {
-          postSchedulesByIDExecutions({
-            dataProvider: dataProvider!,
-            scheduleID: data.id,
-          });
-        }}
-      >
-        Run now
-      </Button>
+      {setupIssue ? (
+        <Button
+          color="warning"
+          sx={{ marginInline: 2 }}
+          onClick={() => {
+            editSchedule({ navigate, scheduleID: data.id });
+          }}
+        >
+          Setup
+        </Button>
+      ) : (
+        <Button
+          sx={{ marginInline: 2 }}
+          onClick={() => {
+            postSchedulesByIDExecutions({
+              dataProvider: dataProvider!,
+              scheduleID: data.id,
+            });
+          }}
+        >
+          Run now
+        </Button>
+      )}
     </ListItem>
   );
 }

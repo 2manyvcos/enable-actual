@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import type { output } from 'zod';
 import { editTarget } from '@/actions/targets';
 import ActualBudgetTarget from '@/integrations/actualbudget/Target';
+import type Issue from '@shared/schema/Issue';
 import type TargetResponse from '@shared/schema/TargetResponse';
 
 const components = {
@@ -13,9 +14,11 @@ const components = {
 export default function Target({
   data,
   preview,
+  issues,
 }: {
   data: output<typeof TargetResponse>;
   preview: boolean;
+  issues?: output<typeof Issue>[];
 }) {
   const navigate = useNavigate();
 
@@ -35,6 +38,7 @@ export default function Target({
           <EditIcon />
         </IconButton>
       }
+      issues={issues}
     />
   );
 }

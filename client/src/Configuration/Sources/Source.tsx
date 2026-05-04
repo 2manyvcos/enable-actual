@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import type { output } from 'zod';
 import { editSource } from '@/actions/sources';
 import EnableBankingSource from '@/integrations/enablebanking/Source';
+import type Issue from '@shared/schema/Issue';
 import type SourceResponse from '@shared/schema/SourceResponse';
 
 const components = {
@@ -13,9 +14,11 @@ const components = {
 export default function Source({
   data,
   preview,
+  issues,
 }: {
   data: output<typeof SourceResponse>;
   preview: boolean;
+  issues?: output<typeof Issue>[];
 }) {
   const navigate = useNavigate();
 
@@ -35,6 +38,7 @@ export default function Source({
           <EditIcon />
         </IconButton>
       }
+      issues={issues}
     />
   );
 }

@@ -6,16 +6,22 @@ import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { type output } from 'zod';
 import { gotoSchedules } from '@/actions/schedules';
+import type Issue from '@shared/schema/Issue';
 import type ScheduleResponse from '@shared/schema/ScheduleResponse';
 import { stringifyError } from '@shared/utils';
 import AddSchedule from './AddSchedule';
 import EditSchedule from './EditSchedule';
 import Schedule from './Schedule';
 
-export default function Schedules() {
+export default function Schedules({
+  issues,
+}: {
+  issues?: output<typeof Issue>[];
+}) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -28,6 +34,11 @@ export default function Schedules() {
   const editID = edit?.startsWith('schedule:')
     ? edit.substring('schedule:'.length)
     : undefined;
+
+  const issuesByID = useMemo(
+    () => Object.groupBy(issues?.filter(({ id }) => id) ?? [], ({ id }) => id!),
+    [issues],
+  );
 
   const resource = useResource<
     FetchProviderType,
@@ -76,6 +87,7 @@ export default function Schedules() {
               key={schedule.id}
               data={schedule}
               preview={previewID === schedule.id}
+              issues={issuesByID[schedule.id]}
             />
           ))}
         </List>

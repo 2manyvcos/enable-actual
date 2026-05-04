@@ -67,11 +67,10 @@ export async function getSourcesByID(
 
   const { sources } = loadState();
 
-  if (!Object.hasOwn(sources, sourceID)) {
+  const source = sources[sourceID];
+  if (!Object.hasOwn(sources, sourceID) || !source) {
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
-
-  const source = sources[sourceID]!;
 
   let response: output<typeof SourceResponse>;
   switch (source.type) {
@@ -91,11 +90,10 @@ export async function putSourcesByID(
 
   const { sources } = loadState();
 
-  if (!Object.hasOwn(sources, sourceID)) {
+  const source = sources[sourceID];
+  if (!Object.hasOwn(sources, sourceID) || !source) {
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
-
-  const source = sources[sourceID]!;
 
   let update: output<typeof SourceUpdate>;
   try {
@@ -144,11 +142,10 @@ export async function getSourcesByIDAccounts(
 
   const { sources } = loadState();
 
-  if (!Object.hasOwn(sources, sourceID)) {
+  const source = sources[sourceID];
+  if (!Object.hasOwn(sources, sourceID) || !source) {
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
-
-  const source = sources[sourceID]!;
 
   let response: output<typeof SourceAccount>[];
   switch (source.type) {

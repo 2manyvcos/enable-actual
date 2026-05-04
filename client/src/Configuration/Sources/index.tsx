@@ -6,16 +6,22 @@ import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { type output } from 'zod';
 import { gotoSources } from '@/actions/sources';
+import type Issue from '@shared/schema/Issue';
 import type SourceResponse from '@shared/schema/SourceResponse';
 import { stringifyError } from '@shared/utils';
 import AddSource from './AddSource';
 import EditSource from './EditSource';
 import Source from './Source';
 
-export default function Sources() {
+export default function Sources({
+  issues,
+}: {
+  issues?: output<typeof Issue>[];
+}) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -28,6 +34,11 @@ export default function Sources() {
   const editID = edit?.startsWith('source:')
     ? edit.substring('source:'.length)
     : undefined;
+
+  const issuesByID = useMemo(
+    () => Object.groupBy(issues?.filter(({ id }) => id) ?? [], ({ id }) => id!),
+    [issues],
+  );
 
   const resource = useResource<
     FetchProviderType,
@@ -76,6 +87,7 @@ export default function Sources() {
               key={source.id}
               data={source}
               preview={previewID === source.id}
+              issues={issuesByID[source.id]}
             />
           ))}
         </List>
