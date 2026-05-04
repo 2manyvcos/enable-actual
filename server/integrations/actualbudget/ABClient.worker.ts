@@ -23,7 +23,22 @@ process.on('unhandledRejection', (error) => {
   console.debug('Unhandled promise rejection:', error);
 });
 
+let inited: string | undefined;
+// FIXME: remove when session question is answered: https://github.com/actualbudget/actual/pull/7432#issuecomment-4370501890
+let timeout: NodeJS.Timeout;
 async function init({ serverURL, password }: ABConfig): Promise<void> {
+  const url = new URL(serverURL);
+  url.password = password;
+  const initHash = createHash('sha256').update(url.href).digest('hex');
+
+  if (inited === initHash) return;
+
+  // FIXME: remove when session question is answered: https://github.com/actualbudget/actual/pull/7432#issuecomment-4370501890
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    inited = undefined;
+  }, 3_600_000);
+
   const serverHash = createHash('sha256').update(serverURL).digest('hex');
   const dataDir = path.join(ACTUAL_DATA_DIR, serverHash);
 
@@ -31,7 +46,11 @@ async function init({ serverURL, password }: ABConfig): Promise<void> {
 
   try {
     await api.init({ dataDir, serverURL, password });
+
+    inited = initHash;
   } catch (error) {
+    inited = undefined;
+
     throw new ABError(
       `Authentication failed: ${stringifyError(error)}`,
       'client',
@@ -40,40 +59,28 @@ async function init({ serverURL, password }: ABConfig): Promise<void> {
 }
 
 const auth: ABFnAuth = async (config) => {
-  try {
-    await init(config);
-  } finally {
-    await api.shutdown();
-  }
+  await init(config);
 };
 
 const getBudgets: ABFnGetBudgets = async (config) => {
-  try {
-    await init(config);
+  await init(config);
 
-    return api.getBudgets();
-  } finally {
-    await api.shutdown();
-  }
+  return api.getBudgets();
 };
 
 const downloadBudget: ABFnDownloadBudget = async (
   config,
   { budgetID, budgetPassword },
 ) => {
-  try {
-    await init(config);
+  await init(config);
 
-    try {
-      await api.downloadBudget(budgetID, { password: budgetPassword });
-    } catch (error) {
-      throw new ABError(
-        `Downloading budget file failed: ${stringifyError(error)}`,
-        'client',
-      );
-    }
-  } finally {
-    await api.shutdown();
+  try {
+    await api.downloadBudget(budgetID, { password: budgetPassword });
+  } catch (error) {
+    throw new ABError(
+      `Downloading budget file failed: ${stringifyError(error)}`,
+      'client',
+    );
   }
 };
 
@@ -81,15 +88,11 @@ const getAccounts: ABFnGetAccounts = async (
   config,
   { budgetID, budgetPassword },
 ) => {
-  try {
-    await init(config);
+  await init(config);
 
-    await api.downloadBudget(budgetID, { password: budgetPassword });
+  await api.downloadBudget(budgetID, { password: budgetPassword });
 
-    return api.getAccounts();
-  } finally {
-    await api.shutdown();
-  }
+  return api.getAccounts();
 };
 
 const importTransactions: ABFnImportTransactions = async (
@@ -97,49 +100,45 @@ const importTransactions: ABFnImportTransactions = async (
   { budgetID, budgetPassword },
   bundles,
 ) => {
-  try {
-    await init(config);
+  await init(config);
 
-    await api.downloadBudget(budgetID, { password: budgetPassword });
+  await api.downloadBudget(budgetID, { password: budgetPassword });
 
-    const accounts = (await api.getAccounts()) as ABAccount[];
-    const accountUIDs = Object.fromEntries(
-      accounts.filter(({ id }) => id).map(({ id }) => [id!, true]),
-    );
+  const accounts = (await api.getAccounts()) as ABAccount[];
+  const accountUIDs = Object.fromEntries(
+    accounts.filter(({ id }) => id).map(({ id }) => [id!, true]),
+  );
 
-    const result: ABImportResult = { added: 0, updated: 0, errors: [] };
+  const result: ABImportResult = { added: 0, updated: 0, errors: [] };
 
-    await api.batchBudgetUpdates(async () => {
-      for (const { accountUID, transactions } of bundles) {
-        if (!Object.hasOwn(accountUIDs, accountUID)) {
-          result.errors.push(`Account "${accountUID}" not found`);
-          continue;
-        }
-
-        const { added, updated, errors } = await api.importTransactions(
-          accountUID,
-          transactions.map((transaction) => ({
-            account: transaction.account,
-            date: transaction.date,
-            amount: transaction.amount,
-            payee_name: transaction.payeeName,
-            imported_payee: transaction.importedPayee,
-            notes: transaction.notes,
-            imported_id: transaction.importedID,
-          })),
-          { reimportDeleted: false, defaultCleared: true },
-        );
-
-        result.added += added.length;
-        result.updated += updated.length;
-        result.errors.push(...errors);
+  await api.batchBudgetUpdates(async () => {
+    for (const { accountUID, transactions } of bundles) {
+      if (!Object.hasOwn(accountUIDs, accountUID)) {
+        result.errors.push(`Account "${accountUID}" not found`);
+        continue;
       }
-    });
 
-    return result;
-  } finally {
-    await api.shutdown();
-  }
+      const { added, updated, errors } = await api.importTransactions(
+        accountUID,
+        transactions.map((transaction) => ({
+          account: transaction.account,
+          date: transaction.date,
+          amount: transaction.amount,
+          payee_name: transaction.payeeName,
+          imported_payee: transaction.importedPayee,
+          notes: transaction.notes,
+          imported_id: transaction.importedID,
+        })),
+        { reimportDeleted: false, defaultCleared: true },
+      );
+
+      result.added += added.length;
+      result.updated += updated.length;
+      result.errors.push(...errors);
+    }
+  });
+
+  return result;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
@@ -155,7 +154,26 @@ let queue = Promise.resolve();
 
 parentPort!.addListener(
   'message',
-  ({ id, method, args }: { id: string; method: string; args: unknown[] }) => {
+  async ({
+    id,
+    method,
+    args,
+  }: {
+    id: string;
+    method: string;
+    args: unknown[];
+  }) => {
+    if (method === 'close') {
+      console.debug('Shutting down Actual Budget API client');
+      try {
+        await api.shutdown();
+      } catch (error) {
+        console.debug('Error shutting down Actual Budget API client:', error);
+      }
+      console.debug('Exiting Actual Budget worker');
+      process.exit(0);
+    }
+
     queue = queue.then(async () => {
       try {
         const result = await methods[method](...args);

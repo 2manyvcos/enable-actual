@@ -15,6 +15,7 @@ import {
   SSL_PRIVATE_KEY_FILE,
 } from './config.ts';
 import { loadHistory } from './history.ts';
+import { shutdownABWorkers } from './integrations/actualbudget/ABClient.ts';
 import resolveClientTemplate from './resolveClientTemplate.ts';
 import { startScheduler } from './scheduler/scheduler.ts';
 import { loadState } from './state.ts';
@@ -34,6 +35,38 @@ try {
 } catch (error) {
   throw new Error(`Error loading history: ${stringifyError(error)}`);
 }
+
+let forceShutdown = false;
+async function shutdown() {
+  if (forceShutdown) {
+    console.log('Forcing shutdown');
+    process.exit(0);
+  }
+
+  console.log(
+    '\nGot request to shut down, this may take some time - Send another signal to force shutdown now.',
+  );
+  forceShutdown = true;
+
+  console.debug('Shutting down now…');
+
+  try {
+    await Promise.all([shutdownABWorkers()]);
+  } catch (error) {
+    console.debug('Error while shutting down:', stringifyError(error));
+    const timeout = 10;
+    console.debug(`Waiting ${timeout} seconds…`);
+    await new Promise((resolve) => {
+      setTimeout(resolve, timeout * 1000);
+    });
+  }
+
+  console.debug('Bye');
+  process.exit(0);
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 startScheduler();
 

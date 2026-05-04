@@ -3,7 +3,10 @@ import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { stringifyError } from '../../shared/utils.ts';
 import { PUBLIC_URL } from '../config.ts';
-import { getTargetsByIDActualBudgetBudgets } from '../integrations/actualbudget/routes.ts';
+import {
+  getTargetsByIDActualBudgetBudgets,
+  postTargetsByIDActualBudgetConnection,
+} from '../integrations/actualbudget/routes.ts';
 import {
   getSourcesByIDEnableBankingASPSPs,
   postEnableBankingSession,
@@ -75,6 +78,10 @@ router.get('/v1/targets/:targetID', getTargetsByID);
 router.put('/v1/targets/:targetID', putTargetsByID);
 router.delete('/v1/targets/:targetID', deleteTargetsByID);
 router.get('/v1/targets/:targetID/accounts', getTargetsByIDAccounts);
+router.post(
+  '/v1/targets/:targetID/actualbudget/connection',
+  postTargetsByIDActualBudgetConnection,
+);
 router.get(
   '/v1/targets/:targetID/actualbudget/budgets',
   getTargetsByIDActualBudgetBudgets,
