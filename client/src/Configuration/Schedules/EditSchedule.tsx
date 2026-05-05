@@ -14,12 +14,13 @@ import TextField from '@mui/material/TextField';
 import { set, update } from 'immutable';
 import { useState, type ReactNode } from 'react';
 import type { input, output } from 'zod';
-import { deleteSchedulesByIDState, putSchedulesByID } from '@/api/schedules';
+import { putSchedulesByID } from '@/api/schedules';
 import NumberField from '@/components/NumberField';
 import ScheduleAccountMappingSchema from '@shared/schema/ScheduleAccountMapping';
 import type ScheduleResponse from '@shared/schema/ScheduleResponse';
 import type ScheduleUpdate from '@shared/schema/ScheduleUpdate';
 import DeleteSchedule from './DeleteSchedule';
+import DeleteScheduleState from './DeleteScheduleState';
 import ScheduleAccountMapping from './ScheduleAccountMapping';
 
 type HandleChangeValue<T> =
@@ -32,10 +33,12 @@ function Component({
   data: schedule,
   onClose,
   deleteAction,
+  deleteStateAction,
 }: {
   data: output<typeof ScheduleResponse>;
   onClose: () => void;
   deleteAction: ReactNode;
+  deleteStateAction: ReactNode;
 }) {
   const { dataProvider } = useConfigContext<FetchProviderType>();
 
@@ -200,16 +203,7 @@ function Component({
       <DialogActions>
         {deleteAction}
 
-        <Button
-          onClick={() => {
-            deleteSchedulesByIDState({
-              dataProvider: dataProvider!,
-              scheduleID: schedule.id,
-            });
-          }}
-        >
-          Reset state
-        </Button>
+        {deleteStateAction}
 
         <Button onClick={onClose}>Cancel</Button>
 
@@ -229,6 +223,7 @@ export default function EditSchedule({
   onClose: () => void;
 }) {
   const [deleteRequested, setDeleteRequested] = useState(false);
+  const [deleteStateRequested, setDeleteStateRequested] = useState(false);
 
   return (
     <>
@@ -249,6 +244,15 @@ export default function EditSchedule({
               Delete
             </Button>
           }
+          deleteStateAction={
+            <Button
+              onClick={() => {
+                setDeleteStateRequested(true);
+              }}
+            >
+              Reset state
+            </Button>
+          }
         />
       </Dialog>
 
@@ -259,6 +263,17 @@ export default function EditSchedule({
           onSuccess={onClose}
           onClose={() => {
             setDeleteRequested(false);
+          }}
+        />
+      )}
+
+      {!data ? null : (
+        <DeleteScheduleState
+          open={deleteStateRequested}
+          data={data}
+          onSuccess={onClose}
+          onClose={() => {
+            setDeleteStateRequested(false);
           }}
         />
       )}
