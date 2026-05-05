@@ -9,6 +9,9 @@ import type Transaction from '../../shared/schema/Transaction.ts';
 import type TransactionBundle from '../../shared/schema/TransactionBundle.ts';
 import { stringifyError } from '../../shared/utils.ts';
 import { publishEvent } from '../api/events.ts';
+import { getScheduleResponse } from '../api/schedules.ts';
+import { getSourceAccounts, getSourceResponse } from '../api/sources.ts';
+import { getTargetAccounts, getTargetResponse } from '../api/targets.ts';
 import { HISTORY_LENGTH, PUBLIC_URL } from '../config.ts';
 import { putHistory } from '../history.ts';
 import { importActualBudgetTransactions } from '../integrations/actualbudget/transactions.ts';
@@ -39,7 +42,93 @@ export default function createImportJob(
       id: uuid(),
       time: new Date(),
       scheduleID,
-      scheduleName: schedule.name,
+      scheduleName: (await getScheduleResponse(scheduleID, schedule)).name,
+      sources: Object.fromEntries(
+        await Promise.all(
+          Object.entries(
+            Object.groupBy(schedule.accounts, ({ sourceID }) => sourceID),
+          )
+            .filter(
+              ([sourceID]) =>
+                Object.hasOwn(sources, sourceID) && sources[sourceID],
+            )
+            .map(async ([sourceID, accounts]) => {
+              const source = sources[sourceID]!;
+              const accountNames = Object.fromEntries(
+                (await getSourceAccounts(sourceID, source))?.map(
+                  ({ id, name }) => [id, name],
+                ) ?? [],
+              );
+
+              return [
+                sourceID,
+                {
+                  name: (await getSourceResponse(sourceID, source)).name,
+                  accounts: Object.fromEntries(
+                    Object.keys(
+                      Object.groupBy(
+                        accounts ?? [],
+                        ({ sourceAccountID }) => sourceAccountID,
+                      ),
+                    )
+                      .filter(
+                        (sourceAccountID) =>
+                          Object.hasOwn(accountNames, sourceAccountID) &&
+                          accountNames[sourceAccountID],
+                      )
+                      .map((sourceAccountID) => [
+                        sourceAccountID,
+                        { name: accountNames[sourceAccountID] },
+                      ]),
+                  ),
+                },
+              ];
+            }),
+        ),
+      ),
+      targets: Object.fromEntries(
+        await Promise.all(
+          Object.entries(
+            Object.groupBy(schedule.accounts, ({ targetID }) => targetID),
+          )
+            .filter(
+              ([targetID]) =>
+                Object.hasOwn(targets, targetID) && targets[targetID],
+            )
+            .map(async ([targetID, accounts]) => {
+              const target = targets[targetID]!;
+              const accountNames = Object.fromEntries(
+                (await getTargetAccounts(targetID, target))?.map(
+                  ({ id, name }) => [id, name],
+                ) ?? [],
+              );
+
+              return [
+                targetID,
+                {
+                  name: (await getTargetResponse(targetID, target)).name,
+                  accounts: Object.fromEntries(
+                    Object.keys(
+                      Object.groupBy(
+                        accounts ?? [],
+                        ({ targetAccountID }) => targetAccountID,
+                      ),
+                    )
+                      .filter(
+                        (targetAccountID) =>
+                          Object.hasOwn(accountNames, targetAccountID) &&
+                          accountNames[targetAccountID],
+                      )
+                      .map((targetAccountID) => [
+                        targetAccountID,
+                        { name: accountNames[targetAccountID] },
+                      ]),
+                  ),
+                },
+              ];
+            }),
+        ),
+      ),
     });
 
     const bundles: {
@@ -66,7 +155,7 @@ export default function createImportJob(
       ).map(async ([sourceID, accounts]): Promise<void> => {
         const source = sources[sourceID];
         if (!Object.hasOwn(sources, sourceID) || !source) {
-          report.errors.push(`Source "${sourceID}" not found`);
+          report.errors.push({ message: `Source "${sourceID}" not found` });
           return;
         }
 
@@ -91,11 +180,10 @@ export default function createImportJob(
               break;
           }
         } catch (error) {
-          report.errors.push(
-            `Error fetching transactions for source "${sourceID}": ${stringifyError(
-              error,
-            )}`,
-          );
+          report.errors.push({
+            message: `Error fetching transactions: ${stringifyError(error)}`,
+            sourceID,
+          });
           return;
         }
 
@@ -118,7 +206,7 @@ export default function createImportJob(
       ).map(async ([targetID, accounts]): Promise<void> => {
         const target = targets[targetID];
         if (!Object.hasOwn(targets, targetID) || !target) {
-          report.errors.push(`Target "${targetID}" not found`);
+          report.errors.push({ message: `Target "${targetID}" not found` });
           return;
         }
 
@@ -163,11 +251,10 @@ export default function createImportJob(
               break;
           }
         } catch (error) {
-          report.errors.push(
-            `Error importing transactions into target "${targetID}": ${stringifyError(
-              error,
-            )}`,
-          );
+          report.errors.push({
+            message: `Error importing transactions: ${stringifyError(error)}`,
+            targetID,
+          });
           return;
         }
 

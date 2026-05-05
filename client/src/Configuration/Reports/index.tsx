@@ -6,11 +6,11 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { array, type input, type output } from 'zod';
-import { deleteReports } from '@/api/reports';
 import ImportReport from '@shared/schema/ImportReport';
 import { stringifyError } from '@shared/utils';
+import DeleteReports from './DeleteReports';
 import Report from './Report';
 
 export default function Reports() {
@@ -22,6 +22,8 @@ export default function Reports() {
     query: undefined,
     events: true,
   });
+
+  const [clearRequested, setClearRequested] = useState(false);
 
   const [data, error] = useMemo<
     [output<typeof ImportReport>[], unknown]
@@ -70,8 +72,8 @@ export default function Reports() {
     <>
       <AccordionActions>
         <Button
-          onClick={async () => {
-            await deleteReports({ dataProvider: resource.dataProvider });
+          onClick={() => {
+            setClearRequested(true);
           }}
         >
           Clear
@@ -83,6 +85,13 @@ export default function Reports() {
           <Report key={report.id} data={report} />
         ))}
       </AccordionDetails>
+
+      <DeleteReports
+        open={clearRequested}
+        onClose={() => {
+          setClearRequested(false);
+        }}
+      />
     </>
   );
 }

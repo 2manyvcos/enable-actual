@@ -76,6 +76,8 @@ const downloadBudget: ABFnDownloadBudget = async (
 
   try {
     await api.downloadBudget(budgetID, { password: budgetPassword });
+
+    await api.sync();
   } catch (error) {
     throw new ABError(
       `Downloading budget file failed: ${stringifyError(error)}`,
@@ -92,6 +94,8 @@ const getAccounts: ABFnGetAccounts = async (
 
   await api.downloadBudget(budgetID, { password: budgetPassword });
 
+  await api.sync();
+
   return api.getAccounts();
 };
 
@@ -103,6 +107,8 @@ const importTransactions: ABFnImportTransactions = async (
   await init(config);
 
   await api.downloadBudget(budgetID, { password: budgetPassword });
+
+  await api.sync();
 
   const accounts = (await api.getAccounts()) as ABAccount[];
   const accountUIDs = Object.fromEntries(
@@ -137,6 +143,8 @@ const importTransactions: ABFnImportTransactions = async (
       result.errors.push(...errors);
     }
   });
+
+  await api.sync();
 
   return result;
 };

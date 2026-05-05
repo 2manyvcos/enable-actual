@@ -51,12 +51,10 @@ export async function importActualBudgetTransactions({
   report.updatedTransactions += updated;
 
   report.errors.push(
-    ...errors.map(
-      (error) =>
-        `Error importing transactions into target "${targetID}": ${stringifyError(
-          error,
-        )}`,
-    ),
+    ...errors.map((error) => ({
+      message: `Error importing transactions: ${stringifyError(error)}`,
+      targetID,
+    })),
   );
 
   return !report.errors.length;

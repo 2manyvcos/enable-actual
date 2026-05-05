@@ -9,5 +9,4 @@ export default strictObject({
   hasPassword: boolean(),
   budgetID: string().optional(),
   hasBudgetPassword: boolean(),
-  setupRequired: boolean(),
 });

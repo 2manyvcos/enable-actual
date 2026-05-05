@@ -7,4 +7,5 @@ export default strictObject({
   currency: string(),
   payee: string().optional(),
   notes: string().optional(),
+  raw: string(),
 });

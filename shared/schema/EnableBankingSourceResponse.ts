@@ -12,5 +12,4 @@ export default strictObject({
   tokenValidityDays: number().int().nonnegative().optional(),
   sessionID: string().optional(),
   sessionValidUntil: coerce.date<string | Date>().optional(),
-  setupRequired: boolean(),
 });

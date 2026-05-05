@@ -2,10 +2,10 @@ import type { Request, Response } from 'express';
 import type { output } from 'zod';
 import type Issue from '../../shared/schema/Issue.ts';
 import { stringifyError } from '../../shared/utils.ts';
-import { getActualBudgetTargetIssues } from '../integrations/actualbudget/targets.ts';
-import { getEnableBankingSourceIssues } from '../integrations/enablebanking/sources.ts';
 import { loadState } from '../state.ts';
 import { getScheduleIssues } from './schedules.ts';
+import { getSourceIssues } from './sources.ts';
+import { getTargetIssues } from './targets.ts';
 
 export async function getIssues(_req: Request, res: Response): Promise<void> {
   const state = loadState();
@@ -27,20 +27,11 @@ export async function getIssues(_req: Request, res: Response): Promise<void> {
         Object.entries(state.sources)
           .filter(([, source]) => source)
           .map(async ([sourceID, source]) => {
-            switch (source!.type) {
-              case 'enablebanking':
-                try {
-                  return await getEnableBankingSourceIssues(
-                    sourceID,
-                    source!,
-                    state,
-                  );
-                } catch (error) {
-                  console.debug(
-                    `Error resolving issues: ${stringifyError(error)}`,
-                  );
-                  return [];
-                }
+            try {
+              return await getSourceIssues(sourceID, source!, state);
+            } catch (error) {
+              console.debug(`Error resolving issues: ${stringifyError(error)}`);
+              return [];
             }
           }),
       )
@@ -62,20 +53,11 @@ export async function getIssues(_req: Request, res: Response): Promise<void> {
         Object.entries(state.targets)
           .filter(([, target]) => target)
           .map(async ([targetID, target]) => {
-            switch (target!.type) {
-              case 'actualbudget':
-                try {
-                  return await getActualBudgetTargetIssues(
-                    targetID,
-                    target!,
-                    state,
-                  );
-                } catch (error) {
-                  console.debug(
-                    `Error resolving issues: ${stringifyError(error)}`,
-                  );
-                  return [];
-                }
+            try {
+              return await getTargetIssues(targetID, target!, state);
+            } catch (error) {
+              console.debug(`Error resolving issues: ${stringifyError(error)}`);
+              return [];
             }
           }),
       )
