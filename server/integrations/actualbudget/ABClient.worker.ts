@@ -76,6 +76,8 @@ const downloadBudget: ABFnDownloadBudget = async (
 
   try {
     await api.downloadBudget(budgetID, { password: budgetPassword });
+
+    await api.sync();
   } catch (error) {
     throw new ABError(
       `Downloading budget file failed: ${stringifyError(error)}`,
@@ -91,6 +93,8 @@ const getAccounts: ABFnGetAccounts = async (
   await init(config);
 
   await api.downloadBudget(budgetID, { password: budgetPassword });
+
+  await api.sync();
 
   return api.getAccounts();
 };
