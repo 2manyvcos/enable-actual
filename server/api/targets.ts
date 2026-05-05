@@ -3,6 +3,8 @@ import { removeIn, setIn } from 'immutable';
 import { v7 as uuid } from 'uuid';
 import type { output } from 'zod';
 import IDResponse from '../../shared/schema/IDResponse.ts';
+import type Issue from '../../shared/schema/Issue.ts';
+import type State from '../../shared/schema/State.ts';
 import type TargetAccount from '../../shared/schema/TargetAccount.ts';
 import TargetRequest from '../../shared/schema/TargetRequest.ts';
 import type TargetResponse from '../../shared/schema/TargetResponse.ts';
@@ -12,24 +14,72 @@ import {
   applyActualBudgetTargetRequest,
   applyActualBudgetTargetUpdate,
   getActualBudgetTargetAccounts,
+  getActualBudgetTargetIssues,
   getActualBudgetTargetResponse,
 } from '../integrations/actualbudget/targets.ts';
 import { loadState, putState } from '../state.ts';
 import APIError from './APIError.ts';
 import { publishEvent } from './events.ts';
 
+export async function getTargetResponse(
+  id: string,
+  target: output<typeof TargetState>,
+): Promise<output<typeof TargetResponse>> {
+  switch (target.type) {
+    case 'actualbudget':
+      return await getActualBudgetTargetResponse(id, target);
+  }
+}
+
+export async function applyTargetRequest(
+  request: output<typeof TargetRequest>,
+): Promise<output<typeof TargetState>> {
+  switch (request.type) {
+    case 'actualbudget':
+      return await applyActualBudgetTargetRequest(request);
+  }
+}
+
+export async function applyTargetUpdate(
+  target: output<typeof TargetState>,
+  update: output<typeof TargetUpdate>,
+): Promise<output<typeof TargetState>> {
+  if (target.type !== update.type) throw new APIError('Type mismatch', 400);
+
+  switch (update.type) {
+    case 'actualbudget':
+      return await applyActualBudgetTargetUpdate(target, update);
+  }
+}
+
+export async function getTargetIssues(
+  id: string,
+  target: output<typeof TargetState>,
+  state: output<typeof State>,
+): Promise<output<typeof Issue>[]> {
+  switch (target.type) {
+    case 'actualbudget':
+      return await getActualBudgetTargetIssues(id, target, state);
+  }
+}
+
+export async function getTargetAccounts(
+  id: string,
+  target: output<typeof TargetState>,
+): Promise<output<typeof TargetAccount>[]> {
+  switch (target.type) {
+    case 'actualbudget':
+      return await getActualBudgetTargetAccounts(id, target);
+  }
+}
+
 export async function getTargets(_req: Request, res: Response): Promise<void> {
   const { targets } = loadState();
 
   const response: output<typeof TargetResponse>[] = await Promise.all(
     Object.entries(targets)
-      .filter(([, value]) => value)
-      .map(async ([targetID, target]) => {
-        switch (target!.type) {
-          case 'actualbudget':
-            return await getActualBudgetTargetResponse(targetID, target!);
-        }
-      }),
+      .filter(([, target]) => target)
+      .map(async ([targetID, target]) => getTargetResponse(targetID, target!)),
   );
 
   res.send(response);
@@ -44,13 +94,7 @@ export async function postTargets(req: Request, res: Response): Promise<void> {
   }
 
   const targetID = uuid();
-
-  let target: output<typeof TargetState>;
-  switch (request.type) {
-    case 'actualbudget':
-      target = await applyActualBudgetTargetRequest(request);
-      break;
-  }
+  const target = await applyTargetRequest(request);
 
   putState((prev) => setIn(prev, ['targets', targetID], target));
 
@@ -72,12 +116,7 @@ export async function getTargetsByID(
     throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
-  let response: output<typeof TargetResponse>;
-  switch (target.type) {
-    case 'actualbudget':
-      response = await getActualBudgetTargetResponse(targetID, target);
-      break;
-  }
+  const response = await getTargetResponse(targetID, target);
 
   res.send(response);
 }
@@ -104,12 +143,7 @@ export async function putTargetsByID(
 
   if (target.type !== update.type) throw new APIError('Type mismatch', 400);
 
-  let nextTarget: output<typeof TargetState>;
-  switch (update.type) {
-    case 'actualbudget':
-      nextTarget = await applyActualBudgetTargetUpdate(target, update);
-      break;
-  }
+  const nextTarget = await applyTargetUpdate(target, update);
 
   putState((prev) => setIn(prev, ['targets', targetID], nextTarget));
 
@@ -147,12 +181,7 @@ export async function getTargetsByIDAccounts(
     throw new APIError(`Target "${targetID}" not found`, 404);
   }
 
-  let response: output<typeof TargetAccount>[];
-  switch (target.type) {
-    case 'actualbudget':
-      response = await getActualBudgetTargetAccounts(targetID, target!);
-      break;
-  }
+  const response = await getTargetAccounts(targetID, target);
 
   res.send(response);
 }

@@ -1,4 +1,4 @@
-import { array, coerce, number, strictObject, string } from 'zod';
+import { array, coerce, number, record, strictObject, string } from 'zod';
 import RejectedTransaction from './RejectedTransaction.ts';
 import ResolvedTransaction from './ResolvedTransaction.ts';
 
@@ -7,7 +7,35 @@ export default strictObject({
   time: coerce.date<string | Date>(),
   scheduleID: string(),
   scheduleName: string().optional(),
-  errors: array(string()).prefault([]),
+  sources: record(
+    string(),
+    strictObject({
+      name: string().optional(),
+      accounts: record(
+        string(),
+        strictObject({ name: string().optional() }).optional(),
+      ),
+    }).optional(),
+  ),
+  targets: record(
+    string(),
+    strictObject({
+      name: string().optional(),
+      accounts: record(
+        string(),
+        strictObject({ name: string().optional() }).optional(),
+      ),
+    }).optional(),
+  ),
+  errors: array(
+    strictObject({
+      message: string(),
+      sourceID: string().optional(),
+      sourceAccountID: string().optional(),
+      targetID: string().optional(),
+      targetAccountID: string().optional(),
+    }),
+  ).prefault([]),
   rejectedTransactions: array(RejectedTransaction).prefault([]),
   resolvedTransactions: array(ResolvedTransaction).prefault([]),
   importedTransactions: number().int().nonnegative().default(0),

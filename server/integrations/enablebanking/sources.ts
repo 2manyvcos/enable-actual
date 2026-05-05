@@ -11,9 +11,20 @@ import APIError from '../../api/APIError.ts';
 import { ENABLEBANKING_API } from '../../config.ts';
 import EBClient, { type EBError } from './EBClient.ts';
 
+function isSetupRequired({
+  bankCountry,
+  bankName,
+  psuType,
+  tokenValidityDays,
+}: output<typeof EnableBankingSourceState>): boolean {
+  return !bankCountry || !bankName || !psuType || !tokenValidityDays;
+}
+
 export function getEnableBankingSourceResponse(
   id: string,
-  {
+  source: output<typeof EnableBankingSourceState>,
+): output<typeof EnableBankingSourceResponse> {
+  const {
     name,
     appID,
     bankCountry,
@@ -22,17 +33,14 @@ export function getEnableBankingSourceResponse(
     tokenValidityDays,
     sessionID,
     sessionValidUntil,
-  }: output<typeof EnableBankingSourceState>,
-): output<typeof EnableBankingSourceResponse> {
-  const setupRequired =
-    !bankCountry || !bankName || !psuType || !tokenValidityDays;
+  } = source;
 
   try {
     return EnableBankingSourceResponse.decode({
       id,
       type: 'enablebanking',
       name,
-      available: !setupRequired && !!sessionID,
+      available: !isSetupRequired(source) && !!sessionID,
       appID,
       bankCountry,
       bankName,
@@ -40,7 +48,6 @@ export function getEnableBankingSourceResponse(
       tokenValidityDays,
       sessionID,
       sessionValidUntil,
-      setupRequired,
     });
   } catch (error) {
     throw new APIError(error, 500, 'Schema violation');
@@ -154,7 +161,7 @@ export function getEnableBankingSourceIssues(
 ): output<typeof Issue>[] {
   const data = getEnableBankingSourceResponse(id, source);
 
-  if (data.setupRequired) {
+  if (isSetupRequired(source)) {
     return [
       {
         description: `Source "${data.name || id}" requires additional setup!`,

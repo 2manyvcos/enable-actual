@@ -104,6 +104,8 @@ const importTransactions: ABFnImportTransactions = async (
 
   await api.downloadBudget(budgetID, { password: budgetPassword });
 
+  await api.sync();
+
   const accounts = (await api.getAccounts()) as ABAccount[];
   const accountUIDs = Object.fromEntries(
     accounts.filter(({ id }) => id).map(({ id }) => [id!, true]),
@@ -137,6 +139,8 @@ const importTransactions: ABFnImportTransactions = async (
       result.errors.push(...errors);
     }
   });
+
+  await api.sync();
 
   return result;
 };

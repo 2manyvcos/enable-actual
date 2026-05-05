@@ -3,33 +3,83 @@ import { removeIn, setIn } from 'immutable';
 import { v7 as uuid } from 'uuid';
 import type { output } from 'zod';
 import IDResponse from '../../shared/schema/IDResponse.ts';
+import type Issue from '../../shared/schema/Issue.ts';
 import type SourceAccount from '../../shared/schema/SourceAccount.ts';
 import SourceRequest from '../../shared/schema/SourceRequest.ts';
 import type SourceResponse from '../../shared/schema/SourceResponse.ts';
 import type SourceState from '../../shared/schema/SourceState.ts';
 import SourceUpdate from '../../shared/schema/SourceUpdate.ts';
+import type State from '../../shared/schema/State.ts';
 import {
   applyEnableBankingSourceRequest,
   applyEnableBankingSourceUpdate,
   getEnableBankingSourceAccounts,
+  getEnableBankingSourceIssues,
   getEnableBankingSourceResponse,
 } from '../integrations/enablebanking/sources.ts';
 import { loadState, putState } from '../state.ts';
 import APIError from './APIError.ts';
 import { publishEvent } from './events.ts';
 
+export async function getSourceResponse(
+  id: string,
+  source: output<typeof SourceState>,
+): Promise<output<typeof SourceResponse>> {
+  switch (source.type) {
+    case 'enablebanking':
+      return await getEnableBankingSourceResponse(id, source);
+  }
+}
+
+export async function applySourceRequest(
+  request: output<typeof SourceRequest>,
+): Promise<output<typeof SourceState>> {
+  switch (request.type) {
+    case 'enablebanking':
+      return await applyEnableBankingSourceRequest(request);
+  }
+}
+
+export async function applySourceUpdate(
+  source: output<typeof SourceState>,
+  update: output<typeof SourceUpdate>,
+): Promise<output<typeof SourceState>> {
+  if (source.type !== update.type) throw new APIError('Type mismatch', 400);
+
+  switch (update.type) {
+    case 'enablebanking':
+      return await applyEnableBankingSourceUpdate(source, update);
+  }
+}
+
+export async function getSourceIssues(
+  id: string,
+  source: output<typeof SourceState>,
+  state: output<typeof State>,
+): Promise<output<typeof Issue>[]> {
+  switch (source.type) {
+    case 'enablebanking':
+      return await getEnableBankingSourceIssues(id, source, state);
+  }
+}
+
+export async function getSourceAccounts(
+  id: string,
+  source: output<typeof SourceState>,
+): Promise<output<typeof SourceAccount>[]> {
+  switch (source.type) {
+    case 'enablebanking':
+      return await getEnableBankingSourceAccounts(id, source);
+  }
+}
+
 export async function getSources(_req: Request, res: Response): Promise<void> {
   const { sources } = loadState();
 
   const response: output<typeof SourceResponse>[] = await Promise.all(
     Object.entries(sources)
-      .filter(([, value]) => value)
-      .map(async ([sourceID, source]) => {
-        switch (source!.type) {
-          case 'enablebanking':
-            return await getEnableBankingSourceResponse(sourceID, source!);
-        }
-      }),
+      .filter(([, source]) => source)
+      .map(async ([sourceID, source]) => getSourceResponse(sourceID, source!)),
   );
 
   res.send(response);
@@ -44,13 +94,7 @@ export async function postSources(req: Request, res: Response): Promise<void> {
   }
 
   const sourceID = uuid();
-
-  let source: output<typeof SourceState>;
-  switch (request.type) {
-    case 'enablebanking':
-      source = await applyEnableBankingSourceRequest(request);
-      break;
-  }
+  const source = await applySourceRequest(request);
 
   putState((prev) => setIn(prev, ['sources', sourceID], source));
 
@@ -72,12 +116,7 @@ export async function getSourcesByID(
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
-  let response: output<typeof SourceResponse>;
-  switch (source.type) {
-    case 'enablebanking':
-      response = await getEnableBankingSourceResponse(sourceID, source);
-      break;
-  }
+  const response = await getSourceResponse(sourceID, source);
 
   res.send(response);
 }
@@ -102,14 +141,7 @@ export async function putSourcesByID(
     throw new APIError(error, 400, 'Schema violation');
   }
 
-  if (source.type !== update.type) throw new APIError('Type mismatch', 400);
-
-  let nextSource: output<typeof SourceState>;
-  switch (update.type) {
-    case 'enablebanking':
-      nextSource = await applyEnableBankingSourceUpdate(source, update);
-      break;
-  }
+  const nextSource = await applySourceUpdate(source, update);
 
   putState((prev) => setIn(prev, ['sources', sourceID], nextSource));
 
@@ -147,12 +179,7 @@ export async function getSourcesByIDAccounts(
     throw new APIError(`Source "${sourceID}" not found`, 404);
   }
 
-  let response: output<typeof SourceAccount>[];
-  switch (source.type) {
-    case 'enablebanking':
-      response = await getEnableBankingSourceAccounts(sourceID, source!);
-      break;
-  }
+  const response = await getSourceAccounts(sourceID, source);
 
   res.send(response);
 }

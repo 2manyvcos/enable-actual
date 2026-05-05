@@ -10,29 +10,28 @@ import APIError from '../../api/APIError.ts';
 import ABClient from './ABClient.ts';
 import type { ABError } from './ABClient.types.ts';
 
+function isSetupRequired({
+  budgetID,
+}: output<typeof ActualBudgetTargetState>): boolean {
+  return !budgetID;
+}
+
 export function getActualBudgetTargetResponse(
   id: string,
-  {
-    name,
-    url,
-    password,
-    budgetID,
-    budgetPassword,
-  }: output<typeof ActualBudgetTargetState>,
+  target: output<typeof ActualBudgetTargetState>,
 ): output<typeof ActualBudgetTargetResponse> {
-  const setupRequired = !budgetID;
+  const { name, url, password, budgetID, budgetPassword } = target;
 
   try {
     return ActualBudgetTargetResponse.decode({
       id,
       type: 'actualbudget',
       name,
-      available: !setupRequired,
+      available: !isSetupRequired(target),
       url,
       hasPassword: !!password,
       budgetID,
       hasBudgetPassword: !!budgetPassword,
-      setupRequired,
     });
   } catch (error) {
     throw new APIError(error, 500, 'Schema violation');
@@ -161,7 +160,7 @@ export function getActualBudgetTargetIssues(
 ): output<typeof Issue>[] {
   const data = getActualBudgetTargetResponse(id, target);
 
-  if (data.setupRequired) {
+  if (isSetupRequired(target)) {
     return [
       {
         description: `Target "${data.name || id}" requires additional setup!`,

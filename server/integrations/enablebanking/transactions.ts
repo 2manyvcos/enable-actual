@@ -62,6 +62,7 @@ function convertTransaction(
     currency: transaction.transaction_amount.currency,
     payee,
     notes,
+    raw: JSON.stringify(transaction),
   };
 
   let rejectionReason: string | undefined;
@@ -133,11 +134,11 @@ export async function resolveEnableBankingTransactions({
               resolvedTransactions.push(...transactions);
             }
           } catch (error) {
-            report.errors.push(
-              `Error fetching transactions for source "${sourceID}", account "${sourceAccountID}": ${stringifyError(
-                error,
-              )}`,
-            );
+            report.errors.push({
+              message: `Error fetching transactions: ${stringifyError(error)}`,
+              sourceID,
+              sourceAccountID,
+            });
             return undefined;
           }
         }

@@ -9,18 +9,67 @@ import ScheduleRequest from '../../shared/schema/ScheduleRequest.ts';
 import ScheduleResponse from '../../shared/schema/ScheduleResponse.ts';
 import ScheduleState from '../../shared/schema/ScheduleState.ts';
 import ScheduleUpdate from '../../shared/schema/ScheduleUpdate.ts';
-import type SourceAccount from '../../shared/schema/SourceAccount.ts';
 import type State from '../../shared/schema/State.ts';
-import type TargetAccount from '../../shared/schema/TargetAccount.ts';
 import { stringifyError } from '../../shared/utils.ts';
-import { getActualBudgetTargetAccounts } from '../integrations/actualbudget/targets.ts';
-import { getEnableBankingSourceAccounts } from '../integrations/enablebanking/sources.ts';
 import { runSchedule, updateSchedule } from '../scheduler/scheduler.ts';
 import { loadState, putState } from '../state.ts';
 import APIError from './APIError.ts';
 import { publishEvent } from './events.ts';
+import { getSourceAccounts } from './sources.ts';
+import { getTargetAccounts } from './targets.ts';
 
-function getScheduleResponse(
+async function isSetupRequired(
+  { accounts }: output<typeof ScheduleState>,
+  state: output<typeof State>,
+): Promise<boolean> {
+  return (
+    await Promise.all(
+      accounts.flatMap((account): Promise<boolean>[] => [
+        (async () => {
+          try {
+            const source = state.sources[account.sourceID];
+            if (!Object.hasOwn(state.sources, account.sourceID) || !source)
+              return true;
+            const sourceAccounts = await getSourceAccounts(
+              account.sourceID,
+              source,
+            );
+            if (
+              !sourceAccounts.some(({ id }) => id === account.sourceAccountID)
+            )
+              return true;
+          } catch (error) {
+            console.debug(`Error resolving issues: ${stringifyError(error)}`);
+          }
+
+          return false;
+        })(),
+
+        (async () => {
+          try {
+            const target = state.targets[account.targetID];
+            if (!Object.hasOwn(state.targets, account.targetID) || !target)
+              return true;
+            const targetAccounts = await getTargetAccounts(
+              account.targetID,
+              target,
+            );
+            if (
+              !targetAccounts.some(({ id }) => id === account.targetAccountID)
+            )
+              return true;
+          } catch (error) {
+            console.debug(`Error resolving issues: ${stringifyError(error)}`);
+          }
+
+          return false;
+        })(),
+      ]),
+    )
+  ).some(Boolean);
+}
+
+export async function getScheduleResponse(
   id: string,
   {
     name,
@@ -31,7 +80,7 @@ function getScheduleResponse(
     appendPayeeID,
     accounts,
   }: output<typeof ScheduleState>,
-): output<typeof ScheduleResponse> {
+): Promise<output<typeof ScheduleResponse>> {
   try {
     return ScheduleResponse.decode({
       id,
@@ -49,7 +98,7 @@ function getScheduleResponse(
   }
 }
 
-function applyScheduleRequest({
+export async function applyScheduleRequest({
   name,
   schedule,
   initialDays,
@@ -57,7 +106,7 @@ function applyScheduleRequest({
   offsetDays,
   appendPayeeID,
   accounts,
-}: output<typeof ScheduleRequest>): output<typeof ScheduleState> {
+}: output<typeof ScheduleRequest>): Promise<output<typeof ScheduleState>> {
   const { valid, error } = validateCronExpression(schedule);
   if (!valid) throw new APIError(error, 400, 'Invalid CRON expression');
 
@@ -76,7 +125,7 @@ function applyScheduleRequest({
   }
 }
 
-function applyScheduleUpdate(
+export function applyScheduleUpdate(
   { state }: output<typeof ScheduleState>,
   {
     name,
@@ -112,63 +161,9 @@ export async function getScheduleIssues(
   schedule: output<typeof ScheduleState>,
   state: output<typeof State>,
 ): Promise<output<typeof Issue>[]> {
-  const data = getScheduleResponse(id, schedule);
+  const data = await getScheduleResponse(id, schedule);
 
-  const setupRequired = (
-    await Promise.all(
-      schedule.accounts.flatMap((account): Promise<boolean>[] => [
-        (async () => {
-          try {
-            const source = state.sources[account.sourceID];
-            if (!Object.hasOwn(state.sources, account.sourceID) || !source)
-              return true;
-            let sourceAccounts: output<typeof SourceAccount>[];
-            switch (source.type) {
-              case 'enablebanking':
-                sourceAccounts = await getEnableBankingSourceAccounts(
-                  account.sourceID,
-                  source,
-                );
-            }
-            if (
-              !sourceAccounts.some(({ id }) => id === account.sourceAccountID)
-            )
-              return true;
-          } catch (error) {
-            console.debug(`Error resolving issues: ${stringifyError(error)}`);
-          }
-
-          return false;
-        })(),
-
-        (async () => {
-          try {
-            const target = state.targets[account.targetID];
-            if (!Object.hasOwn(state.targets, account.targetID) || !target)
-              return true;
-            let targetAccounts: output<typeof TargetAccount>[];
-            switch (target.type) {
-              case 'actualbudget':
-                targetAccounts = await getActualBudgetTargetAccounts(
-                  account.targetID,
-                  target,
-                );
-            }
-            if (
-              !targetAccounts.some(({ id }) => id === account.targetAccountID)
-            )
-              return true;
-          } catch (error) {
-            console.debug(`Error resolving issues: ${stringifyError(error)}`);
-          }
-
-          return false;
-        })(),
-      ]),
-    )
-  ).some(Boolean);
-
-  if (setupRequired) {
+  if (await isSetupRequired(schedule, state)) {
     return [
       {
         description: `Schedule "${data.name || id}" requires additional setup!`,
@@ -191,7 +186,7 @@ export async function getSchedules(
 
   const response: output<typeof ScheduleResponse>[] = await Promise.all(
     Object.entries(schedules)
-      .filter(([, value]) => value)
+      .filter(([, schedule]) => schedule)
       .map(async ([scheduleID, schedule]) =>
         getScheduleResponse(scheduleID, schedule!),
       ),

@@ -118,7 +118,7 @@ export default function Configuration() {
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="reports-content"
-          id="reports-headers"
+          id="reports-header"
         >
           <Typography component="span">Import History</Typography>
         </AccordionSummary>
