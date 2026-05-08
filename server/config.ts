@@ -32,4 +32,10 @@ export const ENABLEBANKING_API =
 
 export const ACTUAL_DATA_DIR = path.join(DATA_DIR, 'actual');
 
+export const TRANSACTION_NOTES_PREFIX =
+  process.env.TRANSACTION_NOTES_PREFIX ?? '';
+
+export const TRANSACTION_NOTES_SUFFIX =
+  process.env.TRANSACTION_NOTES_SUFFIX ?? '';
+
 export const LOG_LEVEL = process.env.LOG_LEVEL ?? 'info';

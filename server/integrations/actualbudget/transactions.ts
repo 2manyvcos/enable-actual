@@ -5,6 +5,10 @@ import type ResolvedTransaction from '../../../shared/schema/ResolvedTransaction
 import type ScheduleState from '../../../shared/schema/ScheduleState';
 import type TransactionImportBundle from '../../../shared/schema/TransactionImportBundle';
 import { stringifyError, toDateString } from '../../../shared/utils.ts';
+import {
+  TRANSACTION_NOTES_PREFIX,
+  TRANSACTION_NOTES_SUFFIX,
+} from '../../config.ts';
 import ABClient from './ABClient.ts';
 import type { ABTransaction } from './ABClient.types';
 
@@ -17,7 +21,10 @@ function convertResolvedTransaction(
     amount: transaction.details.amount,
     payeeName: transaction.details.payee,
     importedPayee: transaction.details.payee,
-    notes: transaction.details.notes,
+    notes:
+      [TRANSACTION_NOTES_PREFIX, transaction.details.notes, TRANSACTION_NOTES_SUFFIX]
+        .filter(Boolean)
+        .join(' ') || undefined,
     importedID: transaction.details.id,
   };
 }
