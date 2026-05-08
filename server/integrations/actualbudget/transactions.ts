@@ -15,6 +15,9 @@ import type { ABTransaction } from './ABClient.types';
 function convertResolvedTransaction(
   transaction: output<typeof ResolvedTransaction>,
 ): ABTransaction {
+  const prefix = transaction.notesPrefix ?? TRANSACTION_NOTES_PREFIX;
+  const suffix = transaction.notesSuffix ?? TRANSACTION_NOTES_SUFFIX;
+
   return {
     account: transaction.targetAccountID,
     date: toDateString(transaction.details.date),
@@ -22,7 +25,7 @@ function convertResolvedTransaction(
     payeeName: transaction.details.payee,
     importedPayee: transaction.details.payee,
     notes:
-      [TRANSACTION_NOTES_PREFIX, transaction.details.notes, TRANSACTION_NOTES_SUFFIX]
+      [prefix, transaction.details.notes, suffix]
         .filter(Boolean)
         .join(' ') || undefined,
     importedID: transaction.details.id,

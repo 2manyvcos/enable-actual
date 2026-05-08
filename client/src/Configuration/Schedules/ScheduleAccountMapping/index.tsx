@@ -19,6 +19,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { remove, setIn } from 'immutable';
 import type { input, output } from 'zod';
@@ -91,7 +92,7 @@ function Item({
       }
     >
       <ListItemText>
-        <Stack spacing={2} sx={{ marginRight: 2 }}>
+          <Stack spacing={2} sx={{ marginRight: 2 }}>
           <FormControl fullWidth>
             <InputLabel id="source-label">Source</InputLabel>
 
@@ -261,6 +262,26 @@ function Item({
               </FormControl>
             </>
           )}
+
+          <TextField
+            label="Notes Prefix"
+            helperText="Text added before each imported transaction's notes. Useful for adding tags like #auto-imported."
+            placeholder={window.enableActual.notesPrefix ?? ''}
+            value={data.notesPrefix ?? ''}
+            onChange={(event) => {
+              handleChange('notesPrefix', event.target.value || undefined);
+            }}
+          />
+
+          <TextField
+            label="Notes Suffix"
+            helperText="Text added after each imported transaction's notes. Useful for adding tags like #auto-imported."
+            placeholder={window.enableActual.notesSuffix ?? ''}
+            value={data.notesSuffix ?? ''}
+            onChange={(event) => {
+              handleChange('notesSuffix', event.target.value || undefined);
+            }}
+          />
         </Stack>
       </ListItemText>
     </ListItem>
@@ -371,7 +392,13 @@ export default function ScheduleAccountMapping({
       <CardActions>
         <Button
           onClick={() => {
-            onChange([...data, {}]);
+            onChange([
+              ...data,
+              {
+                notesPrefix: window.enableActual.notesPrefix || undefined,
+                notesSuffix: window.enableActual.notesSuffix || undefined,
+              },
+            ]);
           }}
           startIcon={<AddIcon />}
         >
