@@ -6,5 +6,7 @@ export default strictObject({
   sourceAccountID: string(),
   targetID: string(),
   targetAccountID: string(),
+  notesPrefix: string().optional(),
+  notesSuffix: string().optional(),
   details: Transaction,
 });

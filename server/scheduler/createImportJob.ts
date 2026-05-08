@@ -216,11 +216,13 @@ export default function createImportJob(
           .map(([targetAccountID, accounts]) => ({
             targetAccountID,
             transactions: accounts!.flatMap(
-              ({ sourceID, sourceAccountID }) =>
+              ({ sourceID, sourceAccountID, notesPrefix, notesSuffix }) =>
                 bundles[sourceID]?.[sourceAccountID]?.map(
                   (transaction): output<typeof ResolvedTransaction> => ({
                     sourceID,
                     sourceAccountID,
+                    notesPrefix,
+                    notesSuffix,
                     targetID,
                     targetAccountID,
                     details: transaction,

@@ -1,11 +1,18 @@
 import fs from 'fs';
 import path from 'path';
-import { APP_NAME, PUBLIC_URL } from './config.ts';
+import {
+  APP_NAME,
+  PUBLIC_URL,
+  TRANSACTION_NOTES_PREFIX,
+  TRANSACTION_NOTES_SUFFIX,
+} from './config.ts';
 
 const templates: { [path: string]: string | undefined } = {};
 const templateParams = {
   ENABLEACTUAL_CONFIG_APP_NAME: APP_NAME,
   ENABLEACTUAL_CONFIG_PUBLIC_URL: PUBLIC_URL,
+  ENABLEACTUAL_CONFIG_NOTES_PREFIX: TRANSACTION_NOTES_PREFIX,
+  ENABLEACTUAL_CONFIG_NOTES_SUFFIX: TRANSACTION_NOTES_SUFFIX,
 };
 
 export default function resolveClientTemplate(

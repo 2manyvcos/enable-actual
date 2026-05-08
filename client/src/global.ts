@@ -3,6 +3,8 @@ declare global {
     enableActual: {
       appName: string;
       publicURL: string;
+      notesPrefix?: string;
+      notesSuffix?: string;
     };
   }
 }

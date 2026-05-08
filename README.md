@@ -76,7 +76,9 @@ Then open https://YOUR-HOSTNAME:3000 in your browser and complete the setup.
 | `HISTORY_LENGTH`       | Number of stored history entries                                                | `10`                            |
 | `ENABLEBANKING_API`    | Enable Banking API                                                              | `https://api.enablebanking.com` |
 | `LOG_LEVEL`            | Log level (`none`, `info`, `debug`)                                             | `info`                          |
-
+| `TRANSACTION_NOTES_PREFIX` | Text prepended to each imported transaction's notes                        | —                               |
+| `TRANSACTION_NOTES_SUFFIX` | Text appended to each imported transaction's notes                         | —                               |
+ 
 ---
 
 ## Recommended Data Directory Permissions
