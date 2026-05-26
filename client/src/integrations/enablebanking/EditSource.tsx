@@ -1,3 +1,6 @@
+import { putSourcesByID } from '@/api/sources';
+import { postSourcesByIDEnableBankingAuth } from '@/api/sources-enablebanking';
+import NumberField from '@/components/NumberField';
 import type { FetchProviderType } from '@civet/common';
 import { useConfigContext, useResource } from '@civet/core';
 import SaveIcon from '@mui/icons-material/Save';
@@ -12,16 +15,13 @@ import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { set } from 'immutable';
-import { useMemo, useState, type ReactNode } from 'react';
-import type { input, output } from 'zod';
-import { putSourcesByID } from '@/api/sources';
-import { postSourcesByIDEnableBankingAuth } from '@/api/sources-enablebanking';
-import NumberField from '@/components/NumberField';
 import type EnableBankingASPSP from '@shared/schema/EnableBankingASPSP';
 import type EnableBankingSourceResponse from '@shared/schema/EnableBankingSourceResponse';
 import type EnableBankingSourceUpdate from '@shared/schema/EnableBankingSourceUpdate';
 import { stringifyError } from '@shared/utils';
+import { set } from 'immutable';
+import { useMemo, useState, type ReactNode } from 'react';
+import type { input, output } from 'zod';
 
 export default function EditSource({
   data: source,
@@ -303,6 +303,14 @@ export default function EditSource({
 
       <DialogActions>
         {deleteAction}
+
+        <Button
+          onClick={() => {
+            aspspResource.notify();
+          }}
+        >
+          Reload
+        </Button>
 
         <Button onClick={onClose}>Cancel</Button>
 

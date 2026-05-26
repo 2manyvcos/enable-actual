@@ -1,5 +1,6 @@
 import fs from 'fs';
-import * as jwt from 'jsonwebtoken';
+// eslint-disable-next-line import-x/default
+import jwt from 'jsonwebtoken';
 import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
 import { stringifyError } from '../../../shared/utils.ts';
