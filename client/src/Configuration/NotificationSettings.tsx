@@ -1,3 +1,8 @@
+import {
+  postNotificationSettingsNtfyTests,
+  putNotificationSettings,
+} from '@/api/notification-settings';
+import NumberField from '@/components/NumberField';
 import type { FetchProviderType } from '@civet/common';
 import { useResource } from '@civet/core';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -20,16 +25,11 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import NotificationSettingsSchema from '@shared/schema/NotificationSettings';
+import { stringifyError } from '@shared/utils';
 import { setIn } from 'immutable';
 import { useState } from 'react';
 import type { input, output } from 'zod';
-import {
-  postNotificationSettingsNtfyTests,
-  putNotificationSettings,
-} from '@/api/notification-settings';
-import NumberField from '@/components/NumberField';
-import NotificationSettingsSchema from '@shared/schema/NotificationSettings';
-import { stringifyError } from '@shared/utils';
 
 export default function NotificationSettings() {
   const resource = useResource<
@@ -151,6 +151,7 @@ export default function NotificationSettings() {
                   <TextField
                     id="ntfy-url"
                     label="URL"
+                    helperText="Enter your NTFY URL including the topic, e.g. https://ntfy.sh/my-secret-topic"
                     name="ntfy-url"
                     value={data?.ntfy?.url ?? ''}
                     onChange={(event) => {
