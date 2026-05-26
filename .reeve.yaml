@@ -39,4 +39,5 @@ steps:
         latest
         ${TAG}-actual${ACTUAL_VERSION}
       PLATFORM: amd64,arm64
+      BUILD_DRIVER: docker-container
       ACTUAL_VERSION: { var: ACTUAL_VERSION }
