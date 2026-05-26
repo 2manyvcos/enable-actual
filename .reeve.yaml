@@ -18,23 +18,25 @@ steps:
   - name: Get package version
     task: '@reeve/node-get-package-version'
 
+  - name: Get Actual version
+    task: node:alpine
+    command: sh
+    input: |
+      set -e
+      cd /reeve/src
+      apk update && apk add jq curl
+      npm install --production
+      ACTUAL_VERSION=`npm list '@actual-app/api' --depth=0 --json | jq -er '.dependencies["@actual-app/api"].version'`
+      curl -fso /dev/null -w "Status %{http_code}\n" "$REEVE_API/api/v1/var?key=ACTUAL_VERSION&value=${ACTUAL_VERSION}"
+
   - name: Build image
     task: '@docker/build'
     params:
       DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
       NAME: docker.io/2manyvcos/enable-actual
       TAG: { var: PACKAGE_VERSION }
+      TAG_ALIASES: >
+        latest
+        ${TAG}-actual${ACTUAL_VERSION}
       PLATFORM: amd64,arm64
-
-  - name: Tag image with Actual version
-    task: '@docker/cli'
-    params:
-      DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
-      TAG: { var: PACKAGE_VERSION }
-    command: sh
-    input: |
-      set -e
-      apk update && apk add jq
-      ACTUAL_VERSION=`docker run --rm docker.io/2manyvcos/enable-actual:${TAG} npm list '@actual-app/api' --depth=0 --json | jq -er '.dependencies["@actual-app/api"].version'`
-      docker image tag docker.io/2manyvcos/enable-actual:${TAG} docker.io/2manyvcos/enable-actual:${TAG}-actual${ACTUAL_VERSION}
-      docker push docker.io/2manyvcos/enable-actual:${TAG}-actual${ACTUAL_VERSION}
+      ACTUAL_VERSION: { var: ACTUAL_VERSION }
