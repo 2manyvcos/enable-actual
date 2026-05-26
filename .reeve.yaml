@@ -24,7 +24,7 @@ steps:
       DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
       NAME: docker.io/2manyvcos/enable-actual
       TAG: { var: PACKAGE_VERSION }
-      PLATFORM: amd64
+      PLATFORM: amd64,arm64
 
   - name: Tag image with Actual version
     task: '@docker/cli'
