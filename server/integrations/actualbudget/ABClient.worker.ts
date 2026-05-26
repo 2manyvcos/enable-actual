@@ -1,8 +1,8 @@
+import * as api from '@actual-app/api';
 import { createHash } from 'crypto';
 import { mkdirSync } from 'fs';
 import path from 'path';
 import { parentPort } from 'worker_threads';
-import api from '@actual-app/api';
 import { stringifyError } from '../../../shared/utils.ts';
 import { ACTUAL_DATA_DIR } from '../../config.ts';
 import {

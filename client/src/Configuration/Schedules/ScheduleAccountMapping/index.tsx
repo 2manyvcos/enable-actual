@@ -3,6 +3,7 @@ import { useResource } from '@civet/core';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ReplayIcon from '@mui/icons-material/Replay';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -20,14 +21,14 @@ import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { remove, setIn } from 'immutable';
-import type { input, output } from 'zod';
 import type ScheduleAccountMappingSchema from '@shared/schema/ScheduleAccountMapping';
 import type SourceAccount from '@shared/schema/SourceAccount';
 import type SourceResponse from '@shared/schema/SourceResponse';
 import type TargetAccount from '@shared/schema/TargetAccount';
 import type TargetResponse from '@shared/schema/TargetResponse';
 import { stringifyError } from '@shared/utils';
+import { remove, setIn } from 'immutable';
+import type { input, output } from 'zod';
 
 function Item({
   data: items,
@@ -80,14 +81,26 @@ function Item({
   return (
     <ListItem
       secondaryAction={
-        <IconButton
-          aria-label="delete"
-          onClick={() => {
-            onChange(remove(items, index));
-          }}
-        >
-          <DeleteIcon />
-        </IconButton>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <IconButton
+            aria-label="reload"
+            onClick={() => {
+              sourceAccountResource.notify();
+              targetAccountResource.notify();
+            }}
+          >
+            <ReplayIcon />
+          </IconButton>
+
+          <IconButton
+            aria-label="delete"
+            onClick={() => {
+              onChange(remove(items, index));
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </div>
       }
     >
       <ListItemText>

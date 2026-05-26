@@ -1,3 +1,4 @@
+import { putTargetsByID } from '@/api/targets';
 import type { FetchProviderType } from '@civet/common';
 import { useConfigContext, useResource } from '@civet/core';
 import SaveIcon from '@mui/icons-material/Save';
@@ -16,14 +17,13 @@ import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { set } from 'immutable';
-import { useState, type ReactNode } from 'react';
-import type { input, output } from 'zod';
-import { putTargetsByID } from '@/api/targets';
 import type ActualBudgetBudget from '@shared/schema/ActualBudgetBudget';
 import type ActualBudgetTargetResponse from '@shared/schema/ActualBudgetTargetResponse';
 import type ActualBudgetTargetUpdate from '@shared/schema/ActualBudgetTargetUpdate';
 import { stringifyError } from '@shared/utils';
+import { set } from 'immutable';
+import { useState, type ReactNode } from 'react';
+import type { input, output } from 'zod';
 
 export default function EditTarget({
   data: target,
@@ -331,6 +331,14 @@ export default function EditTarget({
 
       <DialogActions>
         {deleteAction}
+
+        <Button
+          onClick={() => {
+            budgetResource.notify();
+          }}
+        >
+          Reload
+        </Button>
 
         <Button onClick={onClose}>Cancel</Button>
 

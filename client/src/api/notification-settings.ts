@@ -1,9 +1,9 @@
 import type { FetchProviderType } from '@civet/common';
-import toast from 'react-hot-toast';
-import type { input } from 'zod';
 import type NotificationSettings from '@shared/schema/NotificationSettings';
 import type NtfyCredentials from '@shared/schema/NtfyCredentials';
 import { stringifyError } from '@shared/utils';
+import { toast } from 'react-hot-toast';
+import type { input } from 'zod';
 
 export async function putNotificationSettings({
   dataProvider,

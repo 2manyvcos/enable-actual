@@ -1,4 +1,5 @@
 import fs from 'fs';
+// eslint-disable-next-line import-x/default
 import jwt from 'jsonwebtoken';
 import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
