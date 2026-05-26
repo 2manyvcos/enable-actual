@@ -1,5 +1,5 @@
 import fs from 'fs';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
 import { stringifyError } from '../../../shared/utils.ts';

@@ -1,3 +1,6 @@
+import { editSource } from '@/actions/sources';
+import { postSources } from '@/api/sources';
+import Md from '@/components/Md';
 import type { FetchProviderType } from '@civet/common';
 import { useConfigContext } from '@civet/core';
 import AddIcon from '@mui/icons-material/Add';
@@ -9,15 +12,12 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { styled } from '@mui/material/styles';
+import EnableBankingSourceRequest from '@shared/schema/EnableBankingSourceRequest';
 import { set } from 'immutable';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import type { input } from 'zod';
-import { editSource } from '@/actions/sources';
-import { postSources } from '@/api/sources';
-import Md from '@/components/Md';
-import EnableBankingSourceRequest from '@shared/schema/EnableBankingSourceRequest';
 
 const setupInstructions = `
 ### Enable Banking Configuration

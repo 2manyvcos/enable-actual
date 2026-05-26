@@ -1,10 +1,10 @@
 import type { FetchProviderType } from '@civet/common';
-import toast from 'react-hot-toast';
-import type { input, output } from 'zod';
 import type IDResponse from '@shared/schema/IDResponse';
 import type ScheduleRequest from '@shared/schema/ScheduleRequest';
 import type ScheduleUpdate from '@shared/schema/ScheduleUpdate';
 import { stringifyError } from '@shared/utils';
+import { toast } from 'react-hot-toast';
+import type { input, output } from 'zod';
 
 export async function postSchedules({
   dataProvider,

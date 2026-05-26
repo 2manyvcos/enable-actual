@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { List, Map, set, update, updateIn } from 'immutable';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { v7 as uuid } from 'uuid';
 import { type output } from 'zod';
 import type EnableBankingASPSP from '../../../shared/schema/EnableBankingASPSP.ts';

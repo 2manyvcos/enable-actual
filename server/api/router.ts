@@ -1,6 +1,6 @@
-import { STATUS_CODES } from 'http';
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
+import { STATUS_CODES } from 'http';
 import { stringifyError } from '../../shared/utils.ts';
 import { PUBLIC_URL } from '../config.ts';
 import {

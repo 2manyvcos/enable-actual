@@ -1,8 +1,8 @@
 import type { FetchProviderType } from '@civet/common';
-import toast from 'react-hot-toast';
-import type { output } from 'zod';
 import type EnableBankingAuthRequest from '@shared/schema/EnableBankingAuthRequest';
 import { stringifyError } from '@shared/utils';
+import { toast } from 'react-hot-toast';
+import type { output } from 'zod';
 
 export async function postSourcesByIDEnableBankingAuth({
   dataProvider,

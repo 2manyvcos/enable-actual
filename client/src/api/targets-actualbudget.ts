@@ -1,6 +1,6 @@
 import type { FetchProviderType } from '@civet/common';
-import toast from 'react-hot-toast';
 import { stringifyError } from '@shared/utils';
+import { toast } from 'react-hot-toast';
 
 export async function postTargetsByIDActualBudgetConnection({
   dataProvider,

@@ -1,93 +1,55 @@
+/* eslint-disable import-x/no-named-as-default-member */
+
 import js from '@eslint/js';
-import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from 'typescript-eslint';
-import { defineConfig, globalIgnores } from 'eslint/config';
+import { importX } from 'eslint-plugin-import-x';
 import prettier from 'eslint-plugin-prettier/recommended';
-import unusedImports from 'eslint-plugin-unused-imports';
-import importPlugin from 'eslint-plugin-import';
+import reactHooks from 'eslint-plugin-react-hooks';
+import { reactRefresh } from 'eslint-plugin-react-refresh';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   globalIgnores(['client/dist']),
+  js.configs.recommended,
+  tseslint.configs.recommended,
+  importX.flatConfigs.recommended,
+  importX.flatConfigs.typescript,
+  prettier,
   {
     files: ['client/**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-      prettier,
-    ],
-    settings: {
-      'import/resolver': {
-        typescript: true,
-        alias: {
-          extensions: ['.ts', '.tsx'],
-          map: [['@', './client/src']],
-          map: [['@shared', './shared']],
-        },
-      },
-    },
+    extends: [reactHooks.configs.flat.recommended, reactRefresh.configs.vite()],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2024,
+      sourceType: 'module',
       globals: globals.browser,
     },
   },
   {
     files: ['server/**/*.ts', 'shared/**/*.ts'],
-    extends: [js.configs.recommended, tseslint.configs.recommended, prettier],
-    settings: {
-      'import/resolver': {
-        typescript: true,
-      },
-    },
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2024,
+      sourceType: 'module',
       globals: globals.node,
     },
-    plugins: {
-      import: importPlugin,
-    },
     rules: {
-      'import/extensions': ['error', 'always'],
+      'import-x/extensions': ['error', 'always'],
+      'import-x/no-named-as-default-member': 'off',
     },
   },
   {
     files: ['client/**/*.{ts,tsx}', 'server/**/*.ts', 'shared/**/*.ts'],
-    plugins: {
-      'unused-imports': unusedImports,
-      import: importPlugin,
-    },
     rules: {
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         {
-          ignoreRestSiblings: true,
+          enableAutofixRemoval: { imports: true },
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      'arrow-body-style': 'error',
-      'unused-imports/no-unused-imports': 'error',
-      'import/no-unresolved': 'error',
-      'import/no-duplicates': 'error',
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            ['sibling', 'index'],
-          ],
-          alphabetize: { order: 'asc', orderImportKind: 'asc' },
-          'newlines-between': 'never',
-        },
-      ],
-      'import/newline-after-import': 'error',
+      'preserve-caught-error': 'off',
     },
   },
 ]);

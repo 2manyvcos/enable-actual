@@ -1,8 +1,8 @@
+import express from 'express';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
 import path from 'node:path';
-import express from 'express';
 import { generate as generateCert } from 'selfsigned';
 import { stringifyError } from '../shared/utils.ts';
 import apiRouter from './api/router.ts';
