@@ -133,7 +133,7 @@ function Item({
     <>
       <TableRow
         sx={{
-          '& > *': { borderBottom: 'unset' },
+          '& > *': { borderBottom: 0 },
         }}
       >
         <TableCell>
@@ -518,6 +518,19 @@ export default function ScheduleAccountMapping({
                   targets={targetResource.data ?? []}
                 />
               ))}
+
+              {data.length ? null : (
+                <TableRow
+                  sx={{
+                    '& > *': { borderBottom: 0 },
+                    '&:last-child td, &:last-child th': { border: 0 },
+                  }}
+                >
+                  <TableCell colSpan={6}>
+                    <i>No entries</i>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

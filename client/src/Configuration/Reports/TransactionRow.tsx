@@ -8,10 +8,10 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
-import { useState } from 'react';
-import type { output } from 'zod';
 import type ImportReport from '@shared/schema/ImportReport';
 import type Transaction from '@shared/schema/Transaction';
+import { useState } from 'react';
+import type { output } from 'zod';
 
 export default function TransactionRow({
   sourceID,
@@ -36,7 +36,7 @@ export default function TransactionRow({
     <>
       <TableRow
         sx={{
-          '& > *': { borderBottom: 'unset' },
+          '& > *': { borderBottom: 0 },
         }}
       >
         <TableCell>
