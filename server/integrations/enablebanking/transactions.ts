@@ -7,13 +7,13 @@ import Transaction from '../../../shared/schema/Transaction.ts';
 import type TransactionBundle from '../../../shared/schema/TransactionBundle.ts';
 import {
   addToDateString,
+  mask,
   startOfDate,
   stringifyError,
 } from '../../../shared/utils.ts';
 import { ENABLEBANKING_API } from '../../config.ts';
 import type { EBAccountIdentification, EBTransaction } from './EBClient.ts';
 import EBClient from './EBClient.ts';
-import maskAccountIdentification from './maskAccountIdentification.ts';
 
 function convertTransaction(
   sourceID: string,
@@ -43,9 +43,9 @@ function convertTransaction(
   }
   if (appendPayeeID && payee && payeeID) {
     if (payeeID.iban) {
-      payee += ` (${maskAccountIdentification(payeeID.iban, 'IBAN')})`;
+      payee += ` (${mask(payeeID.iban)})`;
     } else if (payeeID.other) {
-      payee += ` (${maskAccountIdentification(payeeID.other.identification, payeeID.other.scheme_name)})`;
+      payee += ` (${mask(payeeID.other.identification)})`;
     }
   }
 

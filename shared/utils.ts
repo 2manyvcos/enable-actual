@@ -28,3 +28,14 @@ export function stringifyError(
     return prettifyError(error);
   return ((error as Error)?.message ?? error?.toString()) || fallbackMessage;
 }
+
+export function mask(text: string): string {
+  const trimmed = (text ?? '').toString().replace(/\s/g, '');
+
+  if (trimmed.length > 4) {
+    const end = trimmed.substring(trimmed.length - 4);
+    return `*** ${end}`;
+  }
+
+  return text;
+}
