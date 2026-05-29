@@ -1,3 +1,5 @@
+import { putSchedulesByID } from '@/api/schedules';
+import NumberField from '@/components/NumberField';
 import type { FetchProviderType } from '@civet/common';
 import { useConfigContext } from '@civet/core';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -7,18 +9,14 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
-import { set, update } from 'immutable';
-import { useState, type ReactNode } from 'react';
-import type { input, output } from 'zod';
-import { putSchedulesByID } from '@/api/schedules';
-import NumberField from '@/components/NumberField';
 import ScheduleAccountMappingSchema from '@shared/schema/ScheduleAccountMapping';
 import type ScheduleResponse from '@shared/schema/ScheduleResponse';
 import type ScheduleUpdate from '@shared/schema/ScheduleUpdate';
+import { set, update } from 'immutable';
+import { useState, type ReactNode } from 'react';
+import type { input, output } from 'zod';
 import DeleteSchedule from './DeleteSchedule';
 import DeleteScheduleState from './DeleteScheduleState';
 import ScheduleAccountMapping from './ScheduleAccountMapping';
@@ -79,7 +77,6 @@ function Component({
                 initialDays: data.initialDays!,
                 overscanDays: data.overscanDays!,
                 offsetDays: data.offsetDays!,
-                appendPayeeID: data.appendPayeeID!,
                 accounts: data.accounts!,
               },
             });
@@ -171,20 +168,6 @@ function Component({
               }}
             />
 
-            <FormControlLabel
-              label="Add account identification (e.g. IBAN) to payees"
-              name="append-payee-id"
-              control={
-                <Switch
-                  id="append-payee-id"
-                  checked={data.appendPayeeID ?? false}
-                  onChange={(_event, checked) => {
-                    handleChange('appendPayeeID', checked);
-                  }}
-                />
-              }
-            />
-
             <ScheduleAccountMapping
               data={data.accounts ?? []}
               onChange={(value) => {
@@ -227,7 +210,7 @@ export default function EditSchedule({
 
   return (
     <>
-      <Dialog open={!!data} onClose={onClose}>
+      <Dialog maxWidth="lg" open={!!data} onClose={onClose}>
         <DialogTitle>Edit schedule</DialogTitle>
 
         <Component

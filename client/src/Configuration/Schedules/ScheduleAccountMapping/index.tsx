@@ -1,25 +1,32 @@
+import Md from '@/components/Md';
 import type { FetchProviderType } from '@civet/common';
 import { useResource } from '@civet/core';
 import AddIcon from '@mui/icons-material/Add';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import DeleteIcon from '@mui/icons-material/Delete';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import ReplayIcon from '@mui/icons-material/Replay';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Divider from '@mui/material/Divider';
+import Collapse from '@mui/material/Collapse';
 import FormControl from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
-import InputLabel from '@mui/material/InputLabel';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import type ScheduleAccountMappingSchema from '@shared/schema/ScheduleAccountMapping';
 import type SourceAccount from '@shared/schema/SourceAccount';
@@ -28,7 +35,46 @@ import type TargetAccount from '@shared/schema/TargetAccount';
 import type TargetResponse from '@shared/schema/TargetResponse';
 import { stringifyError } from '@shared/utils';
 import { remove, setIn } from 'immutable';
+import { useState } from 'react';
 import type { input, output } from 'zod';
+
+const advancedInstructions = `
+### Templating
+
+Enable Actual uses [LiquidJS](https://liquidjs.com) to enable customization for specific transaction fields.
+
+[Tutorial](https://liquidjs.com/tutorials/intro-to-liquid.html) | [Playground](https://liquidjs.com/playground.html)
+
+In addition to the predefined [tags](https://liquidjs.com/tags/overview.html) and [filters](https://liquidjs.com/filters/overview.html), the following is also supported:
+
+#### \`{{ data }}\`
+
+The raw dataset from the source.
+Tip: The raw datasets of your already imported transactions can be viewed in the import history.
+
+#### \`{{ default }}\`
+
+The default value that would be used without your custom template.
+This can be useful if you only want to append additional information.
+
+##### Example:
+
+\`\`\`
+{{ default }} #auto-imported
+-> "<DEFAULT VALUE> #auto-imported"
+\`\`\`
+
+#### \`{{ "string" | mask }}\`
+
+Masks a string with at least 4 characters for privacy purposes, e.g. IBANs or similar.
+
+##### Example:
+
+\`\`\`
+{{ "my-iban" | mask }}
+-> "*** iban"
+\`\`\`
+`;
 
 function Item({
   data: items,
@@ -49,6 +95,8 @@ function Item({
   sources: output<typeof SourceResponse>[];
   targets: output<typeof TargetResponse>[];
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   const data = items[index];
 
   const handleChange: <F extends keyof typeof data>(
@@ -56,6 +104,15 @@ function Item({
     value: (typeof data)[F],
   ) => void = (field: string, value: unknown): void => {
     onChange((prev) => setIn(prev ?? [{}], [index, field], value));
+  };
+
+  const handleChangeTemplate: <
+    F extends keyof Required<typeof data>['templates'],
+  >(
+    field: F,
+    value: Required<typeof data>['templates'][F],
+  ) => void = (field: string, value: unknown): void => {
+    onChange((prev) => setIn(prev ?? [{}], [index, 'templates', field], value));
   };
 
   const sourceAccountResource = useResource<
@@ -79,39 +136,26 @@ function Item({
   });
 
   return (
-    <ListItem
-      secondaryAction={
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <>
+      <TableRow
+        sx={{
+          '&& > *': { borderBottom: 0 },
+        }}
+      >
+        <TableCell>
           <IconButton
-            aria-label="reload"
-            onClick={() => {
-              sourceAccountResource.notify();
-              targetAccountResource.notify();
-            }}
+            aria-label="expand row"
+            size="small"
+            onClick={() => setExpanded((prev) => !prev)}
           >
-            <ReplayIcon />
+            {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
+        </TableCell>
 
-          <IconButton
-            aria-label="delete"
-            onClick={() => {
-              onChange(remove(items, index));
-            }}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      }
-    >
-      <ListItemText>
-        <Stack spacing={2} sx={{ marginRight: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel id="source-label">Source</InputLabel>
-
+        <TableCell>
+          <FormControl variant="standard" fullWidth>
             <Select
-              labelId="source-label"
               id="source-select"
-              label="Source"
               value={data.sourceID ?? ''}
               onChange={(event) => {
                 handleChange('sourceID', event.target.value || undefined);
@@ -132,72 +176,62 @@ function Item({
               ))}
             </Select>
           </FormControl>
+        </TableCell>
 
+        <TableCell>
           {sourceAccountResource.isLoading &&
           sourceAccountResource.isInitial ? (
-            <Skeleton variant="rounded" width="100%" height={56} />
+            <Skeleton variant="rounded" width="100%" height={32} />
+          ) : sourceAccountResource.error ? (
+            <Alert
+              severity="error"
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={sourceAccountResource.notify}
+                >
+                  Retry
+                </Button>
+              }
+            >
+              Error: {stringifyError(sourceAccountResource.error)}
+            </Alert>
           ) : (
-            <>
-              {!sourceAccountResource.error ? null : (
-                <Alert
-                  severity="error"
-                  action={
-                    <Button
-                      color="inherit"
-                      size="small"
-                      onClick={sourceAccountResource.notify}
-                    >
-                      Retry
-                    </Button>
-                  }
-                >
-                  Error: {stringifyError(sourceAccountResource.error)}
-                </Alert>
-              )}
+            <FormControl variant="standard" fullWidth>
+              <Select
+                id="source-account-select"
+                value={data.sourceAccountID ?? ''}
+                onChange={(event) => {
+                  handleChange(
+                    'sourceAccountID',
+                    event.target.value || undefined,
+                  );
+                }}
+              >
+                {!data.sourceAccountID ||
+                sourceAccountResource.data?.some(
+                  ({ id }) => id === data.sourceAccountID,
+                ) ? null : (
+                  <MenuItem value={data.sourceAccountID} disabled>
+                    <i>Not found: {data.sourceAccountID}</i>
+                  </MenuItem>
+                )}
 
-              <FormControl fullWidth>
-                <InputLabel id="source-account-label">Account</InputLabel>
-
-                <Select
-                  labelId="source-account-label"
-                  id="source-account-select"
-                  label="Account"
-                  value={data.sourceAccountID ?? ''}
-                  onChange={(event) => {
-                    handleChange(
-                      'sourceAccountID',
-                      event.target.value || undefined,
-                    );
-                  }}
-                >
-                  {!data.sourceAccountID ||
-                  sourceAccountResource.data?.some(
-                    ({ id }) => id === data.sourceAccountID,
-                  ) ? null : (
-                    <MenuItem value={data.sourceAccountID} disabled>
-                      <i>Not found: {data.sourceAccountID}</i>
-                    </MenuItem>
-                  )}
-
-                  {sourceAccountResource.data?.map(({ id, name }) => (
-                    <MenuItem key={id} value={id}>
-                      {name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
+                {sourceAccountResource.data?.map(({ id, name }) => (
+                  <MenuItem key={id} value={id}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           )}
+        </TableCell>
 
-          <ArrowDownwardIcon sx={{ alignSelf: 'center' }} />
-
-          <FormControl fullWidth>
-            <InputLabel id="target-label">Target</InputLabel>
-
+        <TableCell>
+          <FormControl variant="standard" fullWidth>
             <Select
-              labelId="target-label"
               id="target-select"
-              label="Target"
               value={data.targetID ?? ''}
               onChange={(event) => {
                 handleChange('targetID', event.target.value || undefined);
@@ -218,65 +252,163 @@ function Item({
               ))}
             </Select>
           </FormControl>
+        </TableCell>
 
+        <TableCell>
           {targetAccountResource.isLoading &&
           targetAccountResource.isInitial ? (
-            <Skeleton variant="rounded" width="100%" height={56} />
-          ) : (
-            <>
-              {!targetAccountResource.error ? null : (
-                <Alert
-                  severity="error"
-                  action={
-                    <Button
-                      color="inherit"
-                      size="small"
-                      onClick={targetAccountResource.notify}
-                    >
-                      Retry
-                    </Button>
-                  }
+            <Skeleton variant="rounded" width="100%" height={32} />
+          ) : targetAccountResource.error ? (
+            <Alert
+              severity="error"
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={targetAccountResource.notify}
                 >
-                  Error: {stringifyError(targetAccountResource.error)}
+                  Retry
+                </Button>
+              }
+            >
+              Error: {stringifyError(targetAccountResource.error)}
+            </Alert>
+          ) : (
+            <FormControl variant="standard" fullWidth>
+              <Select
+                id="source-account-select"
+                value={data.targetAccountID ?? ''}
+                onChange={(event) => {
+                  handleChange(
+                    'targetAccountID',
+                    event.target.value || undefined,
+                  );
+                }}
+              >
+                {!data.targetAccountID ||
+                targetAccountResource.data?.some(
+                  ({ id }) => id === data.targetAccountID,
+                ) ? null : (
+                  <MenuItem value={data.targetAccountID} disabled>
+                    <i>Not found: {data.targetAccountID}</i>
+                  </MenuItem>
+                )}
+
+                {targetAccountResource.data?.map(({ id, name }) => (
+                  <MenuItem key={id} value={id}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </TableCell>
+
+        <TableCell align="right">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <IconButton
+              aria-label="reload"
+              size="small"
+              onClick={() => {
+                sourceAccountResource.notify();
+                targetAccountResource.notify();
+              }}
+            >
+              <ReplayIcon />
+            </IconButton>
+
+            <IconButton
+              aria-label="delete"
+              size="small"
+              onClick={() => {
+                onChange(remove(items, index));
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </div>
+        </TableCell>
+      </TableRow>
+
+      <TableRow
+        sx={{
+          '&:last-child td, &:last-child th': { border: 0 },
+        }}
+      >
+        <TableCell sx={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={expanded} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Typography
+                color="error"
+                gutterBottom
+                variant="h6"
+                component="div"
+              >
+                Advanced settings
+              </Typography>
+
+              <Stack
+                component="fieldset"
+                spacing={2}
+                sx={{ margin: 0, padding: 0, border: 'none', minWidth: 0 }}
+              >
+                <Alert
+                  severity="info"
+                  sx={{
+                    '& > * > *:first-child': { marginTop: 0 },
+                    '& > * > *:last-child': { marginBottom: 0 },
+                  }}
+                >
+                  <Md>{advancedInstructions}</Md>
                 </Alert>
-              )}
 
-              <FormControl fullWidth>
-                <InputLabel id="source-account-label">Account</InputLabel>
-
-                <Select
-                  labelId="source-account-label"
-                  id="source-account-select"
-                  label="Account"
-                  value={data.targetAccountID ?? ''}
+                <TextField
+                  id="idTemplate"
+                  label="Custom ID Template"
+                  name="idTemplate"
+                  multiline
+                  value={data.templates?.id ?? ''}
                   onChange={(event) => {
-                    handleChange(
-                      'targetAccountID',
+                    handleChangeTemplate('id', event.target.value || undefined);
+                  }}
+                  sx={{ fontFamily: 'monospace' }}
+                />
+
+                <TextField
+                  id="payeeTemplate"
+                  label="Custom Payee Template"
+                  name="payeeTemplate"
+                  multiline
+                  value={data.templates?.payee ?? ''}
+                  onChange={(event) => {
+                    handleChangeTemplate(
+                      'payee',
                       event.target.value || undefined,
                     );
                   }}
-                >
-                  {!data.targetAccountID ||
-                  targetAccountResource.data?.some(
-                    ({ id }) => id === data.targetAccountID,
-                  ) ? null : (
-                    <MenuItem value={data.targetAccountID} disabled>
-                      <i>Not found: {data.targetAccountID}</i>
-                    </MenuItem>
-                  )}
+                  sx={{ fontFamily: 'monospace' }}
+                />
 
-                  {targetAccountResource.data?.map(({ id, name }) => (
-                    <MenuItem key={id} value={id}>
-                      {name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
-          )}
-        </Stack>
-      </ListItemText>
-    </ListItem>
+                <TextField
+                  id="notesTemplate"
+                  label="Custom Notes Template"
+                  name="notesTemplate"
+                  multiline
+                  value={data.templates?.notes ?? ''}
+                  onChange={(event) => {
+                    handleChangeTemplate(
+                      'notes',
+                      event.target.value || undefined,
+                    );
+                  }}
+                  sx={{ fontFamily: 'monospace' }}
+                />
+              </Stack>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
   );
 }
 
@@ -363,22 +495,51 @@ export default function ScheduleAccountMapping({
           Account mappings
         </Typography>
 
-        <List>
-          {data.map((_, index) => (
-            <>
-              {index === 0 ? null : <Divider />}
+        <TableContainer component={Paper}>
+          <Table stickyHeader size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell />
 
-              <Item
-                key={index}
-                data={data}
-                onChange={onChange}
-                index={index}
-                sources={sourceResource.data ?? []}
-                targets={targetResource.data ?? []}
-              />
-            </>
-          ))}
-        </List>
+                <TableCell>Source</TableCell>
+
+                <TableCell>Source Account</TableCell>
+
+                <TableCell>Target</TableCell>
+
+                <TableCell>Target Account</TableCell>
+
+                <TableCell />
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {data.map((_, index) => (
+                <Item
+                  key={index}
+                  data={data}
+                  onChange={onChange}
+                  index={index}
+                  sources={sourceResource.data ?? []}
+                  targets={targetResource.data ?? []}
+                />
+              ))}
+
+              {data.length ? null : (
+                <TableRow
+                  sx={{
+                    '&& > *': { borderBottom: 0 },
+                    '&:last-child td, &:last-child th': { border: 0 },
+                  }}
+                >
+                  <TableCell colSpan={6}>
+                    <i>No entries</i>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </CardContent>
 
       <CardActions>

@@ -11,16 +11,14 @@ import {
   stringifyError,
 } from '../../../shared/utils.ts';
 import { ENABLEBANKING_API } from '../../config.ts';
-import type { EBAccountIdentification, EBTransaction } from './EBClient.ts';
+import type { EBTransaction } from './EBClient.ts';
 import EBClient from './EBClient.ts';
-import maskAccountIdentification from './maskAccountIdentification.ts';
 
 function convertTransaction(
   sourceID: string,
   sourceAccountID: string,
   report: output<typeof ImportReport>,
   transaction: EBTransaction,
-  appendPayeeID: boolean,
 ): output<typeof Transaction> | undefined {
   const rawDate =
     transaction.booking_date ||
@@ -33,20 +31,10 @@ function convertTransaction(
   if (transaction.credit_debit_indicator === 'DBIT') amount *= -1;
 
   let payee: string | undefined;
-  let payeeID: EBAccountIdentification | undefined;
   if (transaction.credit_debit_indicator === 'DBIT') {
     payee = transaction.creditor?.name ?? undefined;
-    payeeID = transaction.creditor_account ?? undefined;
   } else {
     payee = transaction.debtor?.name ?? undefined;
-    payeeID = transaction.debtor_account ?? undefined;
-  }
-  if (appendPayeeID && payee && payeeID) {
-    if (payeeID.iban) {
-      payee += ` (${maskAccountIdentification(payeeID.iban, 'IBAN')})`;
-    } else if (payeeID.other) {
-      payee += ` (${maskAccountIdentification(payeeID.other.identification, payeeID.other.scheme_name)})`;
-    }
   }
 
   const notes =
@@ -82,7 +70,7 @@ function convertTransaction(
 }
 
 export async function resolveEnableBankingTransactions({
-  schedule: { initialDays, overscanDays, offsetDays, appendPayeeID },
+  schedule: { initialDays, overscanDays, offsetDays },
   report,
   sourceID,
   source: { appID, privateKey },
@@ -152,7 +140,6 @@ export async function resolveEnableBankingTransactions({
                 sourceAccountID,
                 report,
                 transaction,
-                appendPayeeID,
               ),
             )
             .filter((entry) => entry != null),

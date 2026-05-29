@@ -2,6 +2,7 @@ import { merge, update, updateIn } from 'immutable';
 import { v7 as uuid } from 'uuid';
 import { type output } from 'zod';
 import ImportReport from '../../shared/schema/ImportReport.ts';
+import type RejectedTransaction from '../../shared/schema/RejectedTransaction.ts';
 import type ResolvedTransaction from '../../shared/schema/ResolvedTransaction.ts';
 import type ScheduleImportAccountState from '../../shared/schema/ScheduleImportAccountState.ts';
 import ScheduleImportState from '../../shared/schema/ScheduleImportState.ts';
@@ -18,6 +19,7 @@ import { importActualBudgetTransactions } from '../integrations/actualbudget/tra
 import { resolveEnableBankingTransactions } from '../integrations/enablebanking/transactions.ts';
 import notify from '../notify.ts';
 import { loadState, putState } from '../state.ts';
+import { parseTemplate } from '../templates.ts';
 
 export default function createImportJob(
   scheduleID: string,
@@ -210,52 +212,107 @@ export default function createImportJob(
           return;
         }
 
-        const targetAccounts = Object.entries(
-          Object.groupBy(accounts!, ({ targetAccountID }) => targetAccountID),
-        )
-          .map(([targetAccountID, accounts]) => ({
-            targetAccountID,
-            transactions: accounts!.flatMap(
-              ({ sourceID, sourceAccountID }) =>
-                bundles[sourceID]?.[sourceAccountID]?.map(
-                  (transaction): output<typeof ResolvedTransaction> => ({
-                    sourceID,
-                    sourceAccountID,
-                    targetID,
-                    targetAccountID,
-                    details: transaction,
-                  }),
-                ) ?? [],
-            ),
-          }))
-          .filter(({ transactions }) => transactions.length);
+        let success = true;
+
+        const targetAccounts = (
+          await Promise.all(
+            Object.entries(
+              Object.groupBy(
+                accounts!,
+                ({ targetAccountID }) => targetAccountID,
+              ),
+            ).map(async ([targetAccountID, accounts]) => ({
+              targetAccountID,
+              transactions: await Promise.all(
+                accounts!.flatMap(
+                  ({ sourceID, sourceAccountID, templates }) =>
+                    bundles[sourceID]?.[sourceAccountID]?.map(
+                      async (
+                        details,
+                      ): Promise<output<typeof ResolvedTransaction>> => {
+                        const transaction = {
+                          sourceID,
+                          sourceAccountID,
+                          targetID,
+                          targetAccountID,
+                          details,
+                        };
+
+                        try {
+                          await Promise.all<void>([
+                            (async () => {
+                              if (!templates?.id) return;
+                              transaction.details.id =
+                                (await parseTemplate(templates.id, {
+                                  data: JSON.parse(transaction.details.raw),
+                                  default: transaction.details.id ?? null,
+                                })) || undefined;
+                            })(),
+
+                            (async () => {
+                              if (!templates?.payee) return;
+                              transaction.details.payee =
+                                (await parseTemplate(templates.payee, {
+                                  data: JSON.parse(transaction.details.raw),
+                                  default: transaction.details.payee ?? null,
+                                })) || undefined;
+                            })(),
+
+                            (async () => {
+                              if (!templates?.notes) return;
+                              transaction.details.notes =
+                                (await parseTemplate(templates.notes, {
+                                  data: JSON.parse(transaction.details.raw),
+                                  default: transaction.details.notes ?? null,
+                                })) || undefined;
+                            })(),
+                          ]);
+                        } catch (error) {
+                          success = false;
+                          report.rejectedTransactions.push({
+                            sourceID: transaction.sourceID,
+                            sourceAccountID: transaction.sourceAccountID,
+                            reason: `Error applying template: ${stringifyError(error)}`,
+                            details: transaction.details,
+                          } satisfies output<typeof RejectedTransaction>);
+                        }
+
+                        return transaction;
+                      },
+                    ) ?? [],
+                ),
+              ),
+            })),
+          )
+        ).filter(({ transactions }) => transactions.length);
 
         if (!targetAccounts.length) return;
 
-        report.resolvedTransactions.push(
-          ...targetAccounts.flatMap(({ transactions }) => transactions),
-        );
+        if (success) {
+          report.resolvedTransactions.push(
+            ...targetAccounts.flatMap(({ transactions }) => transactions),
+          );
 
-        let success = false;
-        try {
-          switch (target.type) {
-            case 'actualbudget':
-              success = await importActualBudgetTransactions({
-                scheduleID,
-                schedule,
-                report,
-                targetID,
-                target,
-                targetAccounts,
-              });
-              break;
+          try {
+            switch (target.type) {
+              case 'actualbudget':
+                success = await importActualBudgetTransactions({
+                  scheduleID,
+                  schedule,
+                  report,
+                  targetID,
+                  target,
+                  targetAccounts,
+                });
+                break;
+            }
+          } catch (error) {
+            success = false;
+            report.errors.push({
+              message: `Error importing transactions: ${stringifyError(error)}`,
+              targetID,
+            });
           }
-        } catch (error) {
-          report.errors.push({
-            message: `Error importing transactions: ${stringifyError(error)}`,
-            targetID,
-          });
-          return;
         }
 
         if (!success) {

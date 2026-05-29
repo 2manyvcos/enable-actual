@@ -14,24 +14,24 @@ import {
   SSL_ENABLED,
   SSL_PRIVATE_KEY_FILE,
 } from './config.ts';
-import { loadHistory } from './history.ts';
+import { loadHistory, writeHistory } from './history.ts';
 import { shutdownABWorkers } from './integrations/actualbudget/ABClient.ts';
 import resolveClientTemplate from './resolveClientTemplate.ts';
 import { startScheduler } from './scheduler/scheduler.ts';
-import { loadState } from './state.ts';
+import { loadState, writeState } from './state.ts';
 
 import './applyLogLevel.ts';
 
-// prevent server startup if state file is invalid
+// validate state and apply migrations
 try {
-  loadState();
+  writeState(loadState(true));
 } catch (error) {
   throw new Error(`Error loading state: ${stringifyError(error)}`);
 }
 
-// prevent server startup if history file is invalid
+// validate history and apply migrations
 try {
-  loadHistory();
+  writeHistory(loadHistory(true));
 } catch (error) {
   throw new Error(`Error loading history: ${stringifyError(error)}`);
 }

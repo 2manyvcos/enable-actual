@@ -57,5 +57,5 @@ export async function importActualBudgetTransactions({
     })),
   );
 
-  return !report.errors.length;
+  return !errors.length;
 }
