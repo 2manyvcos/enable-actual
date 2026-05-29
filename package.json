@@ -46,6 +46,7 @@
     "express": "^5.2.1",
     "immutable": "^5.1.6",
     "jsonwebtoken": "^9.0.3",
+    "liquidjs": "^10.27.0",
     "node-fetch": "^3.3.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
