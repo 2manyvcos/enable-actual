@@ -43,26 +43,32 @@ const advancedInstructions = `
 
 Enable Actual uses [LiquidJS](https://liquidjs.com) to enable customization for specific transaction fields.
 
-The raw datasets from the source are provided as context when parsing the templates.
-Tip: The raw datasets of your already imported transactions can be viewed in the import history.
-
 [Tutorial](https://liquidjs.com/tutorials/intro-to-liquid.html) | [Playground](https://liquidjs.com/playground.html)
 
 In addition to the predefined [tags](https://liquidjs.com/tags/overview.html) and [filters](https://liquidjs.com/filters/overview.html), the following is also supported:
 
-#### default
+#### \`{{ data }}\`
 
-Returns the default value that would be used without your custom template.
+The raw dataset from the source.
+Tip: The raw datasets of your already imported transactions can be viewed in the import history.
+
+#### \`{{ default }}\`
+
+The default value that would be used without your custom template.
 This can be useful if you only want to append additional information.
+
+##### Example:
 
 \`\`\`
 {{ default }} #auto-imported
 -> "<DEFAULT VALUE> #auto-imported"
 \`\`\`
 
-#### mask
+#### \`{{ "string" | mask }}\`
 
-Masks texts with at least 4 characters for privacy purposes, e.g. IBANs or similar.
+Masks a string with at least 4 characters for privacy purposes, e.g. IBANs or similar.
+
+##### Example:
 
 \`\`\`
 {{ "my-iban" | mask }}
