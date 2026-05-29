@@ -195,7 +195,7 @@ export default function Report({
                       {data.rejectedTransactions.length ? null : (
                         <TableRow
                           sx={{
-                            '& > *': { borderBottom: 0 },
+                            '&& > *': { borderBottom: 0 },
                             '&:last-child td, &:last-child th': { border: 0 },
                           }}
                         >
@@ -245,7 +245,7 @@ export default function Report({
                       {data.resolvedTransactions.length ? null : (
                         <TableRow
                           sx={{
-                            '& > *': { borderBottom: 0 },
+                            '&& > *': { borderBottom: 0 },
                             '&:last-child td, &:last-child th': { border: 0 },
                           }}
                         >
