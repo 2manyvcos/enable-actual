@@ -5,7 +5,7 @@ import { stringifyError } from '../shared/utils.ts';
 import { DATA_DIR, STATE_FILE } from './config.ts';
 import migrateState from './migrations/state.ts';
 
-export function loadState(): output<typeof State> {
+export function loadState(migrate?: boolean): output<typeof State> {
   let raw: unknown = {};
   let exists = false;
 
@@ -18,7 +18,7 @@ export function loadState(): output<typeof State> {
     }
   }
 
-  if (exists) {
+  if (exists && migrate) {
     try {
       raw = migrateState(raw);
     } catch (error) {
@@ -34,18 +34,17 @@ export function putState(
     | Partial<output<typeof State>>
     | ((state: output<typeof State>) => output<typeof State>),
 ): void {
-  mkdirSync(DATA_DIR, { recursive: true });
-
   const currentState = loadState();
 
-  writeFileSync(
-    STATE_FILE,
-    JSON.stringify(
-      typeof nextState === 'function'
-        ? nextState(currentState)
-        : { ...currentState, ...nextState },
-      null,
-      2,
-    ),
+  writeState(
+    typeof nextState === 'function'
+      ? nextState(currentState)
+      : { ...currentState, ...nextState },
   );
+}
+
+export function writeState(nextState: output<typeof State>): void {
+  mkdirSync(DATA_DIR, { recursive: true });
+
+  writeFileSync(STATE_FILE, JSON.stringify(nextState, null, 2));
 }

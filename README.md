@@ -147,6 +147,8 @@ Version 2.0.0 introduces a new **web-based configuration UI**.
 - Start with a fresh data directory
 - Reconfigure via the web interface
 
+---
+
 ## Contributing
 
 Contributions are welcome and appreciated!

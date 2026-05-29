@@ -5,7 +5,7 @@ import { stringifyError } from '../shared/utils.ts';
 import { DATA_DIR, HISTORY_FILE } from './config.ts';
 import migrateHistory from './migrations/history.ts';
 
-export function loadHistory(): output<typeof History> {
+export function loadHistory(migrate?: boolean): output<typeof History> {
   let raw: unknown = {};
   let exists = false;
 
@@ -18,7 +18,7 @@ export function loadHistory(): output<typeof History> {
     }
   }
 
-  if (exists) {
+  if (exists && migrate) {
     try {
       raw = migrateHistory(raw);
     } catch (error) {
@@ -34,18 +34,17 @@ export function putHistory(
     | Partial<output<typeof History>>
     | ((history: output<typeof History>) => output<typeof History>),
 ): void {
-  mkdirSync(DATA_DIR, { recursive: true });
-
   const currentHistory = loadHistory();
 
-  writeFileSync(
-    HISTORY_FILE,
-    JSON.stringify(
-      typeof nextHistory === 'function'
-        ? nextHistory(currentHistory)
-        : { ...currentHistory, ...nextHistory },
-      null,
-      2,
-    ),
+  writeHistory(
+    typeof nextHistory === 'function'
+      ? nextHistory(currentHistory)
+      : { ...currentHistory, ...nextHistory },
   );
+}
+
+export function writeHistory(nextHistory: output<typeof History>): void {
+  mkdirSync(DATA_DIR, { recursive: true });
+
+  writeFileSync(HISTORY_FILE, JSON.stringify(nextHistory, null, 2));
 }
