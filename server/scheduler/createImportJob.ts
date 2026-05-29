@@ -239,34 +239,32 @@ export default function createImportJob(
                         };
 
                         try {
-                          const data = JSON.parse(transaction.details.raw);
-
                           await Promise.all<void>([
                             (async () => {
                               if (!templates?.id) return;
-                              transaction.details.id = await parseTemplate(
-                                templates?.id,
-                                { data, default: transaction.details.id },
-                              );
+                              transaction.details.id =
+                                (await parseTemplate(templates.id, {
+                                  data: JSON.parse(transaction.details.raw),
+                                  default: transaction.details.id ?? null,
+                                })) || undefined;
                             })(),
 
                             (async () => {
                               if (!templates?.payee) return;
-                              transaction.details.payee = await parseTemplate(
-                                templates?.payee,
-                                {
-                                  data,
-                                  default: transaction.details.payee,
-                                },
-                              );
+                              transaction.details.payee =
+                                (await parseTemplate(templates.payee, {
+                                  data: JSON.parse(transaction.details.raw),
+                                  default: transaction.details.payee ?? null,
+                                })) || undefined;
                             })(),
 
                             (async () => {
                               if (!templates?.notes) return;
-                              transaction.details.notes = await parseTemplate(
-                                templates?.notes,
-                                { data, default: transaction.details.notes },
-                              );
+                              transaction.details.notes =
+                                (await parseTemplate(templates.notes, {
+                                  data: JSON.parse(transaction.details.raw),
+                                  default: transaction.details.notes ?? null,
+                                })) || undefined;
                             })(),
                           ]);
                         } catch (error) {
