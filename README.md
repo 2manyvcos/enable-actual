@@ -137,6 +137,50 @@ Use `http://actualbudget:5006` as the Actual Budget server URL.
 
 ---
 
+## Troubleshooting
+
+### My transactions don't have a payee / the payee appears in the transaction notes
+
+Normally, the bank includes the payee in the designated field. However, some banks deviate from this standard and either omit this information entirely or include it in a different field (usually `remittance_information`).
+
+If the information is provided in a non standard field, you can use a payee template to specify where it is resolved from, e.g.:
+
+```liquid
+{{ default | default: data.remittance_information[0] }}
+```
+
+### My transactions appear twice after about 24 hours
+
+Enable Actual uses the transaction ID provided by your bank for deduplication. However, at some banks (e.g., N26 (DE)), new transactions are deleted after a certain period of time and recreated with a new ID (presumably after they have been booked by the transaction partner). This results in the transactions being imported a second time during the next import.
+
+For affected bank accounts, the ID can be ignored using an ID template. This allows Actual Budget's deduplication feature to attempt to remove duplicate transactions, which generally works quiet well as long as the transaction amount does not change retrospectively (as with payments at unmanned gas stations or similar):
+
+```liquid
+{{ "" }}
+```
+
+### How can I import transactions from multiple different banks?
+
+First, add an application for each of your banks in Enable Banking.  
+**Don't add all your Banks to a single application**!  
+Then, you can create a source in Enable Actual for each of your Bank  accounts by linking the corresponding Enable Banking applications.  
+After setting up your import targets, create a schedule and add an account mapping for each of the Bank accounts you want to import.
+
+### I have several accounts that share the same bank name - how can I tell them apart after import?
+
+You can customize the imported payee to include account identification (IBAN or similar) by using the following payee template:
+
+```liquid
+{% if data.credit_debit_indicator == "DBIT" -%}
+  {% assign payeeID = data.creditor_account.iban | default: data.creditor_account.other.identification -%}
+{% else -%}
+  {% assign payeeID = data.debtor_account.iban | default: data.debtor_account.other.identification -%}
+{% endif -%}
+{{ default }} {% if payeeID %}({{ payeeID | mask }}){% endif %}
+```
+
+---
+
 ## Upgrading
 
 ### 2.0.0
