@@ -37,6 +37,7 @@ steps:
       TAG: { var: PACKAGE_VERSION }
       TAG_ALIASES: >
         latest
+        actual${ACTUAL_VERSION}
         ${TAG}-actual${ACTUAL_VERSION}
       PLATFORM: amd64,arm64
       BUILD_DRIVER: docker-container
