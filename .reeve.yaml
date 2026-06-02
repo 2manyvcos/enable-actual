@@ -1,6 +1,11 @@
 ---
+type: trigger
+cron: 0 0 * * *
+action: :images:docker.io/2manyvcos/enable-actual:build-latest
+
+---
 type: pipeline
-name: Build Enable Actual
+name: build image - docker.io/2manyvcos/enable-actual
 
 when:
   workerGroup:
@@ -12,24 +17,44 @@ when:
       - package.json
       - .reeve.yaml
   action:
-    include: [enable-actual:build]
+    include:
+      - images:docker.io/2manyvcos/enable-actual:build
+      - :images:docker.io/2manyvcos/enable-actual:build-latest
 
 steps:
-  - name: Get package version
+  - name: get package version
     task: '@reeve/node-get-package-version'
 
-  - name: Get Actual version
+  - name: install dependencies
     task: node:alpine
     command: sh
     input: |
       set -e
       cd /reeve/src
-      apk update && apk add jq curl
       npm install --production
+
+  - name: update actual client
+    when:
+      action:
+        include: [:images:docker.io/2manyvcos/enable-actual:build-latest]
+    task: node:alpine
+    command: sh
+    input: |
+      set -e
+      cd /reeve/src
+      npm install @actual-app/api@latest
+
+  - name: get actual version
+    task: node:alpine
+    command: sh
+    input: |
+      set -e
+      cd /reeve/src
+      apk add --no-cache jq curl
       ACTUAL_VERSION=`npm list '@actual-app/api' --depth=0 --json | jq -er '.dependencies["@actual-app/api"].version'`
       curl -fso /dev/null -w "Status %{http_code}\n" "$REEVE_API/api/v1/var?key=ACTUAL_VERSION&value=${ACTUAL_VERSION}"
 
-  - name: Build image
+  - name: build image - docker.io/2manyvcos/enable-actual
     task: '@docker/build'
     params:
       DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
