@@ -46,6 +46,8 @@ steps:
 
   - name: get actual version
     task: node:alpine
+    params:
+      PACKAGE_VERSION: { var: PACKAGE_VERSION }
     command: sh
     input: |
       set -e
@@ -53,17 +55,19 @@ steps:
       apk add --no-cache jq curl
       ACTUAL_VERSION=`npm list '@actual-app/api' --depth=0 --json | jq -er '.dependencies["@actual-app/api"].version'`
       curl -fso /dev/null -w "Status %{http_code}\n" "$REEVE_API/api/v1/var?key=ACTUAL_VERSION&value=${ACTUAL_VERSION}"
+      curl -fso /dev/null -w "Status %{http_code}\n" "$REEVE_API/api/v1/var?key=LONG_TAG&value=${PACKAGE_VERSION}-actual${ACTUAL_VERSION}"
 
   - name: build image - docker.io/2manyvcos/enable-actual
     task: '@docker/build'
     params:
       DOCKER_LOGIN_REGISTRIES: { env: docker/hub/2manyvcos/login }
       NAME: docker.io/2manyvcos/enable-actual
-      TAG: { var: PACKAGE_VERSION }
+      TAG: { var: LONG_TAG }
       TAG_ALIASES: >
         latest
+        ${PACKAGE_VERSION}
         actual${ACTUAL_VERSION}
-        ${TAG}-actual${ACTUAL_VERSION}
       PLATFORM: amd64,arm64
       BUILD_DRIVER: docker-container
+      PACKAGE_VERSION: { var: PACKAGE_VERSION }
       ACTUAL_VERSION: { var: ACTUAL_VERSION }
