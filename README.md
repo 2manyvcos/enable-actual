@@ -50,6 +50,9 @@ Then open https://YOUR-HOSTNAME:3000 in your browser and complete the setup.
 > ⚠️ Your browser will tell you that the website uses an insecure self signed certificate, which is expected.
 > However, you should provide your own trusted certificate for production use.
 
+> ⚠️ Make sure that you use an image that is compatible with your Actual Budget server version.
+> A tag is available for the Docker image that tracks the Actual version, e.g. `2manyvcos/enable-actual:actual26.6.0`
+
 ---
 
 ## Security & Requirements
@@ -162,9 +165,9 @@ For affected bank accounts, the ID can be ignored using an ID template. This all
 ### How can I import transactions from multiple different banks?
 
 First, add an application for each of your banks in Enable Banking.  
-**Don't add all your Banks to a single application**!  
-Then, you can create a source in Enable Actual for each of your Bank  accounts by linking the corresponding Enable Banking applications.  
-After setting up your import targets, create a schedule and add an account mapping for each of the Bank accounts you want to import.
+**Don't add all your banks to a single application**!  
+Then, you can create a source in Enable Actual for each of your bank accounts by linking the corresponding Enable Banking applications.  
+After setting up your import targets, create a schedule and add an account mapping for each of the bank accounts you want to import.
 
 ### I have several accounts that share the same bank name - how can I tell them apart after import?
 
