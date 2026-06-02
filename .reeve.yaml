@@ -1,7 +1,7 @@
 ---
 type: trigger
 cron: 0 0 * * *
-action: :images:docker.io/2manyvcos/enable-actual:build-latest
+action: ':images:docker.io/2manyvcos/enable-actual:build-latest'
 
 ---
 type: pipeline
@@ -19,7 +19,7 @@ when:
   action:
     include:
       - images:docker.io/2manyvcos/enable-actual:build
-      - :images:docker.io/2manyvcos/enable-actual:build-latest
+      - ':images:docker.io/2manyvcos/enable-actual:build-latest'
 
 steps:
   - name: get package version
@@ -36,7 +36,7 @@ steps:
   - name: update actual client
     when:
       action:
-        include: [:images:docker.io/2manyvcos/enable-actual:build-latest]
+        include: [':images:docker.io/2manyvcos/enable-actual:build-latest']
     task: node:alpine
     command: sh
     input: |
