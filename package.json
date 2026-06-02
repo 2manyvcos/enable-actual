@@ -1,7 +1,7 @@
 {
   "name": "enable-actual",
   "description": "Import transactions from European banks into Actual Budget using Enable Banking",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "author": {
     "name": "Aaron Burmeister"
   },
