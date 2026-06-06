@@ -9,7 +9,7 @@ name: build image - docker.io/2manyvcos/enable-actual
 
 when:
   workerGroup:
-    include: [soldier]
+    include: [soldier@midgar]
   trigger:
     include: [commit, action]
   file:
