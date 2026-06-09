@@ -328,6 +328,9 @@ export default class EBClient {
         ? async () =>
             this.getTransactions({
               accountUID,
+              dateFrom,
+              dateTo,
+              transactionStatus,
               continuationKey: nextContinuationKey,
             })
         : undefined,
