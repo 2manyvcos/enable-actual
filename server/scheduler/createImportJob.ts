@@ -145,8 +145,7 @@ export default function createImportJob(
       [sourceID: string]:
         | {
             [sourceAccountID: string]:
-              | output<typeof ScheduleImportAccountState>
-              | undefined;
+              output<typeof ScheduleImportAccountState> | undefined;
           }
         | undefined;
     } = {};
