@@ -50,7 +50,7 @@ Then open https://YOUR-HOSTNAME:3000 in your browser and complete the setup.
 > ⚠️ Your browser will tell you that the website uses an insecure self signed certificate, which is expected.
 > However, you should provide your own trusted certificate for production use.
 
-> ⚠️ Make sure that you use an image that is compatible with your Actual Budget server version.
+> ⚠️ Make sure that you use an image that is compatible with your Actual Budget server version, that is, the Actual client version included in the image must be the same or higher than the server version (see [#32](https://github.com/2manyvcos/enable-actual/issues/32#issuecomment-6150662225)).
 > A tag is available for the Docker image that tracks the Actual version, e.g. `2manyvcos/enable-actual:actual26.6.0`
 
 ---
