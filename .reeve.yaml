@@ -31,7 +31,8 @@ steps:
     input: |
       set -e
       cd /reeve/src
-      npm install --production
+      apk --no-cache add python3 make # required for better-sqlite3 (@actual-app/api dependency)
+      npm install --omit=dev
 
   - name: update actual client
     when:
