@@ -25,8 +25,8 @@ function convertTransaction(
     transaction.value_date ||
     transaction.transaction_date;
 
-  let amount = Math.round(
-    parseFloat(transaction.transaction_amount.amount) * 100 || 0,
+  let amount = Math.abs(
+    Math.round(parseFloat(transaction.transaction_amount.amount) * 100 || 0),
   );
   if (transaction.credit_debit_indicator === 'DBIT') amount *= -1;
 
